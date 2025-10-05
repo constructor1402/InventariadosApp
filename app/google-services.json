@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1096273178057",
+    "project_id": "inventariados-app",
+    "storage_bucket": "inventariados-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1096273178057:android:ecd0260b9f78988e854c18",
+        "android_client_info": {
+          "package_name": "com.example.inventariadosapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCLTlOSM37pGvdnPXeODFJvXiRizNJBjP8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

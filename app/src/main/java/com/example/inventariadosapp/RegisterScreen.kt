@@ -24,11 +24,17 @@ import androidx.navigation.compose.rememberNavController
 import com.example.inventariadosapp.ui.theme.BungeeInline
 import com.example.inventariadosapp.ui.theme.Kavoon
 import androidx.compose.animation.animateColorAsState
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.Timestamp
+import android.widget.Toast
+
 
 @Composable
 fun RegisterScreen(navController: NavController) {
     val context = LocalContext.current
     val activity = context as? Activity
+    val db = FirebaseFirestore.getInstance()
+
 
     var nombre by remember { mutableStateOf("") }
     var celular by remember { mutableStateOf("") }
@@ -46,7 +52,7 @@ fun RegisterScreen(navController: NavController) {
         ) {
             // Botón para volver
             IconButton(
-                onClick = { navController.popBackStack() },
+                onClick = { navController.navigate("bienvenida") },
                 modifier = Modifier
                     .align(Alignment.TopStart)
                     .padding(start = 8.dp, top = 8.dp)
@@ -118,9 +124,52 @@ fun RegisterScreen(navController: NavController) {
 
                 Spacer(modifier = Modifier.height(24.dp))
 
+
                 // Botón registrarse
                 Button(
-                    onClick = { /* Acción de registro */ },
+                    onClick = {
+                        if (nombre.isNotBlank() && celular.isNotBlank() && correo.isNotBlank() &&
+                            contrasena.isNotBlank() && confirmar.isNotBlank() && rolSeleccionado.isNotBlank()
+                        ) {
+                            if (contrasena == confirmar) {
+                                val usuario = hashMapOf(
+                                    "nombreCompleto" to nombre,
+                                    "numeroCelular" to celular,
+                                    "correoElectronico" to correo,
+                                    "contrasena" to contrasena,
+                                    "rolSeleccionado" to rolSeleccionado,
+                                    "fechaRegistro" to Timestamp.now()
+                                )
+
+                                db.collection("usuarios")
+                                    .add(usuario)
+                                    .addOnSuccessListener {
+                                        Toast.makeText(
+                                            context,
+                                            "✅ Usuario registrado correctamente",
+                                            Toast.LENGTH_LONG
+                                        ).show()
+                                        // Redirige al login solo si el NavController está activo
+                                        try {
+                                            navController.navigate("login")
+                                        } catch (e: Exception) {
+                                            Toast.makeText(context, "Error al navegar: ${e.message}", Toast.LENGTH_SHORT).show()
+                                        }
+                                    }
+                                    .addOnFailureListener { e ->
+                                        Toast.makeText(
+                                            context,
+                                            "❌ Error al registrar: ${e.message}",
+                                            Toast.LENGTH_LONG
+                                        ).show()
+                                    }
+                            } else {
+                                Toast.makeText(context, "⚠️ Las contraseñas no coinciden", Toast.LENGTH_LONG).show()
+                            }
+                        } else {
+                            Toast.makeText(context, "⚠️ Completa todos los campos", Toast.LENGTH_LONG).show()
+                        }
+                    },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = colorResource(id = R.color.boton_principal)
                     ),
@@ -137,6 +186,7 @@ fun RegisterScreen(navController: NavController) {
                         textAlign = TextAlign.Center
                     )
                 }
+
             }
         }
     }

@@ -165,10 +165,4 @@ fun PantallaBienvenida(navController: NavController) {
     }
 }
 
-// Vista previa de la pantalla de bienvenida
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun PreviewPantallaBienvenida() {
-    val navController = rememberNavController()
-    PantallaBienvenida(navController)
-}
+
