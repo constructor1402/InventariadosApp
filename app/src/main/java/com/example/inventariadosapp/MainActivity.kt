@@ -18,6 +18,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -25,6 +26,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.inventariadosapp.ui.theme.InventariadosAppTheme
+import com.example.inventariadosapp.ui.theme.Kavoon
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -65,13 +67,14 @@ fun PantallaBienvenida(navController: NavController) {
             IconButton(
                 onClick = { activity?.finish() },
                 modifier = Modifier
-                    .size(48.dp)
+                    .size(60.dp) // tamaño del área del botón
                     .align(Alignment.TopEnd)
                     .padding(top = 11.dp, end = 16.dp)
             ) {
                 Image(
                     painter = painterResource(id = R.drawable.ic_close_roja),
-                    contentDescription = "Cerrar aplicación"
+                    contentDescription = "Cerrar aplicación",
+                    modifier = Modifier.size(40.dp) // tamaño visible del icono
                 )
             }
 
@@ -81,14 +84,14 @@ fun PantallaBienvenida(navController: NavController) {
                 verticalArrangement = Arrangement.Top,
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(top = 143.dp) // posición del título según Figma
+                    .padding(top = 143.dp)
             ) {
                 // Nombre de la app
                 Text(
                     text = "INVENTARIADOS",
                     fontSize = 35.sp,
                     color = colorResource(id = R.color.texto_principal),
-                    style = MaterialTheme.typography.headlineLarge,
+                    fontFamily = Kavoon,
                     textAlign = TextAlign.Center
                 )
 
@@ -99,7 +102,7 @@ fun PantallaBienvenida(navController: NavController) {
                     modifier = Modifier
                         .size(172.dp)
                         .clip(CircleShape)
-                        .background(Color(0xFF949EDE)), // color del círculo del Figma
+                        .background(Color(0xFF949EDE)),
                     contentAlignment = Alignment.Center
                 ) {
                     Image(
@@ -116,7 +119,7 @@ fun PantallaBienvenida(navController: NavController) {
                     text = "¡BIENVENIDO!",
                     fontSize = 50.sp,
                     color = colorResource(id = R.color.texto_principal),
-                    style = MaterialTheme.typography.bodyLarge,
+                    fontFamily = Kavoon,
                     textAlign = TextAlign.Center
                 )
 
@@ -135,7 +138,7 @@ fun PantallaBienvenida(navController: NavController) {
                     Text(
                         text = "INICIAR SESIÓN",
                         color = Color.Black,
-                        style = MaterialTheme.typography.labelLarge
+                        fontFamily = Kavoon
                     )
                 }
 
@@ -154,7 +157,7 @@ fun PantallaBienvenida(navController: NavController) {
                     Text(
                         text = "CREAR CUENTA",
                         color = Color.Black,
-                        style = MaterialTheme.typography.labelLarge
+                        fontFamily = Kavoon
                     )
                 }
             }
@@ -162,5 +165,10 @@ fun PantallaBienvenida(navController: NavController) {
     }
 }
 
-
-
+// Vista previa de la pantalla de bienvenida
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun PreviewPantallaBienvenida() {
+    val navController = rememberNavController()
+    PantallaBienvenida(navController)
+}
