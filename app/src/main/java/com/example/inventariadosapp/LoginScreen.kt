@@ -40,7 +40,7 @@ fun LoginScreen(navController: NavController) {
                 .padding(innerPadding)
                 .padding(horizontal = 24.dp, vertical = 16.dp)
         ) {
-            // 🔙 Flecha volver
+            // Flecha volver
             IconButton(
                 onClick = { navController.popBackStack() },
                 modifier = Modifier
@@ -61,7 +61,7 @@ fun LoginScreen(navController: NavController) {
                     .verticalScroll(scrollState),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // 🟣 Título
+                // Título
                 Text(
                     text = "Inicio de Sesión",
                     fontFamily = Kavoon,
@@ -72,7 +72,7 @@ fun LoginScreen(navController: NavController) {
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // 🟣 Logo
+                // Logo
                 Image(
                     painter = painterResource(id = R.drawable.logo_inventariados),
                     contentDescription = "Logo",
@@ -148,7 +148,7 @@ fun LoginScreen(navController: NavController) {
 
                 Spacer(modifier = Modifier.height(30.dp))
 
-                // 🟠 Botón iniciar sesión
+                // Botón iniciar sesión
                 Button(
                     onClick = {
                         if (correo.isNotBlank() && contrasena.isNotBlank()) {
