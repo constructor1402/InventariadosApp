@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">InventariadosApp</string>
+    <string name="title_app">INVENTARIADOS</string>
+    <string name="m_welcome">¡BIENVENIDO!</string>
+    <string name="login_b">INICIAR SESIÓN</string>
+    <string name="register_b">CREAR CUENTA</string>
+    <string name="close_app_description">Cerrar aplicación</string>
+
 </resources>

@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -75,7 +76,7 @@ fun PantallaBienvenida(navController: NavController) {
             ) {
                 Image(
                     painter = painterResource(id = R.drawable.ic_close_roja),
-                    contentDescription = "Cerrar aplicación",
+                    contentDescription = stringResource(R.string.close_app_description),
                     modifier = Modifier.size(40.dp) // tamaño visible del icono
                 )
             }
@@ -90,7 +91,7 @@ fun PantallaBienvenida(navController: NavController) {
             ) {
                 // Nombre de la app
                 Text(
-                    text = "INVENTARIADOS",
+                    text = stringResource(R.string.title_app),
                     fontSize = 35.sp,
                     color = colorResource(id = R.color.texto_principal),
                     fontFamily = Kavoon,
@@ -118,7 +119,7 @@ fun PantallaBienvenida(navController: NavController) {
 
                 // Texto de bienvenida
                 Text(
-                    text = "¡BIENVENIDO!",
+                    text = stringResource(R.string.m_welcome),
                     fontSize = 50.sp,
                     color = colorResource(id = R.color.texto_principal),
                     fontFamily = Kavoon,
@@ -138,7 +139,7 @@ fun PantallaBienvenida(navController: NavController) {
                         .height(69.dp)
                 ) {
                     Text(
-                        text = "INICIAR SESIÓN",
+                        text = stringResource(R.string.login_b),
                         color = Color.Black,
                         fontFamily = Kavoon
                     )
@@ -157,7 +158,7 @@ fun PantallaBienvenida(navController: NavController) {
                         .height(69.dp)
                 ) {
                     Text(
-                        text = "CREAR CUENTA",
+                        text = stringResource(R.string.register_b),
                         color = Color.Black,
                         fontFamily = Kavoon
                     )
