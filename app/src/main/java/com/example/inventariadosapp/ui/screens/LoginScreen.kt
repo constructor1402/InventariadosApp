@@ -217,7 +217,7 @@ fun LoginScreen(navController: NavController) {
                     shape = RoundedCornerShape(16.dp)
                 ) {
                     Text(
-                        text = stringResource(id = R.string.login_button_text),
+                        text = stringResource(id = R.string.login_button),
                         fontFamily = Kavoon,
                         color = colorResource(id = R.color.texto_principal),
                         fontSize = 18.sp
@@ -239,4 +239,3 @@ fun LoginScreen(navController: NavController) {
         }
     }
 }
-

@@ -274,5 +274,3 @@ fun PreviewRegisterScreen() {
     val navController = rememberNavController()
     RegisterScreen(navController)
 }
-
-

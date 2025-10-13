@@ -1,6 +1,8 @@
 package com.example.inventariadosapp.ui.theme
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Typography
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -8,12 +10,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.example.inventariadosapp.R
 
-// Declaramos las fuentes personalizadas
+// Fuentes personalizadas
 val BungeeInline = FontFamily(Font(R.font.bungeeinline_regular))
 val Kavoon = FontFamily(Font(R.font.kavoon_regular))
 
-
-// Definimos la tipografía general de la app
+// Tipografía base que usa los colores del tema activo (claro u oscuro)
 val AppTypography = Typography(
     headlineLarge = TextStyle(
         fontFamily = BungeeInline,
@@ -31,3 +32,8 @@ val AppTypography = Typography(
         fontSize = 16.sp
     )
 )
+
+// Función auxiliar para acceder más fácil desde las pantallas
+@Composable
+fun appTextColor() = MaterialTheme.colorScheme.onBackground
+
