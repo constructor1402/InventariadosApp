@@ -50,7 +50,7 @@ fun LoginScreen(navController: NavController) {
             ) {
                 Image(
                     painter = painterResource(id = R.drawable.ic_arrow_back),
-                    contentDescription = "Volver",
+                    contentDescription = stringResource(id = R.string.close_app_description),
                     modifier = Modifier.size(40.dp)
                 )
             }
@@ -64,7 +64,7 @@ fun LoginScreen(navController: NavController) {
             ) {
                 // Título
                 Text(
-                    text = ("Inicio de Sesión"),
+                    text = stringResource(id = R.string.login_title),
                     fontFamily = Kavoon,
                     fontSize = 24.sp,
                     color = colorResource(id = R.color.texto_principal),
@@ -76,7 +76,7 @@ fun LoginScreen(navController: NavController) {
                 // Logo
                 Image(
                     painter = painterResource(id = R.drawable.logo_inventariados),
-                    contentDescription = "Logo",
+                    contentDescription = stringResource(id = R.string.app_name),
                     modifier = Modifier
                         .size(120.dp)
                         .padding(vertical = 8.dp)
@@ -86,7 +86,7 @@ fun LoginScreen(navController: NavController) {
 
                 // Campo correo
                 Text(
-                    text = "Correo electrónico",
+                    text = stringResource(id = R.string.email_label),
                     fontFamily = Kavoon,
                     color = Color.Black,
                     fontSize = 15.sp,
@@ -96,7 +96,7 @@ fun LoginScreen(navController: NavController) {
                 OutlinedTextField(
                     value = correo,
                     onValueChange = { correo = it },
-                    placeholder = { Text("Ingresa tu correo") },
+                    placeholder = { Text(stringResource(id = R.string.email_placeholder)) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(55.dp),
@@ -113,7 +113,7 @@ fun LoginScreen(navController: NavController) {
 
                 // Campo contraseña
                 Text(
-                    text = "Contraseña",
+                    text = stringResource(id = R.string.password_label),
                     fontFamily = Kavoon,
                     color = Color.Black,
                     fontSize = 15.sp,
@@ -123,7 +123,7 @@ fun LoginScreen(navController: NavController) {
                 OutlinedTextField(
                     value = contrasena,
                     onValueChange = { contrasena = it },
-                    placeholder = { Text("Ingresa tu contraseña") },
+                    placeholder = { Text(stringResource(id = R.string.password_placeholder)) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(55.dp),
@@ -136,7 +136,10 @@ fun LoginScreen(navController: NavController) {
                             painterResource(id = R.drawable.ic_visibility)
 
                         IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                            Icon(painter = icon, contentDescription = "Mostrar u ocultar contraseña")
+                            Icon(
+                                painter = icon,
+                                contentDescription = stringResource(id = R.string.password_toggle_description)
+                            )
                         }
                     },
                     colors = OutlinedTextFieldDefaults.colors(
@@ -160,7 +163,7 @@ fun LoginScreen(navController: NavController) {
                                     if (documents.isEmpty) {
                                         Toast.makeText(
                                             navController.context,
-                                            "El correo no está registrado.",
+                                            navController.context.getString(R.string.toast_email_not_registered),
                                             Toast.LENGTH_SHORT
                                         ).show()
                                     } else {
@@ -170,11 +173,10 @@ fun LoginScreen(navController: NavController) {
                                         if (storedPassword == contrasena) {
                                             Toast.makeText(
                                                 navController.context,
-                                                "Inicio de sesión exitoso",
+                                                navController.context.getString(R.string.toast_login_success),
                                                 Toast.LENGTH_SHORT
                                             ).show()
 
-                                            // Aquí definimos a qué pantalla ir según el rol
                                             val rol = userDoc.getString("rolSeleccionado")
                                             when (rol) {
                                                 "Admin" -> navController.navigate("panel_admin")
@@ -185,7 +187,7 @@ fun LoginScreen(navController: NavController) {
                                         } else {
                                             Toast.makeText(
                                                 navController.context,
-                                                "Contraseña incorrecta.",
+                                                navController.context.getString(R.string.toast_wrong_password),
                                                 Toast.LENGTH_SHORT
                                             ).show()
                                         }
@@ -194,14 +196,14 @@ fun LoginScreen(navController: NavController) {
                                 .addOnFailureListener { e ->
                                     Toast.makeText(
                                         navController.context,
-                                        "Error al verificar usuario: ${e.message}",
+                                        navController.context.getString(R.string.toast_login_error) + " ${e.message}",
                                         Toast.LENGTH_SHORT
                                     ).show()
                                 }
                         } else {
                             Toast.makeText(
                                 navController.context,
-                                "Completa todos los campos",
+                                navController.context.getString(R.string.toast_fill_fields),
                                 Toast.LENGTH_SHORT
                             ).show()
                         }
@@ -215,7 +217,7 @@ fun LoginScreen(navController: NavController) {
                     shape = RoundedCornerShape(16.dp)
                 ) {
                     Text(
-                        text = "INICIAR SESIÓN",
+                        text = stringResource(id = R.string.login_button_text),
                         fontFamily = Kavoon,
                         color = colorResource(id = R.color.texto_principal),
                         fontSize = 18.sp
@@ -227,7 +229,7 @@ fun LoginScreen(navController: NavController) {
                 // Enlace de registro
                 TextButton(onClick = { navController.navigate("registro") }) {
                     Text(
-                        text = "¿No tienes cuenta? Regístrate",
+                        text = stringResource(id = R.string.register_link_text),
                         color = Color.Black,
                         fontFamily = Kavoon,
                         fontSize = 14.sp
@@ -237,3 +239,4 @@ fun LoginScreen(navController: NavController) {
         }
     }
 }
+

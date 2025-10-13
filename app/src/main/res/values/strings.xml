@@ -6,4 +6,32 @@
     <string name="register_b">CREAR CUENTA</string>
     <string name="close_app_description">Cerrar aplicación</string>
 
+    <!-- LoginScreen -->
+    <string name="login_title">Inicio de Sesión</string>
+    <string name="email_label">Correo electrónico</string>
+    <string name="email_placeholder">Ingresa tu correo</string>
+    <string name="password_label">Contraseña</string>
+    <string name="password_placeholder">Ingresa tu contraseña</string>
+    <string name="password_toggle_description">Mostrar u ocultar contraseña</string>
+    <string name="login_button_text">INICIAR SESIÓN</string>
+    <string name="register_link_text">¿No tienes cuenta? Regístrate</string>
+
+    <!-- Mensajes Toast -->
+    <string name="toast_email_not_registered">El correo no está registrado.</string>
+    <string name="toast_login_success">Inicio de sesión exitoso</string>
+    <string name="toast_wrong_password">Contraseña incorrecta.</string>
+    <string name="toast_login_error">Error al verificar usuario:</string>
+    <string name="toast_fill_fields">Completa todos los campos</string>
+
+
+
+
+
+
+
+
+
+
+
+
 </resources>
