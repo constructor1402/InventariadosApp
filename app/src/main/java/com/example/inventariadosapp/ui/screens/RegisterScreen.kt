@@ -27,6 +27,7 @@ import androidx.compose.animation.animateColorAsState
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.Timestamp
 import android.widget.Toast
+import androidx.compose.ui.res.stringResource
 
 
 @Composable
@@ -35,6 +36,8 @@ fun RegisterScreen(navController: NavController) {
     val activity = context as? Activity
     val db = FirebaseFirestore.getInstance()
 
+    // ✅ Nuevo estado de carga
+    var isLoading by remember { mutableStateOf(false) }
 
     var nombre by remember { mutableStateOf("") }
     var celular by remember { mutableStateOf("") }
@@ -50,7 +53,7 @@ fun RegisterScreen(navController: NavController) {
                 .background(colorResource(id = R.color.fondo_claro))
                 .padding(horizontal = 24.dp, vertical = 16.dp)
         ) {
-            // Botón para volver
+            // 🔙 Botón para volver
             IconButton(
                 onClick = { navController.navigate("bienvenida") },
                 modifier = Modifier
@@ -64,9 +67,9 @@ fun RegisterScreen(navController: NavController) {
                 )
             }
 
-            // Contenido principal con scroll
             val scrollState = rememberScrollState()
 
+            // 🔹 CONTENIDO PRINCIPAL
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Top,
@@ -76,7 +79,7 @@ fun RegisterScreen(navController: NavController) {
                     .verticalScroll(scrollState)
             ) {
                 Text(
-                    text = "Registro de usuario",
+                    text = stringResource(R.string.register_title),
                     fontSize = 22.sp,
                     color = colorResource(id = R.color.texto_principal),
                     fontFamily = Kavoon,
@@ -85,29 +88,25 @@ fun RegisterScreen(navController: NavController) {
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Nombre completo
+                // 🔸 Campos
                 TextLabel("Nombre completo")
                 InputField(nombre, "Nombre completo") { nombre = it }
 
-                // Número de celular
                 TextLabel("Número de celular")
                 InputField(celular, "Número de celular") { celular = it }
 
-                // Correo electrónico
                 TextLabel("Correo electrónico")
                 InputField(correo, "Correo electrónico") { correo = it }
 
-                // Contraseña
                 TextLabel("Contraseña")
                 InputField(contrasena, "Contraseña") { contrasena = it }
 
-                // Confirmar contraseña
                 TextLabel("Confirmar contraseña")
                 InputField(confirmar, "Confirmar contraseña") { confirmar = it }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Selector de rol
+                // 🔸 Rol
                 TextLabel("Selecciona un rol")
 
                 Column(
@@ -124,14 +123,16 @@ fun RegisterScreen(navController: NavController) {
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-
-                // Botón registrarse
+                // 🔹 BOTÓN REGISTRARSE
                 Button(
                     onClick = {
                         if (nombre.isNotBlank() && celular.isNotBlank() && correo.isNotBlank() &&
                             contrasena.isNotBlank() && confirmar.isNotBlank() && rolSeleccionado.isNotBlank()
                         ) {
                             if (contrasena == confirmar) {
+                                // ✅ Mostrar overlay de carga
+                                isLoading = true
+
                                 val usuario = hashMapOf(
                                     "nombreCompleto" to nombre,
                                     "numeroCelular" to celular,
@@ -144,19 +145,16 @@ fun RegisterScreen(navController: NavController) {
                                 db.collection("usuarios")
                                     .add(usuario)
                                     .addOnSuccessListener {
+                                        isLoading = false
                                         Toast.makeText(
                                             context,
                                             "✅ Usuario registrado correctamente",
                                             Toast.LENGTH_LONG
                                         ).show()
-                                        // Redirige al login solo si el NavController está activo
-                                        try {
-                                            navController.navigate("login")
-                                        } catch (e: Exception) {
-                                            Toast.makeText(context, "Error al navegar: ${e.message}", Toast.LENGTH_SHORT).show()
-                                        }
+                                        navController.navigate("login")
                                     }
                                     .addOnFailureListener { e ->
+                                        isLoading = false
                                         Toast.makeText(
                                             context,
                                             "❌ Error al registrar: ${e.message}",
@@ -176,7 +174,8 @@ fun RegisterScreen(navController: NavController) {
                     modifier = Modifier
                         .width(217.dp)
                         .height(69.dp),
-                    shape = RoundedCornerShape(16.dp)
+                    shape = RoundedCornerShape(16.dp),
+                    enabled = !isLoading
                 ) {
                     Text(
                         text = "REGISTRARSE",
@@ -186,17 +185,42 @@ fun RegisterScreen(navController: NavController) {
                         textAlign = TextAlign.Center
                     )
                 }
+            }
 
+            // 🔷 OVERLAY DE CARGA
+            if (isLoading) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color(0x88000000)), // fondo semitransparente
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        CircularProgressIndicator(
+                            color = colorResource(id = R.color.boton_principal),
+                            strokeWidth = 4.dp,
+                            modifier = Modifier.size(48.dp)
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = "Registrando...",
+                            color = colorResource(id = R.color.white),
+                            fontFamily = Kavoon,
+                            fontSize = 16.sp
+                        )
+                    }
+                }
             }
         }
     }
 }
 
+
 @Composable
 fun TextLabel(text: String) {
     Text(
         text = text,
-        color = Color.Black,
+        color = colorResource(id = R.color.texto_principal),
         style = MaterialTheme.typography.bodyLarge.copy(
             fontFamily = Kavoon,
             fontSize = 16.sp
@@ -257,7 +281,7 @@ fun RolButton(text: String, isSelected: Boolean, onClick: () -> Unit) {
     ) {
         Text(
             text = text,
-            color = Color.Black,
+            color = colorResource(id = R.color.texto_principal),
             style = MaterialTheme.typography.labelLarge.copy(
                 fontFamily = BungeeInline,
                 fontSize = 16.sp,

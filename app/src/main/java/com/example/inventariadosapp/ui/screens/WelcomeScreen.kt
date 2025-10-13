@@ -25,6 +25,8 @@ import com.example.inventariadosapp.R
 import com.example.inventariadosapp.ui.theme.BungeeInline
 import com.example.inventariadosapp.ui.theme.Kavoon
 
+
+
 @Composable
 fun WelcomeScreen(navController: NavController) {
     val activity = navController.context as? Activity
@@ -62,7 +64,7 @@ fun WelcomeScreen(navController: NavController) {
                 fontFamily = BungeeInline,
                 fontWeight = FontWeight.Bold,
                 fontSize = 26.sp,
-                color = Color.Black,
+                color = colorResource(id = R.color.texto_principal),
                 textAlign = TextAlign.Center
             )
 
@@ -84,7 +86,7 @@ fun WelcomeScreen(navController: NavController) {
                 text = stringResource(id = R.string.welcome_t),
                 fontFamily = Kavoon,
                 fontSize = 28.sp,
-                color = Color.Black,
+                color = colorResource(id = R.color.texto_principal),
                 textAlign = TextAlign.Center
             )
 

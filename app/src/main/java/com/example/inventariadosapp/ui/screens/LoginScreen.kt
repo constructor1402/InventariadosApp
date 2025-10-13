@@ -230,7 +230,7 @@ fun LoginScreen(navController: NavController) {
                 TextButton(onClick = { navController.navigate("registro") }) {
                     Text(
                         text = stringResource(id = R.string.register_link_text),
-                        color = Color.Black,
+                        color = colorResource(id = R.color.texto_principal),
                         fontFamily = Kavoon,
                         fontSize = 14.sp
                     )

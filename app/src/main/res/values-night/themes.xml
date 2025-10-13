@@ -1,14 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Tema claro -->
     <style name="Theme.InventariadosApp" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <!-- Colores base -->
         <item name="android:colorBackground">@color/fondo_claro</item>
         <item name="android:textColor">@color/texto_principal</item>
         <item name="android:buttonStyle">@style/Widget.MaterialComponents.Button</item>
 
-        <!-- Soporte Material -->
         <item name="colorPrimary">@color/boton_principal</item>
         <item name="colorOnPrimary">@color/white</item>
     </style>
+
+
+
+
+
+
 </resources>
