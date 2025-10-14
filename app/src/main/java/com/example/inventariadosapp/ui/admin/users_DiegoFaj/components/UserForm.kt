@@ -25,6 +25,7 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 fun UserForm(state: UserUiState, viewModel: UserViewModel) {
     val uiState by viewModel.uiState.collectAsState()
     Column(modifier = Modifier.fillMaxWidth()) {
+        //Nombre
         OutlinedTextField(
             value = state.nombre,
             onValueChange = { viewModel.onFieldChange(nombre = it) },
@@ -37,21 +38,24 @@ fun UserForm(state: UserUiState, viewModel: UserViewModel) {
                 unfocusedBorderColor = colorResource(id = R.color.texto_principal)
             )
         )
-
+        //Teléfono
         OutlinedTextField(
             value = state.celular,
             onValueChange = { viewModel.onFieldChange(celular = it) },
             label = { Text("Número de celular") },
             modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
+
+            
         )
 
+        //Correo
         OutlinedTextField(
             value = state.correo,
             onValueChange = { viewModel.onFieldChange(correo = it) },
             label = { Text("Correo electrónico") },
             modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
         )
-
+        //Contraseña
         OutlinedTextField(
             value = state.contrasena,
             onValueChange = { viewModel.onFieldChange(contrasena = it) },
