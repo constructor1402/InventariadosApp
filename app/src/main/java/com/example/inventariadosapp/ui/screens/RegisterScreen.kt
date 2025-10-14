@@ -1,11 +1,12 @@
-package com.example.inventariadosapp
+package com.example.inventariadosapp.screens
 
 import android.app.Activity
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -15,28 +16,26 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.compose.rememberNavController
+import androidx.compose.animation.animateColorAsState
+import com.example.inventariadosapp.R
 import com.example.inventariadosapp.ui.theme.BungeeInline
 import com.example.inventariadosapp.ui.theme.Kavoon
-import androidx.compose.animation.animateColorAsState
-import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.Timestamp
-import android.widget.Toast
-import androidx.compose.ui.res.stringResource
-
+import com.google.firebase.firestore.FirebaseFirestore
 
 @Composable
 fun RegisterScreen(navController: NavController) {
     val context = LocalContext.current
-    val activity = context as? Activity
     val db = FirebaseFirestore.getInstance()
 
-    // ✅ Nuevo estado de carga
     var isLoading by remember { mutableStateOf(false) }
 
     var nombre by remember { mutableStateOf("") }
@@ -69,7 +68,7 @@ fun RegisterScreen(navController: NavController) {
 
             val scrollState = rememberScrollState()
 
-            // 🔹 CONTENIDO PRINCIPAL
+            // 🔹 Contenido principal
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Top,
@@ -79,7 +78,7 @@ fun RegisterScreen(navController: NavController) {
                     .verticalScroll(scrollState)
             ) {
                 Text(
-                    text = stringResource(R.string.register_title),
+                    text = "Registro de usuario",
                     fontSize = 22.sp,
                     color = colorResource(id = R.color.texto_principal),
                     fontFamily = Kavoon,
@@ -90,19 +89,46 @@ fun RegisterScreen(navController: NavController) {
 
                 // 🔸 Campos
                 TextLabel("Nombre completo")
-                InputField(nombre, "Nombre completo") { nombre = it }
+                InputField(
+                    value = nombre,
+                    placeholder = "Nombre completo",
+                    onValueChange = { nombre = it },
+                    keyboardType = KeyboardType.Text
+                )
 
                 TextLabel("Número de celular")
-                InputField(celular, "Número de celular") { celular = it }
+                InputField(
+                    value = celular,
+                    placeholder = "Ejemplo: +573121110000",
+                    onValueChange = { celular = it },
+                    keyboardType = KeyboardType.Phone
+                )
 
                 TextLabel("Correo electrónico")
-                InputField(correo, "Correo electrónico") { correo = it }
+                InputField(
+                    value = correo,
+                    placeholder = "Correo electrónico",
+                    onValueChange = { correo = it },
+                    keyboardType = KeyboardType.Email
+                )
 
                 TextLabel("Contraseña")
-                InputField(contrasena, "Contraseña") { contrasena = it }
+                InputField(
+                    value = contrasena,
+                    placeholder = "Contraseña",
+                    onValueChange = { contrasena = it },
+                    keyboardType = KeyboardType.Password,
+                    isPassword = true
+                )
 
                 TextLabel("Confirmar contraseña")
-                InputField(confirmar, "Confirmar contraseña") { confirmar = it }
+                InputField(
+                    value = confirmar,
+                    placeholder = "Confirmar contraseña",
+                    onValueChange = { confirmar = it },
+                    keyboardType = KeyboardType.Password,
+                    isPassword = true
+                )
 
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -130,36 +156,51 @@ fun RegisterScreen(navController: NavController) {
                             contrasena.isNotBlank() && confirmar.isNotBlank() && rolSeleccionado.isNotBlank()
                         ) {
                             if (contrasena == confirmar) {
-                                // ✅ Mostrar overlay de carga
                                 isLoading = true
 
-                                val usuario = hashMapOf(
-                                    "nombreCompleto" to nombre,
-                                    "numeroCelular" to celular,
-                                    "correoElectronico" to correo,
-                                    "contrasena" to contrasena,
-                                    "rolSeleccionado" to rolSeleccionado,
-                                    "fechaRegistro" to Timestamp.now()
-                                )
-
+                                // 🔹 Verificar si ya existe el usuario con el mismo correo
                                 db.collection("usuarios")
-                                    .add(usuario)
-                                    .addOnSuccessListener {
-                                        isLoading = false
-                                        Toast.makeText(
-                                            context,
-                                            "✅ Usuario registrado correctamente",
-                                            Toast.LENGTH_LONG
-                                        ).show()
-                                        navController.navigate("login")
-                                    }
-                                    .addOnFailureListener { e ->
-                                        isLoading = false
-                                        Toast.makeText(
-                                            context,
-                                            "❌ Error al registrar: ${e.message}",
-                                            Toast.LENGTH_LONG
-                                        ).show()
+                                    .whereEqualTo("correoElectronico", correo)
+                                    .get()
+                                    .addOnSuccessListener { snapshot ->
+                                        if (snapshot.isEmpty) {
+                                            // 🔹 Crear usuario en Firestore
+                                            val usuario = hashMapOf(
+                                                "nombreCompleto" to nombre,
+                                                "numeroCelular" to celular,
+                                                "correoElectronico" to correo,
+                                                "contrasena" to contrasena,
+                                                "rolSeleccionado" to rolSeleccionado,
+                                                "fechaRegistro" to Timestamp.now()
+                                            )
+
+                                            db.collection("usuarios")
+                                                .add(usuario)
+                                                .addOnSuccessListener {
+                                                    isLoading = false
+                                                    Toast.makeText(
+                                                        context,
+                                                        "✅ Usuario registrado correctamente",
+                                                        Toast.LENGTH_LONG
+                                                    ).show()
+                                                    navController.navigate("login")
+                                                }
+                                                .addOnFailureListener { e ->
+                                                    isLoading = false
+                                                    Toast.makeText(
+                                                        context,
+                                                        "❌ Error al guardar datos: ${e.message}",
+                                                        Toast.LENGTH_LONG
+                                                    ).show()
+                                                }
+                                        } else {
+                                            isLoading = false
+                                            Toast.makeText(
+                                                context,
+                                                "⚠️ El correo ya está registrado",
+                                                Toast.LENGTH_LONG
+                                            ).show()
+                                        }
                                     }
                             } else {
                                 Toast.makeText(context, "⚠️ Las contraseñas no coinciden", Toast.LENGTH_LONG).show()
@@ -178,7 +219,7 @@ fun RegisterScreen(navController: NavController) {
                     enabled = !isLoading
                 ) {
                     Text(
-                        text = "REGISTRARSE",
+                        text = if (isLoading) "Registrando..." else "REGISTRARSE",
                         fontSize = 20.sp,
                         color = colorResource(id = R.color.texto_principal),
                         fontFamily = Kavoon,
@@ -187,12 +228,12 @@ fun RegisterScreen(navController: NavController) {
                 }
             }
 
-            // 🔷 OVERLAY DE CARGA
+            // 🔷 Overlay de carga
             if (isLoading) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(Color(0x88000000)), // fondo semitransparente
+                        .background(Color(0x88000000)),
                     contentAlignment = Alignment.Center
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -215,7 +256,6 @@ fun RegisterScreen(navController: NavController) {
     }
 }
 
-
 @Composable
 fun TextLabel(text: String) {
     Text(
@@ -232,7 +272,13 @@ fun TextLabel(text: String) {
 }
 
 @Composable
-fun InputField(value: String, placeholder: String, onValueChange: (String) -> Unit) {
+fun InputField(
+    value: String,
+    placeholder: String,
+    onValueChange: (String) -> Unit,
+    keyboardType: KeyboardType,
+    isPassword: Boolean = false
+) {
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
@@ -244,6 +290,8 @@ fun InputField(value: String, placeholder: String, onValueChange: (String) -> Un
                 fontSize = 15.sp
             )
         },
+        visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None,
+        keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
         modifier = Modifier
             .fillMaxWidth()
             .height(55.dp),
@@ -264,7 +312,6 @@ fun InputField(value: String, placeholder: String, onValueChange: (String) -> Un
 
 @Composable
 fun RolButton(text: String, isSelected: Boolean, onClick: () -> Unit) {
-    // Animación de color suave
     val backgroundColor by animateColorAsState(
         targetValue = if (isSelected) Color(0xFF69C225)
         else colorResource(id = R.color.boton_principal).copy(alpha = 0.7f),
@@ -290,11 +337,4 @@ fun RolButton(text: String, isSelected: Boolean, onClick: () -> Unit) {
             modifier = Modifier.fillMaxWidth()
         )
     }
-}
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun PreviewRegisterScreen() {
-    val navController = rememberNavController()
-    RegisterScreen(navController)
 }
