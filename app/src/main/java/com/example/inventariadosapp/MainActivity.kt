@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import com.example.inventariadosapp.navigation.AppNavigation
+import com.example.inventariadosapp.ui.admin.users_DiegoFaj.UserManagementScreen
 import com.example.inventariadosapp.ui.theme.InventariadosAppTheme
 
 class MainActivity : ComponentActivity() {
@@ -11,7 +12,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             InventariadosAppTheme {
-                AppNavigation()  // Navegación principal
+                AppNavigation() // Navegación principal
             }
         }
     }
