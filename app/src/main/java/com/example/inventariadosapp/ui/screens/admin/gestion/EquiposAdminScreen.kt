@@ -1,4 +1,4 @@
-package com.example.inventariadosapp.screens.admin
+package com.example.inventariadosapp.screens.admin.gestion
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -9,6 +9,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -16,40 +18,50 @@ import com.example.inventariadosapp.R
 import com.example.inventariadosapp.ui.theme.Kavoon
 
 @Composable
-fun GestionAdminScreen(adminNavController: NavController) {
-    Scaffold { padding ->
+fun EquiposAdminScreen(navController: NavController) {
+    Scaffold(
+        bottomBar = { BottomNavGestionBar(navController) }
+    ) { padding ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(colorResource(id = R.color.fondo_claro))
                 .padding(padding)
         ) {
-            // 🔙 Flecha hacia atrás que vuelve a InicioAdminScreen
             IconButton(
-                onClick = { adminNavController.navigate("inicio_admin") },
+                onClick = { navController.navigate("inicio_admin") },
                 modifier = Modifier
                     .align(Alignment.TopStart)
-                    .padding(start = 16.dp, top = 12.dp)
+                    .padding(start = 12.dp, top = 12.dp)
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_arrow_back),
                     contentDescription = "Volver",
                     tint = Color.Unspecified,
-                    modifier = Modifier.size(28.dp)
+                    modifier = Modifier.size(36.dp)
                 )
             }
 
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(top = 80.dp),
+                    .padding(horizontal = 24.dp, vertical = 80.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "Gestión",
+                    text = "Gestión de Equipos",
                     color = colorResource(id = R.color.texto_principal),
                     fontFamily = Kavoon,
-                    fontSize = 22.sp
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
+                )
+                Spacer(modifier = Modifier.height(32.dp))
+                Text(
+                    text = "Pantalla en construcción...",
+                    color = Color.Gray,
+                    fontSize = 14.sp,
+                    textAlign = TextAlign.Center
                 )
             }
         }
