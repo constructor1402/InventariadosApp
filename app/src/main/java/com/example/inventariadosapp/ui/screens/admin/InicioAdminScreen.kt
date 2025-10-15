@@ -2,7 +2,6 @@ package com.example.inventariadosapp.screens.admin
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -19,9 +18,9 @@ import com.example.inventariadosapp.R
 import com.example.inventariadosapp.ui.theme.Kavoon
 
 @Composable
-fun InicioAdminScreen(navController: NavController) {
+fun InicioAdminScreen(adminNavController: NavController) {
     Scaffold(
-        bottomBar = { BottomNavigationBar() } // 👈 Agregamos la barra inferior
+        bottomBar = { BottomNavigationBar(adminNavController, currentRoute = "inicio_admin") }
     ) { padding ->
         Box(
             modifier = Modifier
@@ -29,9 +28,31 @@ fun InicioAdminScreen(navController: NavController) {
                 .background(colorResource(id = R.color.fondo_claro))
                 .padding(padding)
         ) {
+            // ❌ Botón Cerrar sesión → vuelve al Login principal
+            IconButton(
+                onClick = {
+                    // ✅ Este comando devuelve al flujo principal (AppNavigation)
+                    adminNavController.navigate("login") {
+                        popUpTo("inicio_admin") { inclusive = true } // limpia el stack interno
+                        launchSingleTop = true
+                    }
+                },
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(end = 16.dp, top = 12.dp)
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_close_roja),
+                    contentDescription = "Cerrar sesión",
+                    tint = Color.Unspecified,
+                    modifier = Modifier.size(28.dp)
+                )
+            }
+
+            // 🔹 Contenido principal
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .fillMaxSize()
                     .padding(horizontal = 24.dp, vertical = 32.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -45,7 +66,6 @@ fun InicioAdminScreen(navController: NavController) {
 
                 Spacer(modifier = Modifier.height(32.dp))
 
-                // 🔹 Tarjetas del tablero
                 DashboardCard(
                     color = Color(0xFF3949AB),
                     numero = "8",
@@ -76,7 +96,6 @@ fun DashboardCard(color: Color, numero: String, descripcion: String) {
         modifier = Modifier
             .width(220.dp)
             .height(90.dp)
-            .padding(horizontal = 8.dp),
     ) {
         Column(
             modifier = Modifier
@@ -102,58 +121,3 @@ fun DashboardCard(color: Color, numero: String, descripcion: String) {
         }
     }
 }
-
-@Composable
-fun BottomNavigationBar() {
-    Surface(
-        shadowElevation = 12.dp,
-        tonalElevation = 3.dp,
-        color = colorResource(id = R.color.white),
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(75.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 30.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            BottomNavItem(icon = R.drawable.ic_home, label = "Inicio")
-            BottomNavItem(icon = R.drawable.ic_gestion, label = "Gestión")
-            BottomNavItem(icon = R.drawable.ic_informes, label = "Informes")
-        }
-    }
-}
-
-@Composable
-fun BottomNavItem(icon: Int, label: String) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Surface(
-            color = colorResource(id = R.color.boton_principal).copy(alpha = 0.25f),
-            shape = CircleShape,
-            modifier = Modifier.size(40.dp)
-        ) {
-            Icon(
-                painter = painterResource(id = icon),
-                contentDescription = label,
-                tint = colorResource(id = R.color.boton_principal),
-                modifier = Modifier.padding(8.dp)
-            )
-        }
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = label,
-            color = colorResource(id = R.color.texto_principal),
-            fontSize = 12.sp,
-            textAlign = TextAlign.Center,
-            fontFamily = Kavoon
-        )
-    }
-}
-
-
