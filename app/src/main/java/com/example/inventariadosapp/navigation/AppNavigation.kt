@@ -9,9 +9,8 @@ import com.example.inventariadosapp.screens.*
 import com.example.inventariadosapp.LoginScreen
 import com.example.inventariadosapp.PanelConsultaScreen
 import com.example.inventariadosapp.PanelTopografoScreen
-import com.example.inventariadosapp.screens.admin.InicioAdminScreen
+import com.example.inventariadosapp.screens.admin.*
 import com.example.inventariadosapp.ui.screens.WelcomeScreen
-
 
 @Composable
 fun AppNavigation() {
@@ -30,18 +29,25 @@ fun AppNavigation() {
         // 🧾 Registro
         composable("registro") { RegisterScreen(navController) }
 
-        // 🔄 Recuperar contraseña (ingreso del número y código)
+        // 🔄 Recuperar contraseña
         composable("recuperar_contrasena") { RecuperarContrasenaScreen(navController) }
 
-        // 🔑 Restablecer contraseña (recibe el teléfono)
+        // 🔑 Restablecer contraseña
         composable("restablecer_contrasena/{telefono}") { backStackEntry ->
             val telefono = backStackEntry.arguments?.getString("telefono")
             RestablecerContrasenaScreen(navController, telefono)
         }
 
         // 👇 Paneles de roles
-        composable("panel_admin") { InicioAdminScreen(navController) }
+        composable("panel_admin") { AdminNavigation() }
         composable("panel_topografo") { PanelTopografoScreen(navController) }
         composable("panel_consulta") { PanelConsultaScreen(navController) }
+
+        // 👇 Subpantallas internas del panel admin (para que existan como rutas válidas)
+        composable("inicio_admin") { InicioAdminScreen(navController) }
+        composable("gestion_admin") { GestionAdminScreen(navController) }
+        composable("informes_admin") { InformesAdminScreen(navController) }
     }
 }
+
+

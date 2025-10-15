@@ -18,6 +18,7 @@ import com.example.inventariadosapp.ui.admin.users_DiegoFaj.components.UserActio
 import com.example.inventariadosapp.ui.admin.users_DiegoFaj.components.UserForm
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.tooling.preview.Preview
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -81,5 +82,15 @@ fun UserManagementScreen(viewModel: UserViewModel = viewModel()) {
         }
     }
 }
+
+@Preview(showSystemUi = true, showBackground = true)
+@Composable
+fun PreviewUserManagementScreen() {
+    // 👇 Esta preview te deja ver la interfaz sin necesidad del ViewModel real
+    Surface(modifier = Modifier.fillMaxSize()) {
+        UserManagementScreen()
+    }
+}
+
 
 
