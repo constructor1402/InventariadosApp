@@ -7,10 +7,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.inventariadosapp.screens.*
 import com.example.inventariadosapp.LoginScreen
-import com.example.inventariadosapp.PanelAdminScreen
 import com.example.inventariadosapp.PanelConsultaScreen
 import com.example.inventariadosapp.PanelTopografoScreen
+import com.example.inventariadosapp.screens.admin.InicioAdminScreen
 import com.example.inventariadosapp.ui.screens.WelcomeScreen
+
 
 @Composable
 fun AppNavigation() {
@@ -38,11 +39,9 @@ fun AppNavigation() {
             RestablecerContrasenaScreen(navController, telefono)
         }
 
-        // 👇 Ejemplos de paneles (ajusta según tus pantallas reales)
-        composable("panel_admin") { PanelAdminScreen(navController) }
+        // 👇 Paneles de roles
+        composable("panel_admin") { InicioAdminScreen(navController) }
         composable("panel_topografo") { PanelTopografoScreen(navController) }
         composable("panel_consulta") { PanelConsultaScreen(navController) }
     }
 }
-
-
