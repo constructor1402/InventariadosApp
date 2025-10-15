@@ -1,0 +1,140 @@
+<html>
+<head>
+<title>GestionObraScreen.kt</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #cf8e6d;}
+.s1 { color: #bcbec4;}
+.s2 { color: #bcbec4;}
+.s3 { color: #7a7e85;}
+.s4 { color: #2aacb8;}
+.s5 { color: #6aab73;}
+</style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+GestionObraScreen.kt</font>
+</center></td></tr></table>
+<pre><span class="s0">package </span><span class="s1">com</span><span class="s2">.</span><span class="s1">example</span><span class="s2">.</span><span class="s1">inventariadosapp</span><span class="s2">.</span><span class="s1">admin</span><span class="s2">.</span><span class="s1">obra</span>
+
+<span class="s1">import androidx</span><span class="s2">.</span><span class="s1">compose</span><span class="s2">.</span><span class="s1">foundation</span><span class="s2">.</span><span class="s1">background</span>
+<span class="s1">import androidx</span><span class="s2">.</span><span class="s1">compose</span><span class="s2">.</span><span class="s1">foundation</span><span class="s2">.</span><span class="s1">layout</span><span class="s2">.*</span>
+<span class="s1">import androidx</span><span class="s2">.</span><span class="s1">compose</span><span class="s2">.</span><span class="s1">foundation</span><span class="s2">.</span><span class="s1">rememberScrollState</span>
+<span class="s1">import androidx</span><span class="s2">.</span><span class="s1">compose</span><span class="s2">.</span><span class="s1">foundation</span><span class="s2">.</span><span class="s1">verticalScroll</span>
+<span class="s1">import androidx</span><span class="s2">.</span><span class="s1">compose</span><span class="s2">.</span><span class="s1">material3</span><span class="s2">.*</span>
+<span class="s1">import androidx</span><span class="s2">.</span><span class="s1">compose</span><span class="s2">.</span><span class="s1">runtime</span><span class="s2">.</span><span class="s1">Composable</span>
+<span class="s1">import androidx</span><span class="s2">.</span><span class="s1">compose</span><span class="s2">.</span><span class="s1">runtime</span><span class="s2">.</span><span class="s1">LaunchedEffect</span>
+<span class="s1">import androidx</span><span class="s2">.</span><span class="s1">compose</span><span class="s2">.</span><span class="s1">ui</span><span class="s2">.</span><span class="s1">Alignment</span>
+<span class="s1">import androidx</span><span class="s2">.</span><span class="s1">compose</span><span class="s2">.</span><span class="s1">ui</span><span class="s2">.</span><span class="s1">Modifier</span>
+<span class="s1">import androidx</span><span class="s2">.</span><span class="s1">compose</span><span class="s2">.</span><span class="s1">ui</span><span class="s2">.</span><span class="s1">graphics</span><span class="s2">.</span><span class="s1">Color</span>
+<span class="s1">import androidx</span><span class="s2">.</span><span class="s1">compose</span><span class="s2">.</span><span class="s1">ui</span><span class="s2">.</span><span class="s1">unit</span><span class="s2">.</span><span class="s1">dp</span>
+<span class="s1">import androidx</span><span class="s2">.</span><span class="s1">lifecycle</span><span class="s2">.</span><span class="s1">viewmodel</span><span class="s2">.</span><span class="s1">compose</span><span class="s2">.</span><span class="s1">viewModel</span>
+<span class="s1">import com</span><span class="s2">.</span><span class="s1">example</span><span class="s2">.</span><span class="s1">inventariadosapp</span><span class="s2">.</span><span class="s1">admin</span><span class="s2">.</span><span class="s1">obra</span><span class="s2">.</span><span class="s1">components</span><span class="s2">.</span><span class="s1">ObraButtonRow</span>
+<span class="s1">import com</span><span class="s2">.</span><span class="s1">example</span><span class="s2">.</span><span class="s1">inventariadosapp</span><span class="s2">.</span><span class="s1">admin</span><span class="s2">.</span><span class="s1">obra</span><span class="s2">.</span><span class="s1">components</span><span class="s2">.</span><span class="s1">ObraTextField</span>
+
+<span class="s3">// Esta anotación resuelve los errores de &quot;This material API is experimental...&quot;</span>
+<span class="s1">@OptIn</span><span class="s2">(</span><span class="s1">ExperimentalMaterial3Api::</span><span class="s0">class</span><span class="s2">)</span>
+<span class="s1">@Composable</span>
+<span class="s0">fun </span><span class="s1">GestionObraScreen</span><span class="s2">(</span>
+    <span class="s3">// Inyectamos el ViewModel</span>
+    <span class="s1">viewModel: ObraViewModel </span><span class="s2">= </span><span class="s1">viewModel</span><span class="s2">()</span>
+<span class="s2">) {</span>
+    <span class="s3">// Definimos el color de fondo general de tus diseños (azul/morado muy claro: F3F4F6)</span>
+    <span class="s0">val </span><span class="s1">screenBackground </span><span class="s2">= </span><span class="s1">Color</span><span class="s2">(</span><span class="s4">0xFFF3F4F6</span><span class="s2">)</span>
+
+    <span class="s3">// El scrollState es necesario para que el contenido sea desplazable en pantallas pequeñas</span>
+    <span class="s0">val </span><span class="s1">scrollState </span><span class="s2">= </span><span class="s1">rememberScrollState</span><span class="s2">()</span>
+
+    <span class="s1">Scaffold</span><span class="s2">(</span>
+        <span class="s1">topBar </span><span class="s2">= {</span>
+            <span class="s1">TopAppBar</span><span class="s2">(</span>
+                <span class="s1">title </span><span class="s2">= { </span><span class="s1">Text</span><span class="s2">(</span><span class="s5">&quot;Gestión de Obras&quot;</span><span class="s2">) },</span>
+                <span class="s1">colors </span><span class="s2">= </span><span class="s1">TopAppBarDefaults</span><span class="s2">.</span><span class="s1">topAppBarColors</span><span class="s2">(</span>
+                    <span class="s1">containerColor </span><span class="s2">= </span><span class="s1">Color</span><span class="s2">(</span><span class="s4">0xFF7986CB</span><span class="s2">), </span><span class="s3">// Color de la barra superior</span>
+                    <span class="s1">titleContentColor </span><span class="s2">= </span><span class="s1">Color</span><span class="s2">.</span><span class="s1">White</span>
+                <span class="s2">)</span>
+            <span class="s2">)</span>
+        <span class="s2">},</span>
+        <span class="s1">containerColor </span><span class="s2">= </span><span class="s1">screenBackground</span>
+    <span class="s2">) { </span><span class="s1">paddingValues </span><span class="s2">-&gt;</span>
+        <span class="s1">Column</span><span class="s2">(</span>
+            <span class="s1">modifier </span><span class="s2">= </span><span class="s1">Modifier</span>
+                <span class="s2">.</span><span class="s1">fillMaxSize</span><span class="s2">()</span>
+                <span class="s2">.</span><span class="s1">padding</span><span class="s2">(</span><span class="s1">paddingValues</span><span class="s2">)</span>
+                <span class="s2">.</span><span class="s1">padding</span><span class="s2">(</span><span class="s4">16</span><span class="s2">.</span><span class="s1">dp</span><span class="s2">)</span>
+                <span class="s2">.</span><span class="s1">background</span><span class="s2">(</span><span class="s1">screenBackground</span><span class="s2">)</span>
+                <span class="s2">.</span><span class="s1">verticalScroll</span><span class="s2">(</span><span class="s1">scrollState</span><span class="s2">), </span><span class="s3">// Habilitar desplazamiento</span>
+            <span class="s1">horizontalAlignment </span><span class="s2">= </span><span class="s1">Alignment</span><span class="s2">.</span><span class="s1">CenterHorizontally</span>
+        <span class="s2">) {</span>
+
+            <span class="s3">// Título principal</span>
+            <span class="s1">Text</span><span class="s2">(</span>
+                <span class="s1">text </span><span class="s2">= </span><span class="s5">&quot;Gestión de Obras&quot;</span><span class="s2">,</span>
+                <span class="s1">style </span><span class="s2">= </span><span class="s1">MaterialTheme</span><span class="s2">.</span><span class="s1">typography</span><span class="s2">.</span><span class="s1">headlineMedium</span><span class="s2">,</span>
+                <span class="s1">modifier </span><span class="s2">= </span><span class="s1">Modifier</span><span class="s2">.</span><span class="s1">padding</span><span class="s2">(</span><span class="s1">bottom </span><span class="s2">= </span><span class="s4">16</span><span class="s2">.</span><span class="s1">dp</span><span class="s2">)</span>
+            <span class="s2">)</span>
+
+            <span class="s3">// 1. Campo Nombre de Obra</span>
+            <span class="s1">ObraTextField</span><span class="s2">(</span>
+                <span class="s1">value </span><span class="s2">= </span><span class="s1">viewModel</span><span class="s2">.</span><span class="s1">nombreObra</span><span class="s2">,</span>
+                <span class="s1">onValueChange </span><span class="s2">= </span><span class="s1">viewModel::updateNombreObra</span><span class="s2">,</span>
+                <span class="s1">label </span><span class="s2">= </span><span class="s5">&quot;Nombre de Obra&quot;</span><span class="s2">,</span>
+                <span class="s1">isError </span><span class="s2">= </span><span class="s1">viewModel</span><span class="s2">.</span><span class="s1">nombreObraError</span><span class="s2">,</span>
+                <span class="s1">errorMessage </span><span class="s2">= </span><span class="s0">if </span><span class="s2">(</span><span class="s1">viewModel</span><span class="s2">.</span><span class="s1">nombreObraError</span><span class="s2">) </span><span class="s5">&quot;Escribe el nombre de la obra.&quot; </span><span class="s0">else null</span>
+            <span class="s2">)</span>
+
+            <span class="s3">// 2. Campo Ubicación</span>
+            <span class="s1">ObraTextField</span><span class="s2">(</span>
+                <span class="s1">value </span><span class="s2">= </span><span class="s1">viewModel</span><span class="s2">.</span><span class="s1">ubicacion</span><span class="s2">,</span>
+                <span class="s1">onValueChange </span><span class="s2">= </span><span class="s1">viewModel::updateUbicacion</span><span class="s2">,</span>
+                <span class="s1">label </span><span class="s2">= </span><span class="s5">&quot;Ubicación&quot;</span><span class="s2">,</span>
+                <span class="s1">isError </span><span class="s2">= </span><span class="s1">viewModel</span><span class="s2">.</span><span class="s1">ubicacionError</span><span class="s2">,</span>
+                <span class="s1">errorMessage </span><span class="s2">= </span><span class="s0">if </span><span class="s2">(</span><span class="s1">viewModel</span><span class="s2">.</span><span class="s1">ubicacionError</span><span class="s2">) </span><span class="s5">&quot;Ingresa la ubicación.&quot; </span><span class="s0">else null</span>
+            <span class="s2">)</span>
+
+            <span class="s3">// 3. Campo Cliente (Debe ser readOnly, su valor se carga desde una búsqueda)</span>
+            <span class="s1">ObraTextField</span><span class="s2">(</span>
+                <span class="s1">value </span><span class="s2">= </span><span class="s1">viewModel</span><span class="s2">.</span><span class="s1">clienteNombre</span><span class="s2">.</span><span class="s1">ifBlank </span><span class="s2">{ </span><span class="s5">&quot;Cliente asociado&quot; </span><span class="s2">},</span>
+                <span class="s1">onValueChange </span><span class="s2">= {}, </span><span class="s3">// No editable por el usuario</span>
+                <span class="s1">label </span><span class="s2">= </span><span class="s5">&quot;Cliente&quot;</span><span class="s2">,</span>
+                <span class="s1">isError </span><span class="s2">= </span><span class="s0">false</span><span class="s2">,</span>
+                <span class="s1">readOnly </span><span class="s2">= </span><span class="s0">true</span>
+            <span class="s2">)</span>
+
+            <span class="s1">Spacer</span><span class="s2">(</span><span class="s1">Modifier</span><span class="s2">.</span><span class="s1">height</span><span class="s2">(</span><span class="s4">32</span><span class="s2">.</span><span class="s1">dp</span><span class="s2">))</span>
+
+            <span class="s3">// 4. Botones de Acción (Se eliminan las advertencias de 'never used' aquí)</span>
+            <span class="s1">ObraButtonRow</span><span class="s2">(</span>
+                <span class="s1">onGuardarClick </span><span class="s2">= </span><span class="s1">viewModel::guardarObra</span><span class="s2">,</span>
+                <span class="s1">onBuscarClick </span><span class="s2">= {</span>
+                    <span class="s3">// Simulación de búsqueda</span>
+                    <span class="s1">viewModel</span><span class="s2">.</span><span class="s1">buscarObra</span><span class="s2">(</span><span class="s5">&quot;LA PALMA&quot;</span><span class="s2">)</span>
+                <span class="s2">},</span>
+                <span class="s1">onEliminarClick </span><span class="s2">= </span><span class="s1">viewModel::eliminarObra</span>
+            <span class="s2">)</span>
+
+            <span class="s1">Spacer</span><span class="s2">(</span><span class="s1">Modifier</span><span class="s2">.</span><span class="s1">height</span><span class="s2">(</span><span class="s4">24</span><span class="s2">.</span><span class="s1">dp</span><span class="s2">))</span>
+
+            <span class="s3">// 5. Mensaje de Estado (Éxito o Error)</span>
+            <span class="s1">viewModel</span><span class="s2">.</span><span class="s1">mensajeStatus?</span><span class="s2">.</span><span class="s1">let </span><span class="s2">{ </span><span class="s1">status </span><span class="s2">-&gt;</span>
+                <span class="s1">Card</span><span class="s2">(</span>
+                    <span class="s1">colors </span><span class="s2">= </span><span class="s1">CardDefaults</span><span class="s2">.</span><span class="s1">cardColors</span><span class="s2">(</span>
+                        <span class="s3">// Determinar color de fondo basado en el mensaje</span>
+                        <span class="s1">containerColor </span><span class="s2">= </span><span class="s0">if </span><span class="s2">(</span><span class="s1">status</span><span class="s2">.</span><span class="s1">startsWith</span><span class="s2">(</span><span class="s5">&quot;✅&quot;</span><span class="s2">)) </span><span class="s1">Color</span><span class="s2">(</span><span class="s4">0xFFE8F5E9</span><span class="s2">) </span><span class="s0">else </span><span class="s1">Color</span><span class="s2">(</span><span class="s4">0xFFFFEBEE</span><span class="s2">)</span>
+                    <span class="s2">),</span>
+                    <span class="s1">modifier </span><span class="s2">= </span><span class="s1">Modifier</span><span class="s2">.</span><span class="s1">fillMaxWidth</span><span class="s2">().</span><span class="s1">padding</span><span class="s2">(</span><span class="s1">horizontal </span><span class="s2">= </span><span class="s4">8</span><span class="s2">.</span><span class="s1">dp</span><span class="s2">)</span>
+                <span class="s2">) {</span>
+                    <span class="s1">Text</span><span class="s2">(</span>
+                        <span class="s1">text </span><span class="s2">= </span><span class="s1">status</span><span class="s2">,</span>
+                        <span class="s1">color </span><span class="s2">= </span><span class="s0">if </span><span class="s2">(</span><span class="s1">status</span><span class="s2">.</span><span class="s1">startsWith</span><span class="s2">(</span><span class="s5">&quot;✅&quot;</span><span class="s2">)) </span><span class="s1">Color</span><span class="s2">(</span><span class="s4">0xFF388E3C</span><span class="s2">) </span><span class="s0">else </span><span class="s1">Color</span><span class="s2">(</span><span class="s4">0xFFD32F2F</span><span class="s2">),</span>
+                        <span class="s1">modifier </span><span class="s2">= </span><span class="s1">Modifier</span><span class="s2">.</span><span class="s1">padding</span><span class="s2">(</span><span class="s4">12</span><span class="s2">.</span><span class="s1">dp</span><span class="s2">)</span>
+                    <span class="s2">)</span>
+                <span class="s2">}</span>
+            <span class="s2">}</span>
+        <span class="s2">}</span>
+    <span class="s2">}</span>
+<span class="s2">}</span></pre>
+</body>
+</html>
