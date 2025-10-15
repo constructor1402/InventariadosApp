@@ -18,7 +18,10 @@ import com.example.inventariadosapp.R
 import com.example.inventariadosapp.ui.theme.Kavoon
 
 @Composable
-fun InicioAdminScreen(adminNavController: NavController) {
+fun InicioAdminScreen(
+    adminNavController: NavController,
+    mainNavController: NavController
+) {
     Scaffold(
         bottomBar = { BottomNavigationBar(adminNavController, currentRoute = "inicio_admin") }
     ) { padding ->
@@ -28,12 +31,11 @@ fun InicioAdminScreen(adminNavController: NavController) {
                 .background(colorResource(id = R.color.fondo_claro))
                 .padding(padding)
         ) {
-            // ❌ Botón Cerrar sesión → vuelve al Login principal
+            // ❌ Botón cerrar sesión → login principal
             IconButton(
                 onClick = {
-                    // ✅ Este comando devuelve al flujo principal (AppNavigation)
-                    adminNavController.navigate("login") {
-                        popUpTo("inicio_admin") { inclusive = true } // limpia el stack interno
+                    mainNavController.navigate("login") {
+                        popUpTo("panel_admin") { inclusive = true }
                         launchSingleTop = true
                     }
                 },
@@ -49,11 +51,13 @@ fun InicioAdminScreen(adminNavController: NavController) {
                 )
             }
 
-            // 🔹 Contenido principal
+            // Contenido principal centrado verticalmente
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 24.dp, vertical = 32.dp),
+                    .padding(horizontal = 24.dp)
+                    .padding(top = 80.dp, bottom = 40.dp),
+                verticalArrangement = Arrangement.SpaceEvenly,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
@@ -64,26 +68,17 @@ fun InicioAdminScreen(adminNavController: NavController) {
                     textAlign = TextAlign.Center
                 )
 
-                Spacer(modifier = Modifier.height(32.dp))
-
-                DashboardCard(
-                    color = Color(0xFF3949AB),
-                    numero = "8",
-                    descripcion = "Equipos Disponibles"
-                )
-                Spacer(modifier = Modifier.height(24.dp))
-                DashboardCard(
-                    color = Color(0xFF7B1FA2),
-                    numero = "12",
-                    descripcion = "Equipos en Uso"
-                )
-                Spacer(modifier = Modifier.height(24.dp))
-                DashboardCard(
-                    color = Color(0xFF43A047),
-                    numero = "5",
-                    descripcion = "Usuarios Creados"
-                )
+                // 📊 Tarjetas distribuidas verticalmente
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(24.dp)
+                ) {
+                    DashboardCard(Color(0xFF3949AB), "8", "Equipos Disponibles")
+                    DashboardCard(Color(0xFF7B1FA2), "12", "Equipos en Uso")
+                    DashboardCard(Color(0xFF43A047), "5", "Usuarios Creados")
+                }
             }
+
         }
     }
 }

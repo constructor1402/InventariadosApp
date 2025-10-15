@@ -9,7 +9,7 @@ import com.example.inventariadosapp.screens.*
 import com.example.inventariadosapp.LoginScreen
 import com.example.inventariadosapp.PanelConsultaScreen
 import com.example.inventariadosapp.PanelTopografoScreen
-import com.example.inventariadosapp.screens.admin.*
+import com.example.inventariadosapp.screens.admin.AdminNavigation
 import com.example.inventariadosapp.ui.screens.WelcomeScreen
 
 @Composable
@@ -38,16 +38,16 @@ fun AppNavigation() {
             RestablecerContrasenaScreen(navController, telefono)
         }
 
-        // 👇 Paneles de roles
-        composable("panel_admin") { AdminNavigation() }
+        // 👇 Panel administrador (flujo interno)
+        composable("panel_admin") {
+            AdminNavigation(navController) // ✅ pasamos el controlador principal
+        }
+
+        // Otros roles
         composable("panel_topografo") { PanelTopografoScreen(navController) }
         composable("panel_consulta") { PanelConsultaScreen(navController) }
-
-        // 👇 Subpantallas internas del panel admin (para que existan como rutas válidas)
-        composable("inicio_admin") { InicioAdminScreen(navController) }
-        composable("gestion_admin") { GestionAdminScreen(navController) }
-        composable("informes_admin") { InformesAdminScreen(navController) }
     }
 }
+
 
 

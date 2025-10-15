@@ -1,35 +1,40 @@
 package com.example.inventariadosapp.screens.admin
 
 import androidx.compose.runtime.Composable
-import androidx.navigation.NavHostController
+import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.inventariadosapp.screens.admin.gestion.EquiposAdminScreen
+import com.example.inventariadosapp.screens.admin.gestion.ObrasAdminScreen
+import com.example.inventariadosapp.screens.admin.gestion.UsuariosAdminScreen
+
 
 @Composable
-fun AdminNavigation() {
-    // 🔹 Este NavController manejará solo las pantallas internas del panel admin
-    val adminNavController: NavHostController = rememberNavController()
+fun AdminNavigation(mainNavController: NavController) {
+    val adminNavController = rememberNavController()
 
     NavHost(
         navController = adminNavController,
         startDestination = "inicio_admin"
     ) {
-        // 🏠 Pantalla principal del admin (con la barra inferior)
+        // Pantalla principal
         composable("inicio_admin") {
-            InicioAdminScreen(adminNavController)
+            InicioAdminScreen(
+                adminNavController = adminNavController,
+                mainNavController = mainNavController
+            )
         }
 
-        // 🧾 Gestión de usuarios
-        composable("gestion_admin") {
-            GestionAdminScreen(adminNavController)
-        }
+        // Sección de gestión (grupo interno)
+        composable("gestion_admin") { ObrasAdminScreen(adminNavController) }
 
-        // 📊 Informes
-        composable("informes_admin") {
-            InformesAdminScreen(adminNavController)
-        }
+        // Pantallas internas del grupo de gestión
+        composable("obras_admin") { ObrasAdminScreen(adminNavController) }
+        composable("equipos_admin") { EquiposAdminScreen(adminNavController) }
+        composable("usuarios_admin") { UsuariosAdminScreen(adminNavController) }
+
+        // Otros paneles
+        composable("informes_admin") { InformesAdminScreen(adminNavController) }
     }
 }
-
-
