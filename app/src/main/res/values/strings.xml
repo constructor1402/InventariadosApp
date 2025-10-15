@@ -1,3 +1,65 @@
 <resources>
     <string name="app_name">InventariadosApp</string>
+    <string name="title_app">INVENTARIADOS</string>
+    <string name="welcome_t">¡BIENVENIDO!</string>
+    <string name="register_b">CREAR CUENTA</string>
+    <string name="close_app_description">Cerrar aplicación</string>
+
+    <!-- LoginScreen -->
+    <string name="login_title">Inicio de Sesión</string>
+    <string name="email_label">Correo electrónico</string>
+    <string name="email_placeholder">Ingresa tu correo</string>
+    <string name="password_label">Contraseña</string>
+    <string name="password_placeholder">Ingresa tu contraseña</string>
+    <string name="password_toggle_description">Mostrar u ocultar contraseña</string>
+    <string name="login_button">INICIAR SESIÓN</string>
+    <string name="register_link_text">¿No tienes cuenta? Regístrate</string>
+    <string name="forgot_password_text">¿Se te olvidó la  contraseña?</string>
+
+    <!-- Mensajes Toast -->
+    <string name="toast_email_not_registered">El correo no está registrado.</string>
+    <string name="toast_login_success">Inicio de sesión exitoso</string>
+    <string name="toast_wrong_password">Contraseña incorrecta.</string>
+    <string name="toast_login_error">Error al verificar usuario:</string>
+    <string name="toast_fill_fields">Completa todos los campos</string>
+
+
+    <!-- Paneles -->
+    <string name="panel_admin_title">Panel de Administrador</string>
+    <string name="panel_topografo_title">Panel de Topógrafo</string>
+    <string name="panel_consulta_title">Panel de Consulta</string>
+    <string name="logout_button">Cerrar sesión</string>
+
+
+    <!-- RegisterScreen -->
+    <string name="register_title">Registro de usuario</string>
+
+    <!-- Etiquetas -->
+    <string name="name_label">Nombre completo</string>
+    <string name="phone_label">Número de celular</string>
+    <string name="email_label_register">Correo electrónico</string>
+    <string name="password_label_register">Contraseña</string>
+    <string name="confirm_password_label">Confirmar contraseña</string>
+    <string name="select_role_label">Selecciona un rol</string>
+
+    <!-- Roles -->
+    <string name="role_admin">Admin</string>
+    <string name="role_topografo">Topógrafo</string>
+    <string name="role_consulta">Consulta</string>
+
+    <!-- Botones -->
+    <string name="register_button_text">REGISTRARSE</string>
+
+    <!-- Mensajes Toast -->
+    <string name="toast_register_success">✅ Usuario registrado correctamente</string>
+    <string name="toast_register_error">❌ Error al registrar:</string>
+    <string name="toast_password_mismatch">⚠️ Las contraseñas no coinciden</string>
+    <string name="toast_fill_fields_register">⚠️ Completa todos los campos</string>
+    <string name="toast_navigation_error">Error al navegar:</string>
+
+    <!-- Navegación -->
+    <string name="back_description">Volver</string>
+
+
+
 </resources>
