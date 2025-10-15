@@ -4,6 +4,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -59,7 +63,7 @@ fun GestionObraScreen(
             Text(
                 text = "Gestión de Obras",
                 style = TextStyle(
-                    fontFamily = FontFamily.Serif, // Reemplazar por Kavoon
+                    fontFamily = FontFamily.Serif, // Reemplazar por Kavoon si deseas
                     fontWeight = FontWeight.Bold,
                     fontSize = 22.sp,
                     color = Color.Black
@@ -103,13 +107,13 @@ fun GestionObraScreen(
                 ObraActionButton(
                     text = "Guardar",
                     color = Color(0xFF4CAF50),
-                    icon = "done",
+                    icon = Icons.Filled.Done, // ✅ Cambiado a ImageVector
                     onClick = viewModel::guardarObra
                 )
                 ObraActionButton(
                     text = "Buscar",
                     color = Color(0xFF64B5F6),
-                    icon = "search",
+                    icon = Icons.Filled.Search, // ✅ Cambiado a ImageVector
                     onClick = { viewModel.buscarObra(viewModel.nombreObra) }
                 )
             }
@@ -120,7 +124,7 @@ fun GestionObraScreen(
             ObraActionButton(
                 text = "Eliminar",
                 color = Color(0xFFE57373),
-                icon = "delete",
+                icon = Icons.Filled.Delete, // ✅ Cambiado a ImageVector
                 onClick = viewModel::eliminarObra
             )
 
