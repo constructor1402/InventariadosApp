@@ -2,11 +2,13 @@ package com.example.inventariadosapp.screens.admin.gestion
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -19,16 +21,13 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.inventariadosapp.R
-import com.example.inventariadosapp.admin.obra.ObraViewModel
-import com.example.inventariadosapp.admin.obra.components.ObraActionButton
-import com.example.inventariadosapp.admin.obra.components.ObraTextField
 import com.example.inventariadosapp.ui.theme.Kavoon
-
 
 @Composable
 fun ObrasAdminScreen(navController: NavController) {
-    val viewModel: ObraViewModel = viewModel()
+    val viewModel: ObraViewModel = viewModel() // 🔗 Conexión al ViewModel
     val scrollState = rememberScrollState()
+    val darkTheme = isSystemInDarkTheme()
 
     Scaffold(
         bottomBar = { BottomNavGestionBar(navController) }
@@ -39,7 +38,7 @@ fun ObrasAdminScreen(navController: NavController) {
                 .background(colorResource(id = R.color.fondo_claro))
                 .padding(padding)
         ) {
-            // 🔙 Flecha hacia atrás → vuelve al inicio admin
+            // 🔙 Flecha hacia atrás
             IconButton(
                 onClick = { navController.navigate("inicio_admin") },
                 modifier = Modifier
@@ -54,89 +53,80 @@ fun ObrasAdminScreen(navController: NavController) {
                 )
             }
 
-            // 🏗️ Contenido principal: gestión de obras
+            // Contenido principal
             Column(
                 modifier = Modifier
                     .fillMaxSize()
+                    .verticalScroll(scrollState)
                     .padding(horizontal = 24.dp)
-                    .padding(top = 70.dp, bottom = 80.dp)
-                    .verticalScroll(scrollState),
+                    .padding(top = 90.dp, bottom = 90.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
                     text = "Gestión de Obras",
                     color = colorResource(id = R.color.texto_principal),
                     fontFamily = Kavoon,
-                    fontSize = 22.sp,
+                    fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(bottom = 24.dp)
+                    textAlign = TextAlign.Center
                 )
 
-                // Campos
-                ObraTextField(
-                    value = viewModel.nombreObra,
-                    onValueChange = viewModel::updateNombreObra,
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Campos conectados al ViewModel (se rellenan automáticamente al buscar)
+                CustomTextField(
                     label = "Nombre de Obra",
-                    isError = viewModel.nombreObraError,
-                    errorMessage = if (viewModel.nombreObraError) "Escribe el nombre de la obra" else null
+                    placeholder = "Escribe nombre de la obra",
+                    value = viewModel.nombreObra,
+                    onValueChange = { viewModel.updateNombreObra(it) }
                 )
 
-                ObraTextField(
-                    value = viewModel.ubicacion,
-                    onValueChange = viewModel::updateUbicacion,
+                CustomTextField(
                     label = "Ubicación",
-                    isError = viewModel.ubicacionError,
-                    errorMessage = if (viewModel.ubicacionError) "Ingresa la ubicación" else null
+                    placeholder = "Ingresa ubicación",
+                    value = viewModel.ubicacion,
+                    onValueChange = { viewModel.updateUbicacion(it) }
                 )
 
-                ObraTextField(
-                    value = viewModel.clienteNombre.ifBlank { "Cliente asociado" },
-                    onValueChange = {},
+                CustomTextField(
                     label = "Cliente",
-                    isError = false,
-                    readOnly = true
+                    placeholder = "Cliente asociado",
+                    value = viewModel.clienteNombre,
+                    onValueChange = { viewModel.updateClienteNombre(it) }
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Botones de acción
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
+                // Botones de acción conectados a Firebase
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    ObraActionButton(
-                        text = "Guardar",
-                        color = Color(0xFF4CAF50),
-                        icon = "done",
-                        onClick = viewModel::guardarObra
-                    )
-                    ObraActionButton(
-                        text = "Buscar",
-                        color = Color(0xFF64B5F6),
-                        icon = "search",
-                        onClick = { viewModel.buscarObra(viewModel.nombreObra) }
-                    )
+                    ActionButton("Guardar", Color(0xFF4CAF50), R.drawable.ic_check_circle) {
+                        viewModel.guardarObra()
+                    }
+                    ActionButton("Buscar", Color(0xFF2196F3), R.drawable.ic_search) {
+                        viewModel.buscarObra(viewModel.nombreObra)
+                    }
+                    ActionButton("Eliminar", Color(0xFFE53935), R.drawable.ic_delete) {
+                        viewModel.eliminarObra()
+                    }
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
-
-                ObraActionButton(
-                    text = "Eliminar",
-                    color = Color(0xFFE57373),
-                    icon = "delete",
-                    onClick = viewModel::eliminarObra
-                )
-
-                // Mensaje de estado
-                viewModel.mensajeStatus?.let { msg ->
+                // Mensajes dinámicos de estado
+                viewModel.mensajeStatus?.let { mensaje ->
+                    Spacer(modifier = Modifier.height(10.dp))
                     Text(
-                        text = msg,
-                        color = if (msg.startsWith("✅")) Color(0xFF2E7D32) else Color(0xFFD32F2F),
+                        text = mensaje,
+                        color = when {
+                            mensaje.startsWith("✅") -> Color(0xFF2E7D32)
+                            mensaje.startsWith("⚠️") -> Color(0xFFFFA000)
+                            else -> Color(0xFFD32F2F)
+                        },
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp,
                         textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(top = 16.dp)
+                        modifier = Modifier.fillMaxWidth(0.9f)
                     )
                 }
             }
@@ -144,14 +134,105 @@ fun ObrasAdminScreen(navController: NavController) {
     }
 }
 
+// 🔹 Campo de texto reutilizable
+@Composable
+fun CustomTextField(
+    label: String,
+    placeholder: String,
+    value: String,
+    onValueChange: (String) -> Unit,
+    readOnly: Boolean = false
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 6.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = label,
+            color = colorResource(id = R.color.texto_principal),
+            fontFamily = Kavoon,
+            fontSize = 18.sp,
+            modifier = Modifier.padding(bottom = 4.dp)
+        )
+
+        OutlinedTextField(
+            value = value,
+            onValueChange = onValueChange,
+            readOnly = readOnly,
+            placeholder = {
+                Text(
+                    text = placeholder,
+                    color = Color.Gray,
+                    fontSize = 14.sp,
+                    fontFamily = Kavoon,
+                    textAlign = TextAlign.Center
+                )
+            },
+            textStyle = androidx.compose.ui.text.TextStyle(
+                color = Color.Black,
+                fontSize = 16.sp,
+                fontFamily = Kavoon,
+                textAlign = TextAlign.Center
+            ),
+            shape = RoundedCornerShape(16.dp),
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = Color(0xFFEDEDED),
+                unfocusedContainerColor = Color(0xFFEDEDED),
+                focusedIndicatorColor = colorResource(id = R.color.boton_principal),
+                unfocusedIndicatorColor = Color.Gray,
+                cursorColor = colorResource(id = R.color.boton_principal)
+            ),
+            modifier = Modifier
+                .fillMaxWidth(0.9f)
+                .height(52.dp)
+        )
+    }
+}
+
+// 🔹 Botón de acción reutilizable
+@Composable
+fun ActionButton(text: String, color: Color, icon: Int, onClick: () -> Unit) {
+    Button(
+        onClick = onClick,
+        colors = ButtonDefaults.buttonColors(containerColor = color),
+        shape = RoundedCornerShape(12.dp),
+        modifier = Modifier
+            .width(156.dp)
+            .height(45.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = text,
+                color = Color.White,
+                fontSize = 17.sp,
+                fontFamily = Kavoon,
+                modifier = Modifier.padding(end = 6.dp)
+            )
+            Icon(
+                painter = painterResource(id = icon),
+                contentDescription = text,
+                tint = Color.White,
+                modifier = Modifier.size(20.dp)
+            )
+        }
+    }
+}
+
+// 🔹 Barra de navegación inferior (sin cambios)
 @Composable
 fun BottomNavGestionBar(navController: NavController) {
-    val currentRoute = navController.currentBackStackEntry?.destination?.route
+    val darkTheme = isSystemInDarkTheme()
+    val backgroundColor = if (darkTheme) Color(0xFF2C2C2C) else Color(0xFFF5F5F5)
+    val textColor = if (darkTheme) Color.White else Color.Black
 
     Surface(
         shadowElevation = 12.dp,
-        tonalElevation = 3.dp,
-        color = colorResource(id = R.color.white),
+        color = backgroundColor,
         modifier = Modifier
             .fillMaxWidth()
             .height(75.dp)
@@ -159,106 +240,35 @@ fun BottomNavGestionBar(navController: NavController) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 30.dp),
+                .padding(horizontal = 40.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-
-            // 🔹 Obras
-            GestionNavItem(
-                icon = R.drawable.ic_obras,
-                label = "Obras",
-                isSelected = currentRoute == "obras_admin",
-                onClick = {
-                    if (currentRoute != "obras_admin") {
-                        navController.navigate("obras_admin") {
-                            popUpTo("obras_admin") { inclusive = false }
-                            launchSingleTop = true
-                        }
-                    }
-                }
-            )
-
-            // 🔹 Equipos
-            GestionNavItem(
-                icon = R.drawable.ic_equipment,
-                label = "Equipos",
-                isSelected = currentRoute == "equipos_admin",
-                onClick = {
-                    if (currentRoute != "equipos_admin") {
-                        navController.navigate("equipos_admin") {
-                            popUpTo("obras_admin") { inclusive = false }
-                            launchSingleTop = true
-                        }
-                    }
-                }
-            )
-
-            // 🔹 Usuarios
-            GestionNavItem(
-                icon = R.drawable.ic_users,
-                label = "Usuarios",
-                isSelected = currentRoute == "usuarios_admin",
-                onClick = {
-                    if (currentRoute != "usuarios_admin") {
-                        navController.navigate("usuarios_admin") {
-                            popUpTo("obras_admin") { inclusive = false }
-                            launchSingleTop = true
-                        }
-                    }
-                }
-            )
+            GestionNavItem(R.drawable.ic_obras, "Obras", navController, "obras_admin", textColor)
+            GestionNavItem(R.drawable.ic_equipment, "Equipos", navController, "equipos_admin", textColor)
+            GestionNavItem(R.drawable.ic_users, "Usuarios", navController, "usuarios_admin", textColor)
         }
     }
 }
 
-
-
+// 🔹 Ítem de navegación
 @Composable
-fun GestionNavItem(
-    icon: Int,
-    label: String,
-    isSelected: Boolean,
-    onClick: () -> Unit
-) {
-    val backgroundColor = if (isSelected)
-        colorResource(id = R.color.boton_principal).copy(alpha = 0.3f)
-    else
-        colorResource(id = R.color.boton_principal).copy(alpha = 0.1f)
-
-    val textColor = if (isSelected)
-        colorResource(id = R.color.texto_principal)
-    else
-        Color.DarkGray
-
+fun GestionNavItem(icon: Int, label: String, navController: NavController, route: String, textColor: Color) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-        modifier = Modifier.clickable { onClick() }
+        modifier = Modifier.clickable { navController.navigate(route) }
     ) {
-        Surface(
-            color = backgroundColor,
-            shape = MaterialTheme.shapes.medium,
-            modifier = Modifier.size(40.dp)
-        ) {
-            Icon(
-                painter = painterResource(id = icon),
-                contentDescription = label,
-                tint = colorResource(id = R.color.boton_principal),
-                modifier = Modifier.padding(8.dp)
-            )
-        }
-        Spacer(modifier = Modifier.height(4.dp))
+        Icon(
+            painter = painterResource(id = icon),
+            contentDescription = label,
+            tint = colorResource(id = R.color.boton_principal),
+            modifier = Modifier.size(26.dp)
+        )
         Text(
             text = label,
             color = textColor,
             fontSize = 12.sp,
-            textAlign = TextAlign.Center,
             fontFamily = Kavoon
         )
     }
 }
-
-
-
-

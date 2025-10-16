@@ -1,6 +1,8 @@
 package com.example.inventariadosapp.screens.admin
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -22,8 +24,14 @@ fun InicioAdminScreen(
     adminNavController: NavController,
     mainNavController: NavController
 ) {
+    val darkTheme = isSystemInDarkTheme()
+
     Scaffold(
-        bottomBar = { BottomNavigationBar(adminNavController, currentRoute = "inicio_admin") }
+        bottomBar = {
+            val bgColor = if (darkTheme) Color(0xFF2C2C2C) else Color(0xFFF5F5F5)
+            val textColor = if (darkTheme) Color.White else Color.Black
+            BottomNavigationBar(adminNavController, "inicio_admin", bgColor, textColor)
+        }
     ) { padding ->
         Box(
             modifier = Modifier
@@ -78,7 +86,6 @@ fun InicioAdminScreen(
                     DashboardCard(Color(0xFF43A047), "5", "Usuarios Creados")
                 }
             }
-
         }
     }
 }
@@ -114,5 +121,94 @@ fun DashboardCard(color: Color, numero: String, descripcion: String) {
                 textAlign = TextAlign.Center
             )
         }
+    }
+}
+
+@Composable
+fun BottomNavigationBar(
+    navController: NavController,
+    currentRoute: String,
+    bgColor: Color,
+    textColor: Color
+) {
+    Surface(
+        color = bgColor,
+        shadowElevation = 8.dp,
+        tonalElevation = 3.dp,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(75.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 30.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Opciones de navegación
+            BottomNavItem(
+                icon = R.drawable.ic_home,
+                label = "Inicio",
+                isSelected = currentRoute == "inicio_admin",
+                onClick = { if (currentRoute != "inicio_admin") navController.navigate("inicio_admin") },
+                textColor = textColor
+            )
+            BottomNavItem(
+                icon = R.drawable.ic_gestion,
+                label = "Gestión",
+                isSelected = currentRoute == "gestion_admin",
+                onClick = { if (currentRoute != "gestion_admin") navController.navigate("gestion_admin") },
+                textColor = textColor
+            )
+            BottomNavItem(
+                icon = R.drawable.ic_informes,
+                label = "Informes",
+                isSelected = currentRoute == "informes_admin",
+                onClick = { if (currentRoute != "informes_admin") navController.navigate("informes_admin") },
+                textColor = textColor
+            )
+        }
+    }
+}
+
+@Composable
+fun BottomNavItem(
+    icon: Int,
+    label: String,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    textColor: Color
+) {
+    val backgroundColor = if (isSelected)
+        colorResource(id = R.color.boton_principal).copy(alpha = 0.3f)
+    else
+        colorResource(id = R.color.boton_principal).copy(alpha = 0.1f)
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .clickable { onClick() }
+    ) {
+        Surface(
+            color = backgroundColor,
+            shape = MaterialTheme.shapes.medium,
+            modifier = Modifier.size(40.dp)
+        ) {
+            Icon(
+                painter = painterResource(id = icon),
+                contentDescription = label,
+                tint = colorResource(id = R.color.boton_principal),
+                modifier = Modifier.padding(8.dp)
+            )
+        }
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = label,
+            color = textColor,
+            fontSize = 12.sp,
+            fontFamily = Kavoon,
+            textAlign = TextAlign.Center
+        )
     }
 }
