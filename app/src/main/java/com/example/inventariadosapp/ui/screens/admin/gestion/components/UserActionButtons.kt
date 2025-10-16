@@ -1,4 +1,4 @@
-package com.example.inventariadosapp.ui.admin.users_DiegoFaj.components
+package com.example.inventariadosapp.ui.screens.admin.gestion.components
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -13,7 +13,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.inventariadosapp.ui.admin.users_DiegoFaj.UserViewModel
+import com.example.inventariadosapp.ui.screens.admin.gestion.UserViewModel
 
 
 @Composable

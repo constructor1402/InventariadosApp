@@ -18,10 +18,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.inventariadosapp.R
+import com.example.inventariadosapp.ui.screens.admin.gestion.components.ActionButton
+import com.example.inventariadosapp.ui.screens.admin.gestion.components.CustomTextField
 import com.example.inventariadosapp.ui.theme.Kavoon
+
 
 @Composable
 fun ObrasAdminScreen(navController: NavController) {
@@ -38,27 +42,6 @@ fun ObrasAdminScreen(navController: NavController) {
                 .background(colorResource(id = R.color.fondo_claro))
                 .padding(padding)
         ) {
-            // 🔙 Flecha hacia atrás
-            IconButton(
-                onClick = {
-                    navController.navigate("inicio_admin") {
-                        popUpTo("obras_admin") { inclusive = true }
-                        launchSingleTop = true
-                    }
-                },
-                modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .padding(start = 12.dp, top = 12.dp)
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_arrow_back),
-                    contentDescription = "Volver al inicio",
-                    tint = Color.Unspecified,
-                    modifier = Modifier.size(36.dp)
-                )
-            }
-
-
             // Contenido principal
             Column(
                 modifier = Modifier
@@ -79,7 +62,7 @@ fun ObrasAdminScreen(navController: NavController) {
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // Campos conectados al ViewModel (se rellenan automáticamente al buscar)
+                // Campos conectados al ViewModel
                 CustomTextField(
                     label = "Nombre de Obra",
                     placeholder = "Escribe nombre de la obra",
@@ -103,7 +86,7 @@ fun ObrasAdminScreen(navController: NavController) {
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Botones de acción conectados a Firebase
+                // Botones de acción
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -119,7 +102,7 @@ fun ObrasAdminScreen(navController: NavController) {
                     }
                 }
 
-                // Mensajes dinámicos de estado
+                // Mensaje dinámico
                 viewModel.mensaje.let { mensaje ->
                     Spacer(modifier = Modifier.height(10.dp))
                     Text(
@@ -136,98 +119,27 @@ fun ObrasAdminScreen(navController: NavController) {
                     )
                 }
             }
-        }
-    }
-}
 
-// 🔹 Campo de texto reutilizable
-@Composable
-fun CustomTextField(
-    label: String,
-    placeholder: String,
-    value: String,
-    onValueChange: (String) -> Unit,
-    readOnly: Boolean = false
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 6.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = label,
-            color = colorResource(id = R.color.texto_principal),
-            fontFamily = Kavoon,
-            fontSize = 18.sp,
-            modifier = Modifier.padding(bottom = 4.dp)
-        )
-
-        OutlinedTextField(
-            value = value,
-            onValueChange = onValueChange,
-            readOnly = readOnly,
-            placeholder = {
-                Text(
-                    text = placeholder,
-                    color = Color.Gray,
-                    fontSize = 14.sp,
-                    fontFamily = Kavoon,
-                    textAlign = TextAlign.Center
+            // 🔙 Flecha hacia atrás (con zIndex para estar arriba del contenido)
+            IconButton(
+                onClick = { navController.navigate("inicio_admin") },
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(start = 12.dp, top = 12.dp)
+                    .zIndex(2f) // 👈 asegura que esté por encima de todo
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_arrow_back),
+                    contentDescription = "Volver al inicio",
+                    tint = Color.Unspecified,
+                    modifier = Modifier.size(36.dp)
                 )
-            },
-            textStyle = androidx.compose.ui.text.TextStyle(
-                color = Color.Black,
-                fontSize = 16.sp,
-                fontFamily = Kavoon,
-                textAlign = TextAlign.Center
-            ),
-            shape = RoundedCornerShape(16.dp),
-            colors = TextFieldDefaults.colors(
-                focusedContainerColor = Color(0xFFEDEDED),
-                unfocusedContainerColor = Color(0xFFEDEDED),
-                focusedIndicatorColor = colorResource(id = R.color.boton_principal),
-                unfocusedIndicatorColor = Color.Gray,
-                cursorColor = colorResource(id = R.color.boton_principal)
-            ),
-            modifier = Modifier
-                .fillMaxWidth(0.9f)
-                .height(52.dp)
-        )
+            }
+        }
+
     }
 }
 
-// 🔹 Botón de acción reutilizable
-@Composable
-fun ActionButton(text: String, color: Color, icon: Int, onClick: () -> Unit) {
-    Button(
-        onClick = onClick,
-        colors = ButtonDefaults.buttonColors(containerColor = color),
-        shape = RoundedCornerShape(12.dp),
-        modifier = Modifier
-            .width(156.dp)
-            .height(45.dp)
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Text(
-                text = text,
-                color = Color.White,
-                fontSize = 17.sp,
-                fontFamily = Kavoon,
-                modifier = Modifier.padding(end = 6.dp)
-            )
-            Icon(
-                painter = painterResource(id = icon),
-                contentDescription = text,
-                tint = Color.White,
-                modifier = Modifier.size(20.dp)
-            )
-        }
-    }
-}
 
 // 🔹 Barra de navegación inferior (sin cambios)
 @Composable
