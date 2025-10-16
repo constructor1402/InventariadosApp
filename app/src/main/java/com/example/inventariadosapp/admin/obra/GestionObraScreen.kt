@@ -108,13 +108,13 @@ fun GestionObraScreen(
                     text = "Guardar",
                     color = Color(0xFF4CAF50),
                     icon = Icons.Filled.Done, // ✅ Cambiado a ImageVector
-                    onClick = viewModel::guardarObra
+                    onClick = viewModel::guardarObra,
                 )
                 ObraActionButton(
                     text = "Buscar",
                     color = Color(0xFF64B5F6),
                     icon = Icons.Filled.Search, // ✅ Cambiado a ImageVector
-                    onClick = { viewModel.buscarObra(viewModel.nombreObra) }
+                    onClick = { viewModel.buscarObra(viewModel.nombreObra) },
                 )
             }
 
@@ -125,7 +125,7 @@ fun GestionObraScreen(
                 text = "Eliminar",
                 color = Color(0xFFE57373),
                 icon = Icons.Filled.Delete, // ✅ Cambiado a ImageVector
-                onClick = viewModel::eliminarObra
+                onClick = viewModel::eliminarObra,
             )
 
             Spacer(modifier = Modifier.height(24.dp))
