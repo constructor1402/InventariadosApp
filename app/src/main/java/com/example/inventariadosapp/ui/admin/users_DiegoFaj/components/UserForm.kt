@@ -16,8 +16,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
-
-
+import androidx.compose.ui.graphics.Color
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -43,24 +42,47 @@ fun UserForm(state: UserUiState, viewModel: UserViewModel) {
             value = state.celular,
             onValueChange = { viewModel.onFieldChange(celular = it) },
             label = { Text("Número de celular") },
-            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
-
-            
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 4.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedContainerColor = colorResource(id = R.color.boton_principal),
+                unfocusedContainerColor = colorResource(id = R.color.boton_principal),
+                focusedBorderColor = colorResource(id = R.color.texto_principal),
+                unfocusedBorderColor = colorResource(id = R.color.texto_principal)
+            )
         )
+
 
         //Correo
         OutlinedTextField(
             value = state.correo,
             onValueChange = { viewModel.onFieldChange(correo = it) },
             label = { Text("Correo electrónico") },
-            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
+            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedContainerColor = colorResource(id = R.color.boton_principal),
+                unfocusedContainerColor = colorResource(id = R.color.boton_principal),
+                focusedBorderColor = colorResource(id = R.color.texto_principal),
+                unfocusedBorderColor = colorResource(id = R.color.texto_principal)
+            )
+
+
         )
+
         //Contraseña
         OutlinedTextField(
             value = state.contrasena,
             onValueChange = { viewModel.onFieldChange(contrasena = it) },
             label = { Text("Contraseña") },
-            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
+            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedContainerColor = colorResource(id = R.color.boton_principal),
+                unfocusedContainerColor = colorResource(id = R.color.boton_principal),
+                focusedBorderColor = colorResource(id = R.color.texto_principal),
+                unfocusedBorderColor = colorResource(id = R.color.texto_principal)
+            )
+
         )
 
         // Selector de Rol

@@ -1,6 +1,7 @@
 package com.example.inventariadosapp.ui.admin.users_DiegoFaj
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -26,7 +27,13 @@ fun UserManagementScreen(viewModel: UserViewModel = viewModel()) {
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
-    // 🔹 Estructura principal
+    val backgroundColor = if (isSystemInDarkTheme()) {
+        Color(0xFF000000) // Modo oscuro → negro
+    } else {
+        Color(0xFFDDE6FF) // Modo claro → azul pastel claro
+    }
+
+
     Scaffold(
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState) { data ->
@@ -39,27 +46,32 @@ fun UserManagementScreen(viewModel: UserViewModel = viewModel()) {
                 }
             }
         },
-        containerColor = Color(0xFF000000)
+        containerColor = backgroundColor
     ) { innerPadding ->
 
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .background(Color(0xFF000000))
+                .background(backgroundColor)
                 .padding(horizontal = 20.dp, vertical = 24.dp)
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            // 🔸 Título principal
+
+
+        // 🔸 Título principal
+            val titleColor = if (isSystemInDarkTheme()) Color.White else Color.Black
+
             Text(
                 text = "Gestión de Usuarios",
-                color = Color.White,
+                color = titleColor,
                 fontSize = 26.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(bottom = 24.dp)
             )
+
 
             // 🔹 Formulario
             val state = viewModel.uiState.collectAsState().value
@@ -86,7 +98,7 @@ fun UserManagementScreen(viewModel: UserViewModel = viewModel()) {
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
 fun PreviewUserManagementScreen() {
-    // 👇 Esta preview te deja ver la interfaz sin necesidad del ViewModel real
+
     Surface(modifier = Modifier.fillMaxSize()) {
         UserManagementScreen()
     }
