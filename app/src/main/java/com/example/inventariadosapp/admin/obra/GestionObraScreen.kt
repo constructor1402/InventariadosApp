@@ -1,6 +1,5 @@
 package com.example.inventariadosapp.admin.obra
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -21,6 +20,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.inventariadosapp.admin.obra.components.ObraTextField
 import com.example.inventariadosapp.admin.obra.components.ObraActionButton
+import com.example.inventariadosapp.screens.admin.gestion.ObraViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
