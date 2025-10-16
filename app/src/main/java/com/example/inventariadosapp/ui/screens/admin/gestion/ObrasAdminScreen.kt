@@ -40,18 +40,24 @@ fun ObrasAdminScreen(navController: NavController) {
         ) {
             // 🔙 Flecha hacia atrás
             IconButton(
-                onClick = { navController.navigate("inicio_admin") },
+                onClick = {
+                    navController.navigate("inicio_admin") {
+                        popUpTo("obras_admin") { inclusive = true }
+                        launchSingleTop = true
+                    }
+                },
                 modifier = Modifier
                     .align(Alignment.TopStart)
                     .padding(start = 12.dp, top = 12.dp)
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_arrow_back),
-                    contentDescription = "Volver",
+                    contentDescription = "Volver al inicio",
                     tint = Color.Unspecified,
                     modifier = Modifier.size(36.dp)
                 )
             }
+
 
             // Contenido principal
             Column(
@@ -92,7 +98,7 @@ fun ObrasAdminScreen(navController: NavController) {
                     label = "Cliente",
                     placeholder = "Cliente asociado",
                     value = viewModel.clienteNombre,
-                    onValueChange = { viewModel.updateClienteNombre(it) }
+                    onValueChange = { viewModel.updateCliente(it) }
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
@@ -106,7 +112,7 @@ fun ObrasAdminScreen(navController: NavController) {
                         viewModel.guardarObra()
                     }
                     ActionButton("Buscar", Color(0xFF2196F3), R.drawable.ic_search) {
-                        viewModel.buscarObra(viewModel.nombreObra)
+                        viewModel.buscarObra()
                     }
                     ActionButton("Eliminar", Color(0xFFE53935), R.drawable.ic_delete) {
                         viewModel.eliminarObra()
@@ -114,7 +120,7 @@ fun ObrasAdminScreen(navController: NavController) {
                 }
 
                 // Mensajes dinámicos de estado
-                viewModel.mensajeStatus?.let { mensaje ->
+                viewModel.mensaje.let { mensaje ->
                     Spacer(modifier = Modifier.height(10.dp))
                     Text(
                         text = mensaje,
