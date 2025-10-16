@@ -15,11 +15,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.inventariadosapp.ui.admin.users_DiegoFaj.components.UserActionButtons
-import com.example.inventariadosapp.ui.admin.users_DiegoFaj.components.UserForm
+import com.example.inventariadosapp.ui.screens.admin.gestion.components.UserActionButtons
+import com.example.inventariadosapp.ui.screens.admin.gestion.components.UserForm
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.tooling.preview.Preview
+import com.example.inventariadosapp.ui.screens.admin.gestion.UserViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

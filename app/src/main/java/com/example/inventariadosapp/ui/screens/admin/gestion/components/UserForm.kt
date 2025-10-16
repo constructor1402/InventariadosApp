@@ -1,4 +1,4 @@
-package com.example.inventariadosapp.ui.admin.users_DiegoFaj.components
+package com.example.inventariadosapp.ui.screens.admin.gestion.components
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -7,8 +7,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
 import com.example.inventariadosapp.R
-import com.example.inventariadosapp.ui.admin.users_DiegoFaj.UserUiState
-import com.example.inventariadosapp.ui.admin.users_DiegoFaj.UserViewModel
+import com.example.inventariadosapp.ui.screens.admin.gestion.UserUiState
+import com.example.inventariadosapp.ui.screens.admin.gestion.UserViewModel
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -16,7 +16,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.ui.graphics.Color
 
 
 @OptIn(ExperimentalMaterial3Api::class)

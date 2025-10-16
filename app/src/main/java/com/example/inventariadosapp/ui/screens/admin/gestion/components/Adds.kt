@@ -1,20 +1,11 @@
 package com.example.inventariadosapp.ui.screens.admin.gestion.components
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -28,6 +19,7 @@ import androidx.compose.ui.unit.sp
 import com.example.inventariadosapp.R
 import com.example.inventariadosapp.ui.theme.Kavoon
 
+// 🔹 BOTÓN PRINCIPAL (Guardar, Buscar, Eliminar)
 @Composable
 fun EquiposActionButton(
     text: String,
@@ -35,15 +27,14 @@ fun EquiposActionButton(
     icon: ImageVector,
     onClick: () -> Unit
 ) {
-    val buttonModifier = Modifier
-        .fillMaxWidth(0.6f)
-        .height(50.dp)
-        .padding(vertical = 4.dp)
-
     Button(
         onClick = onClick,
         colors = ButtonDefaults.buttonColors(containerColor = color),
-        modifier = buttonModifier
+        shape = RoundedCornerShape(12.dp),
+        modifier = Modifier
+            .fillMaxWidth(0.7f)
+            .height(48.dp)
+            .padding(vertical = 4.dp)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -59,7 +50,8 @@ fun EquiposActionButton(
             Text(
                 text = text,
                 color = Color.White,
-                fontSize = 14.sp,
+                fontSize = 16.sp,
+                fontFamily = Kavoon,
                 fontWeight = FontWeight.Bold,
                 maxLines = 1
             )
@@ -67,7 +59,7 @@ fun EquiposActionButton(
     }
 }
 
-
+// 🔹 CAMPO DE TEXTO
 @Composable
 fun EquipoTextField(
     label: String,
@@ -78,8 +70,7 @@ fun EquipoTextField(
 ) {
     Column(
         modifier = modifier
-            .padding(vertical = 6.dp)
-            .height(IntrinsicSize.Min),
+            .padding(vertical = 6.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
@@ -98,32 +89,36 @@ fun EquipoTextField(
             placeholder = {
                 Text(
                     text = placeholder,
-                    fontFamily = Kavoon
+                    fontFamily = Kavoon,
+                    color = Color.Gray
                 )
             },
             singleLine = true,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp), // 🔹 altura uniforme para ambos campos
+            shape = RoundedCornerShape(16.dp),
             colors = OutlinedTextFieldDefaults.colors(
+                focusedContainerColor = colorResource(id = R.color.campo_fondo),
                 unfocusedContainerColor = colorResource(id = R.color.campo_fondo),
-                focusedContainerColor = colorResource(id = R.color.campo_fondo)
-            )
+                focusedBorderColor = colorResource(id = R.color.boton_principal),
+                unfocusedBorderColor = Color.Gray,
+                cursorColor = colorResource(id = R.color.boton_principal)
+            ),
+            modifier = Modifier
+                .fillMaxWidth(0.8f)
+                .height(52.dp)
         )
     }
 }
 
-
-
+// 🔹 DROPDOWN (Tipo de Equipo)
 @Composable
 fun EquipoDropdown(
     label: String,
     options: List<String>,
     selected: String,
     onSelectedChange: (String) -> Unit,
-    modifier: Modifier
+    modifier: Modifier = Modifier
 ) {
-    var expanded = androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
+    var expanded by remember { mutableStateOf(false) }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
@@ -134,38 +129,40 @@ fun EquipoDropdown(
             fontSize = 16.sp,
             modifier = Modifier.padding(bottom = 4.dp)
         )
-        Spacer(modifier = Modifier.height(4.dp))
-
         Box {
             OutlinedTextField(
                 value = selected.ifEmpty { "Seleccione tipo de equipo" },
                 onValueChange = {},
                 readOnly = true,
+                shape = RoundedCornerShape(16.dp),
                 trailingIcon = {
-                    IconButton(onClick = { expanded.value = true }) {
+                    IconButton(onClick = { expanded = true }) {
                         Icon(Icons.Default.ArrowDropDown, contentDescription = null)
                     }
                 },
                 colors = OutlinedTextFieldDefaults.colors(
+                    focusedContainerColor = colorResource(id = R.color.campo_fondo),
                     unfocusedContainerColor = colorResource(id = R.color.campo_fondo),
-                    focusedContainerColor = colorResource(id = R.color.campo_fondo)
+                    focusedBorderColor = colorResource(id = R.color.boton_principal),
+                    unfocusedBorderColor = Color.Gray,
+                    cursorColor = colorResource(id = R.color.boton_principal)
                 ),
-                modifier = Modifier
-                    .fillMaxWidth(0.7f)
-                    .height(55.dp)
+                modifier = modifier
+                    .fillMaxWidth(0.8f)
+                    .height(52.dp)
             )
 
             DropdownMenu(
-                expanded = expanded.value,
-                onDismissRequest = { expanded.value = false },
-                modifier = Modifier.fillMaxWidth(0.7f)
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+                modifier = Modifier.fillMaxWidth(0.8f)
             ) {
                 options.forEach { option ->
                     DropdownMenuItem(
-                        text = { Text(option) },
+                        text = { Text(option, fontFamily = Kavoon) },
                         onClick = {
                             onSelectedChange(option)
-                            expanded.value = false
+                            expanded = false
                         }
                     )
                 }
@@ -173,13 +170,20 @@ fun EquipoDropdown(
         }
     }
 }
+
+// 🔹 BOTÓN SUBIR ARCHIVO
 @Composable
-fun EquipoUploadButton(label: String, buttonText: String, onClick: () -> Unit, modifier: Modifier) {
+fun EquipoUploadButton(
+    label: String,
+    buttonText: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
+        modifier = modifier
             .padding(vertical = 8.dp)
-            .fillMaxWidth(0.7f)
+            .fillMaxWidth(0.8f)
     ) {
         Text(
             text = label,
@@ -189,14 +193,28 @@ fun EquipoUploadButton(label: String, buttonText: String, onClick: () -> Unit, m
             fontSize = 16.sp,
             modifier = Modifier.padding(bottom = 8.dp)
         )
-        Spacer(modifier = Modifier.height(8.dp))
         Button(
             onClick = onClick,
-            colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.campo_fondo))
+            colors = ButtonDefaults.buttonColors(
+                containerColor = colorResource(id = R.color.campo_fondo),
+                contentColor = Color.Black
+            ),
+            shape = RoundedCornerShape(16.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp)
         ) {
-            Icon(painter = painterResource(id = R.drawable.ic_upload), contentDescription = null)
+            Icon(
+                painter = painterResource(id = R.drawable.ic_upload),
+                contentDescription = null,
+                tint = Color.Black
+            )
             Spacer(modifier = Modifier.width(8.dp))
-            Text(buttonText)
+            Text(
+                text = buttonText,
+                fontFamily = Kavoon,
+                color = Color.Black
+            )
         }
     }
 }

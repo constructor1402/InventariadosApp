@@ -1,4 +1,4 @@
-package com.example.inventariadosapp.ui.admin.users_DiegoFaj
+package com.example.inventariadosapp.ui.screens.admin.gestion
 
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
