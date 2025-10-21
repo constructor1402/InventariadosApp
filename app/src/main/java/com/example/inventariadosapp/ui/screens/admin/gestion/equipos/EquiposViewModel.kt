@@ -1,4 +1,4 @@
-package com.example.inventariadosapp.ui.screens.admin.gestion
+package com.example.inventariadosapp.ui.screens.admin.gestion.equipos
 
 import android.net.Uri
 import androidx.compose.runtime.getValue

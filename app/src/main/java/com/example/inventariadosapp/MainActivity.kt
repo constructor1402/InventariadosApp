@@ -4,7 +4,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import com.example.inventariadosapp.navigation.AppNavigation
-import com.example.inventariadosapp.ui.admin.users_DiegoFaj.UserManagementScreen
 import com.example.inventariadosapp.ui.theme.InventariadosAppTheme
 import com.google.firebase.FirebaseApp
 import com.google.firebase.FirebaseOptions

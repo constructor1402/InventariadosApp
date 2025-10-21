@@ -1,4 +1,4 @@
-package com.example.inventariadosapp.ui.screens
+package com.example.inventariadosapp.ui.screens.login
 
 import android.app.Activity
 import androidx.compose.foundation.Image

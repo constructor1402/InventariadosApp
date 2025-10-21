@@ -24,7 +24,7 @@ import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.inventariadosapp.R
-import com.example.inventariadosapp.ui.screens.admin.gestion.EquiposViewModel
+import com.example.inventariadosapp.ui.screens.admin.gestion.equipos.EquiposViewModel
 import com.example.inventariadosapp.ui.screens.admin.gestion.components.ActionButton
 import com.example.inventariadosapp.ui.screens.admin.gestion.components.CustomTextField
 import com.example.inventariadosapp.ui.theme.Kavoon

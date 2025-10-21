@@ -10,7 +10,7 @@ import com.example.inventariadosapp.LoginScreen
 import com.example.inventariadosapp.PanelConsultaScreen
 import com.example.inventariadosapp.PanelTopografoScreen
 import com.example.inventariadosapp.screens.admin.AdminNavigation
-import com.example.inventariadosapp.ui.screens.WelcomeScreen
+import com.example.inventariadosapp.ui.screens.login.WelcomeScreen
 
 @Composable
 fun AppNavigation() {
