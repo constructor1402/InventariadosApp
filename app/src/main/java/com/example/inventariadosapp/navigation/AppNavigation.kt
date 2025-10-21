@@ -11,6 +11,7 @@ import com.example.inventariadosapp.PanelConsultaScreen
 import com.example.inventariadosapp.PanelTopografoScreen
 import com.example.inventariadosapp.screens.admin.AdminNavigation
 import com.example.inventariadosapp.ui.screens.login.WelcomeScreen
+import com.example.inventariadosapp.ui.screens.topografo.TopografoNavigation
 
 @Composable
 fun AppNavigation() {
@@ -44,7 +45,13 @@ fun AppNavigation() {
         }
 
         // Otros roles
-        composable("panel_topografo") { PanelTopografoScreen(navController) }
+        composable("panel_topografo") {
+            TopografoNavigation(navController)
+        }
+
+
+
+
         composable("panel_consulta") { PanelConsultaScreen(navController) }
     }
 }
