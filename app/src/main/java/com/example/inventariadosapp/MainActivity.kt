@@ -3,10 +3,9 @@ package com.example.inventariadosapp
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import com.example.inventariadosapp.ui.theme.InventariadosAppTheme
-import com.example.inventariadosapp.admin.topografo.assign.AssignNavGraph.AssignNavGraph
-// ** NUEVA IMPORTACIÓN NECESARIA **
 import androidx.navigation.compose.rememberNavController
+import com.example.inventariadosapp.ui.theme.InventariadosAppTheme
+import com.example.inventariadosapp.admin.topografo.assign.assignnavgraph.AssignNavGraph
 import com.google.firebase.FirebaseApp
 
 class MainActivity : ComponentActivity() {
@@ -18,10 +17,10 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             InventariadosAppTheme {
-                // 1. CREAR EL NAV CONTROLLER
+                // 1️⃣ Crear el NavController
                 val navController = rememberNavController()
 
-                // 2. PASAR EL NAV CONTROLLER A LA FUNCIÓN
+                // 2️⃣ Pasar el NavController al gráfico de navegación
                 AssignNavGraph(navController = navController)
             }
         }
