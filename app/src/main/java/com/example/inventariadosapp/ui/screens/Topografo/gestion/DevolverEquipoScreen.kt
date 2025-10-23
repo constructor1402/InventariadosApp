@@ -4,102 +4,202 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.inventariadosapp.R
+import com.example.inventariadosapp.ui.theme.Kavoon
 
 @Composable
 fun DevolverEquipoScreen(
+    serialArg: String,
     navController: NavController,
     onScanClick: () -> Unit,
-    onManualClick: () -> Unit
+    onManualClick: () -> Unit,
+    onConfirmarDevolucion: () -> Unit
 ) {
-    // Fondo general azul claro
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFFDCE6FA))
-            .padding(24.dp)
-    ) {
-        Column(
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.fillMaxSize()
-        ) {
-            // Título principal
-            Text(
-                text = "Devolver Equipo",
-                style = MaterialTheme.typography.titleLarge.copy(
-                    fontSize = 28.sp,
+    var mostrarFormulario by remember { mutableStateOf(false) }
+
+    Scaffold(
+        bottomBar = {
+            BottomNavGestionTopografo(navController = navController, currentRoute = "devolver_equipo")
+        },
+        containerColor = Color(0xFFD7E2FF)
+    ) { padding ->
+
+        if (!mostrarFormulario) {
+            // 🟢 Primera vista: selección del método (igual Figma)
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color(0xFFD7E2FF))
+                    .padding(horizontal = 24.dp)
+                    .padding(bottom = 90.dp)
+                    .padding(top = 30.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "Devolver Equipo",
+                    fontFamily = Kavoon,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF1E1E8E)
-                ),
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(bottom = 40.dp)
-            )
-
-            // Botón Escanear con cámara
-            Button(
-                onClick = onScanClick,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(70.dp)
-                    .padding(horizontal = 16.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00B050)),
-                shape = RoundedCornerShape(25.dp)
-            ) {
-                Text(
-                    text = "Escanear con cámara",
-                    color = Color.White,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold
+                    color = colorResource(id = R.color.texto_principal),
+                    fontSize = 26.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(bottom = 30.dp)
                 )
+
+                // Escanear con cámara
+                Button(
+                    onClick = {
+                        onScanClick()
+                        mostrarFormulario = true
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.verde_admin)),
+                    shape = RoundedCornerShape(16.dp),
+                    modifier = Modifier
+                        .fillMaxWidth(0.9f)
+                        .height(120.dp)
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_camera),
+                            contentDescription = "Escanear con cámara",
+                            tint = Color.White,
+                            modifier = Modifier.size(36.dp)
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Escanear\ncon cámara",
+                            fontFamily = Kavoon,
+                            color = Color.White,
+                            fontSize = 18.sp,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(25.dp))
+
+                // Ingresar manual
+                Button(
+                    onClick = {
+                        onManualClick()
+                        mostrarFormulario = true
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.azul_admin)),
+                    shape = RoundedCornerShape(16.dp),
+                    modifier = Modifier
+                        .fillMaxWidth(0.9f)
+                        .height(120.dp)
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_edit),
+                            contentDescription = "Ingresar manualmente",
+                            tint = Color.White,
+                            modifier = Modifier.size(36.dp)
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Ingresar\nDatos Manual",
+                            fontFamily = Kavoon,
+                            color = Color.White,
+                            fontSize = 18.sp,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
             }
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            // Botón Ingresar Datos Manual
-            Button(
-                onClick = onManualClick,
+        } else {
+            // 🟣 Segunda vista: formulario después del escaneo o ingreso
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(70.dp)
-                    .padding(horizontal = 16.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0070C0)),
-                shape = RoundedCornerShape(25.dp)
+                    .fillMaxSize()
+                    .background(Color(0xFFD7E2FF))
+                    .padding(horizontal = 24.dp)
+                    .padding(bottom = 90.dp)
+                    .padding(top = 30.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "Ingresar Datos Manual",
-                    color = Color.White,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold
+                    text = "Datos del Equipo",
+                    fontFamily = Kavoon,
+                    fontWeight = FontWeight.Bold,
+                    color = colorResource(id = R.color.texto_principal),
+                    fontSize = 26.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(bottom = 20.dp)
                 )
-            }
 
-            Spacer(modifier = Modifier.height(60.dp))
+                CampoLectura(label = "Serial", value = serialArg)
+                CampoLectura(label = "Referencia", value = "Nivel Topográfico")
+                CampoLectura(label = "Tipo de Equipo", value = "Herramienta")
+                CampoLectura(label = "Estado", value = "Asignado")
+                CampoLectura(label = "Obra Actual", value = "Puente Soacha")
 
-            // Botón volver (opcional, si quieres mantener consistencia)
-            Button(
-                onClick = { navController.popBackStack() },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp)
-                    .padding(horizontal = 16.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1E1E8E)),
-                shape = RoundedCornerShape(25.dp)
-            ) {
-                Text(
-                    text = "Volver",
-                    color = Color.White,
-                    fontSize = 16.sp
-                )
+                Spacer(modifier = Modifier.height(35.dp))
+
+                Button(
+                    onClick = { onConfirmarDevolucion() },
+                    colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.verde_admin)),
+                    shape = RoundedCornerShape(16.dp),
+                    modifier = Modifier
+                        .fillMaxWidth(0.9f)
+                        .height(65.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_devolver),
+                        contentDescription = "Confirmar devolución",
+                        tint = Color.White,
+                        modifier = Modifier.size(28.dp)
+                    )
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text(
+                        text = "Confirmar Devolución",
+                        color = Color.White,
+                        fontFamily = Kavoon,
+                        fontSize = 18.sp
+                    )
+                }
             }
         }
+    }
+}
+
+@Composable
+fun CampoLectura(label: String, value: String) {
+    Column(modifier = Modifier.fillMaxWidth(0.9f)) {
+        Text(
+            text = label,
+            fontFamily = Kavoon,
+            color = Color(0xFF1E3A8A),
+            fontSize = 15.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(start = 5.dp, bottom = 4.dp)
+        )
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(55.dp)
+                .background(Color.White, RoundedCornerShape(16.dp))
+                .padding(horizontal = 16.dp),
+            contentAlignment = Alignment.CenterStart
+        ) {
+            Text(
+                text = value.ifEmpty { "—" },
+                color = Color(0xFF111111),
+                fontSize = 16.sp,
+                fontFamily = Kavoon
+            )
+        }
+        Spacer(modifier = Modifier.height(14.dp))
     }
 }

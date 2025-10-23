@@ -1,9 +1,7 @@
 package com.example.inventariadosapp.ui.screens.Topografo
 
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -22,25 +20,34 @@ import com.example.inventariadosapp.ui.theme.Kavoon
 @Composable
 fun InicioTopografoScreen(navController: NavController) {
     Scaffold(
-        bottomBar = { BottomNavTopografo(navController) }
+        bottomBar = {
+            BottomNavTopografo(
+                navController = navController,
+                currentRoute = navController.currentDestination?.route ?: ""
+            )
+        }
     ) { padding ->
-
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(colorResource(id = R.color.fondo_claro))
                 .padding(padding)
         ) {
-            // 🔙 Botón volver
+            // 🔴 Botón cerrar sesión (X roja)
             IconButton(
-                onClick = { navController.navigate("login") },
+                onClick = {
+                    navController.navigate("login") {
+                        popUpTo("panel_topografo") { inclusive = true }
+                        launchSingleTop = true
+                    }
+                },
                 modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .padding(start = 12.dp, top = 12.dp)
+                    .align(Alignment.TopEnd)
+                    .padding(end = 12.dp, top = 12.dp)
             ) {
                 Icon(
-                    painter = painterResource(id = R.drawable.ic_arrow_back),
-                    contentDescription = "Volver",
+                    painter = painterResource(id = R.drawable.ic_close_roja),
+                    contentDescription = "Cerrar sesión",
                     tint = Color.Unspecified,
                     modifier = Modifier.size(36.dp)
                 )
@@ -66,7 +73,7 @@ fun InicioTopografoScreen(navController: NavController) {
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // 🟦 Tarjeta de equipos disponibles
+                // 🟪 Tarjeta de equipos disponibles
                 Card(
                     modifier = Modifier
                         .width(190.dp)
@@ -75,7 +82,7 @@ fun InicioTopografoScreen(navController: NavController) {
                         containerColor = colorResource(id = R.color.morado_admin)
                     ),
                     elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
-                    shape = RoundedCornerShape(12.dp)
+                    shape = MaterialTheme.shapes.medium
                 ) {
                     Column(
                         modifier = Modifier
@@ -112,9 +119,9 @@ fun InicioTopografoScreen(navController: NavController) {
 
                 Spacer(modifier = Modifier.height(40.dp))
 
-                // 🟢 Subtítulo
+                // 🟩 Subtítulo
                 Text(
-                    text = "Acceso Rápidos",
+                    text = "Accesos Rápidos",
                     color = colorResource(id = R.color.texto_principal),
                     fontFamily = Kavoon,
                     fontWeight = FontWeight.Bold,
@@ -123,13 +130,13 @@ fun InicioTopografoScreen(navController: NavController) {
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // 🟩 Botón Asignar
+                // 🟢 Botón Asignar equipo a obra
                 Button(
-                    onClick = { navController.navigate("asignar_equipo") },
+                    onClick = { navController.navigate("gestion_topografo") },
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF059669)
+                        containerColor = Color(0xFF34A853)
                     ),
-                    shape = RoundedCornerShape(16.dp),
+                    shape = MaterialTheme.shapes.medium,
                     modifier = Modifier.fillMaxWidth(0.85f)
                 ) {
                     Icon(
@@ -147,15 +154,15 @@ fun InicioTopografoScreen(navController: NavController) {
                     )
                 }
 
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-                // 🔴 Botón Devolver
+                // 🔴 Botón Devolver equipo
                 Button(
-                    onClick = { navController.navigate("devolver_equipo") },
+                    onClick = { navController.navigate("devolver_equipo/") },
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFE53935)
+                        containerColor = Color(0xFFEA4335)
                     ),
-                    shape = RoundedCornerShape(16.dp),
+                    shape = MaterialTheme.shapes.medium,
                     modifier = Modifier.fillMaxWidth(0.85f)
                 ) {
                     Icon(
@@ -176,4 +183,3 @@ fun InicioTopografoScreen(navController: NavController) {
         }
     }
 }
-

@@ -11,7 +11,7 @@ import com.example.inventariadosapp.PanelConsultaScreen
 import com.example.inventariadosapp.PanelTopografoScreen
 import com.example.inventariadosapp.screens.admin.AdminNavigation
 import com.example.inventariadosapp.ui.screens.login.WelcomeScreen
-import com.example.inventariadosapp.ui.screens.topografo.TopografoNavigation
+import com.example.inventariadosapp.ui.screens.Topografo.TopografoNavigation
 
 @Composable
 fun AppNavigation() {

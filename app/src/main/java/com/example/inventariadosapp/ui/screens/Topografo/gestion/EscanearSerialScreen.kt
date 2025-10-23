@@ -77,9 +77,10 @@ fun EscanearSerialScreen(navController: NavController) {
                 ) {
                     CameraPreviewAndAnalyzer(
                         onTextDetected = { rawValue ->
-                            if (lastDetected == null) {
+                            if (lastDetected == null && !rawValue.isNullOrBlank()) {
                                 lastDetected = rawValue
-                                navController.navigate("devolver_manual?serial=${Uri.encode(rawValue)}")
+                                // Usar la ruta correcta definida en TopografoNavigation
+                                navController.navigate("ingreso_manual/${Uri.encode(rawValue)}")
                             }
                         },
                         modifier = Modifier.matchParentSize()

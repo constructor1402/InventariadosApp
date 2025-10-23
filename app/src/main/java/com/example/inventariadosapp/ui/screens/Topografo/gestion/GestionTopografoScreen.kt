@@ -1,4 +1,4 @@
-package com.example.inventariadosapp.ui.screens.topografo
+package com.example.inventariadosapp.ui.screens.Topografo
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -16,13 +16,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.inventariadosapp.R
-import com.example.inventariadosapp.ui.screens.Topografo.BottomNavTopografo
+import com.example.inventariadosapp.ui.screens.Topografo.gestion.BottomNavGestionTopografo
 import com.example.inventariadosapp.ui.theme.Kavoon
 
 @Composable
 fun GestionTopografoScreen(navController: NavController) {
     Scaffold(
-        bottomBar = { BottomNavTopografo(navController) }
+        bottomBar = {
+            BottomNavGestionTopografo(navController, currentRoute = "gestion_topografo")
+        }
     ) { padding ->
         Box(
             modifier = Modifier
