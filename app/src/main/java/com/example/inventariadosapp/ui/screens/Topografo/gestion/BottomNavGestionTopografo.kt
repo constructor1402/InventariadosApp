@@ -13,6 +13,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.example.inventariadosapp.R
 
 @Composable
@@ -20,8 +21,14 @@ fun BottomNavGestionTopografo(
     navController: NavController,
     currentRoute: String
 ) {
-    // 🎨 mismo color que el BottomNavTopografo
     val bgColor = Color(0xFFF5F5F5)
+
+    // --- Definimos las rutas correctas aquí ---
+    val assignRoute = "gestion_topografo"
+    // La ruta de devolver necesita un argumento, pero como es la principal,
+    // le pasamos un argumento vacío (que tu NavGraph ya maneja).
+    val returnRoute = "devolver_equipo/"
+
 
     Surface(
         color = bgColor,
@@ -42,18 +49,29 @@ fun BottomNavGestionTopografo(
         ) {
             // 🔹 Asignar
             NavigationBarItem(
-                selected = currentRoute == "gestion_topografo",
+                //  👇 --- CORRECCIÓN AQUÍ ---
+                selected = currentRoute == assignRoute,
                 onClick = {
-                    if (currentRoute != "gestion_topografo") {
-                        navController.navigate("gestion_topografo")
+                    //  👇 --- LÓGICA DE NAVEGACIÓN CORREGIDA ---
+                    if (currentRoute != assignRoute) {
+                        navController.navigate(assignRoute) {
+                            // Limpia el backstack hasta el inicio del grafo
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            // Evita múltiples copias de la misma pantalla
+                            launchSingleTop = true
+                            // Restaura el estado al volver
+                            restoreState = true
+                        }
                     }
                 },
                 icon = {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_asignar),
                         contentDescription = "Asignar",
-                        tint = Color(0xFF6D20B9), // morado_admin
-                        modifier = Modifier.size(32.dp) // 🔺 agranda el ícono
+                        tint = Color(0xFF6D20B9),
+                        modifier = Modifier.size(32.dp)
                     )
                 },
                 label = {
@@ -67,18 +85,26 @@ fun BottomNavGestionTopografo(
 
             // 🔸 Devolver
             NavigationBarItem(
-                selected = currentRoute == "devolver_equipo",
+                //  👇 --- CORRECCIÓN AQUÍ (para que coincida con la lógica) ---
+                selected = currentRoute.startsWith("devolver_equipo"),
                 onClick = {
-                    if (currentRoute != "devolver_equipo") {
-                        navController.navigate("devolver_equipo/")
+                    //  👇 --- LÓGICA DE NAVEGACIÓN CORREGIDA ---
+                    if (!currentRoute.startsWith("devolver_equipo")) {
+                        navController.navigate(returnRoute) { // Ruta ya incluye "/"
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
                     }
                 },
                 icon = {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_devolver),
                         contentDescription = "Devolver",
-                        tint = Color(0xFF1E3ABA), // azul_admin
-                        modifier = Modifier.size(32.dp) // 🔺 agranda el ícono
+                        tint = Color(0xFF1E3ABA),
+                        modifier = Modifier.size(32.dp)
                     )
                 },
                 label = {

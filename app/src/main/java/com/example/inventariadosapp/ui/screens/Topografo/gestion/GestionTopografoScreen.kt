@@ -16,11 +16,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.inventariadosapp.R
+//  👇 --- IMPORTACIONES AÑADIDAS ---
+import com.example.inventariadosapp.ui.screens.Topografo.assign.AssignNavGraph.AssignRoutes
+import com.example.inventariadosapp.ui.screens.Topografo.assign.models.TopografoAssignViewModel
+//  👆 --- FIN DE IMPORTACIONES ---
 import com.example.inventariadosapp.ui.screens.Topografo.gestion.BottomNavGestionTopografo
 import com.example.inventariadosapp.ui.theme.Kavoon
 
 @Composable
-fun GestionTopografoScreen(navController: NavController) {
+fun GestionTopografoScreen(
+    navController: NavController,
+    viewModel: TopografoAssignViewModel // <-- RECIBIMOS EL VIEWMODEL
+) {
     Scaffold(
         bottomBar = {
             BottomNavGestionTopografo(navController, currentRoute = "gestion_topografo")
@@ -32,7 +39,7 @@ fun GestionTopografoScreen(navController: NavController) {
                 .background(colorResource(id = R.color.fondo_claro))
                 .padding(padding)
         ) {
-            // 🔙 Flecha volver
+            //  🔙  Flecha volver
             IconButton(
                 onClick = { navController.navigate("inicio_topografo") },
                 modifier = Modifier
@@ -46,14 +53,13 @@ fun GestionTopografoScreen(navController: NavController) {
                     modifier = Modifier.size(36.dp)
                 )
             }
-
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(horizontal = 24.dp, vertical = 80.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // 🧭 Título
+                //  🧭  Título
                 Text(
                     text = "Asignar Equipo a Obra",
                     color = colorResource(id = R.color.texto_principal),
@@ -62,12 +68,10 @@ fun GestionTopografoScreen(navController: NavController) {
                     fontSize = 22.sp,
                     textAlign = TextAlign.Center
                 )
-
                 Spacer(modifier = Modifier.height(40.dp))
-
-                // 🟩 Botón Escanear
+                //  🟩  Botón Escanear
                 Button(
-                    onClick = { navController.navigate("asignar_escanear") },
+                    onClick = { navController.navigate(AssignRoutes.CAMERA) },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF059669)),
                     shape = RoundedCornerShape(16.dp),
                     modifier = Modifier
@@ -93,12 +97,14 @@ fun GestionTopografoScreen(navController: NavController) {
                         )
                     }
                 }
-
                 Spacer(modifier = Modifier.height(24.dp))
-
-                // 🟦 Botón Manual
+                //  🟦  Botón Manual
                 Button(
-                    onClick = { navController.navigate("asignar_manual") },
+                    //  👇  --- LÍNEA MODIFICADA ---
+                    onClick = {
+                        viewModel.clearSelectedEquipo() // 1. Limpiamos el ViewModel
+                        navController.navigate(AssignRoutes.MANUAL) // 2. Navegamos
+                    },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1E3A8A)),
                     shape = RoundedCornerShape(16.dp),
                     modifier = Modifier

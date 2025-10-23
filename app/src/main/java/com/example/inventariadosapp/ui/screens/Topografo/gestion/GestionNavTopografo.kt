@@ -4,20 +4,18 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.inventariadosapp.R
+import com.example.inventariadosapp.ui.screens.Topografo.assign.AssignNavGraph.AssignNavGraph
 import com.example.inventariadosapp.ui.theme.Kavoon
 
 @Composable
@@ -83,36 +81,15 @@ fun GestionNavTopografo(parentNavController: NavController) {
                 navController = navController,
                 startDestination = "asignar"
             ) {
-                // 🟩 Pantalla principal: Asignar equipo a obra
-                composable("asignar") {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(colorResource(id = R.color.fondo_claro))
-                            .padding(24.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Text(
-                            text = "Asignar equipo a obra",
-                            color = colorResource(id = R.color.texto_principal),
-                            fontFamily = Kavoon,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 22.sp,
-                            textAlign = TextAlign.Center
-                        )
-                        Spacer(modifier = Modifier.height(12.dp))
-                        Text(
-                            text = "Pantalla en construcción...",
-                            color = colorResource(id = R.color.morado_admin),
-                            fontFamily = Kavoon,
-                            fontSize = 16.sp,
-                            textAlign = TextAlign.Center
-                        )
-                    }
+                // 🟢 Flujo de ASIGNAR (ajustado)
+                // 🟢 Pantalla de asignar (flujo completo)
+                composable(route = "asignar") {
+                    val assignNavController = rememberNavController()
+                    AssignNavGraph(navController = assignNavController)
                 }
 
-                // 🔁 Pantalla de devolución (flujo completo con escanear e ingreso manual)
+                // 🔁 Pantalla de DEVOLVER (tu fluno ahora que sigue mas
+                // jo actual)
                 composable("devolver") {
                     DevolverEquipoScreen(
                         serialArg = "",
@@ -126,8 +103,6 @@ fun GestionNavTopografo(parentNavController: NavController) {
                         }
                     )
                 }
-
-
             }
         }
     }

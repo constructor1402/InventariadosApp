@@ -18,7 +18,7 @@ import com.example.inventariadosapp.R
 import com.example.inventariadosapp.ui.theme.Kavoon
 
 @Composable
-fun InicioTopografoScreen(navController: NavController) {
+fun InicioTopografoScreen(navController: NavController, parentNavController: NavController) {
     Scaffold(
         bottomBar = {
             BottomNavTopografo(
