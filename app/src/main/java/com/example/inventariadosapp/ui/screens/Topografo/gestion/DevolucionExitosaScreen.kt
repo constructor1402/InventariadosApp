@@ -19,7 +19,7 @@ fun DevolucionExitosaScreen(navController: NavController) {
         Text(text = "El equipo ha sido devuelto correctamente")
         Spacer(modifier = Modifier.height(20.dp))
         Button(onClick = {
-            // volver al inicio de topografo o al stack previo
+            // volver al inicio de topografo
             navController.popBackStack()
             navController.popBackStack() // asegurar volver al main si es necesario
         }) {

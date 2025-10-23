@@ -27,11 +27,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
-import com.google.mlkit.vision.barcode.BarcodeScannerOptions
-import com.google.mlkit.vision.barcode.BarcodeScanning
-import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
-import kotlinx.coroutines.delay
+import com.google.mlkit.vision.text.TextRecognition
+import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import java.util.concurrent.Executors
 
 @SuppressLint("UnsafeOptInUsageError")
@@ -62,7 +60,7 @@ fun EscanearSerialScreen(navController: NavController) {
             .background(Color.Black)
     ) {
         if (hasPermission) {
-            // Contenedor centrado con recuadro tipo lector QR
+            // Contenedor centrado con recuadro
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -78,7 +76,7 @@ fun EscanearSerialScreen(navController: NavController) {
                     contentAlignment = Alignment.Center
                 ) {
                     CameraPreviewAndAnalyzer(
-                        onBarcodeDetected = { rawValue ->
+                        onTextDetected = { rawValue ->
                             if (lastDetected == null) {
                                 lastDetected = rawValue
                                 navController.navigate("devolver_manual?serial=${Uri.encode(rawValue)}")
@@ -123,7 +121,7 @@ fun EscanearSerialScreen(navController: NavController) {
 
 @Composable
 fun CameraPreviewAndAnalyzer(
-    onBarcodeDetected: (String) -> Unit,
+    onTextDetected: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -152,14 +150,11 @@ fun CameraPreviewAndAnalyzer(
                     .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                     .build()
 
-                val options = BarcodeScannerOptions.Builder()
-                    .setBarcodeFormats(Barcode.FORMAT_ALL_FORMATS)
-                    .build()
-
-                val scanner = BarcodeScanning.getClient(options)
-
                 imageAnalysis.setAnalyzer(cameraExecutor) { imageProxy ->
-                    processImageProxy(scanner, imageProxy, onBarcodeDetected)
+                    processImageProxy(
+                        imageProxy = imageProxy,
+                        onTextDetected = onTextDetected
+                    )
                 }
 
                 try {
@@ -191,30 +186,30 @@ fun CameraPreviewAndAnalyzer(
 @androidx.annotation.OptIn(ExperimentalGetImage::class)
 @OptIn(ExperimentalGetImage::class)
 private fun processImageProxy(
-    scanner: com.google.mlkit.vision.barcode.BarcodeScanner,
     imageProxy: ImageProxy,
-    onBarcodeDetected: (String) -> Unit
+    onTextDetected: (String) -> Unit
 ) {
-    val mediaImage = imageProxy.image
-    if (mediaImage != null) {
-        val image = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
-        scanner.process(image)
-            .addOnSuccessListener { barcodes ->
-                for (barcode in barcodes) {
-                    val raw = barcode.rawValue
-                    if (!raw.isNullOrEmpty()) {
-                        onBarcodeDetected(raw.trim())
-                        break
-                    }
-                }
-            }
-            .addOnFailureListener {
-                // Ignorar errores puntuales
-            }
-            .addOnCompleteListener {
-                imageProxy.close()
-            }
-    } else {
+    val mediaImage = imageProxy.image ?: run {
         imageProxy.close()
+        return
     }
+
+    val image = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
+    val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
+
+    recognizer.process(image)
+        .addOnSuccessListener { visionText ->
+            val detectedText = visionText.text
+            // Buscar texto con formato tipo serial
+            val match = Regex("[A-Z]\\d{5,}").find(detectedText)
+            match?.let {
+                onTextDetected(it.value.trim())
+            }
+        }
+        .addOnFailureListener { e ->
+            Log.e("OCR", "Error OCR: ${e.message}")
+        }
+        .addOnCompleteListener {
+            imageProxy.close()
+        }
 }

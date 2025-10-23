@@ -67,6 +67,7 @@ dependencies {
 
     // ML Kit - Barcode Scanning ✅
     implementation("com.google.mlkit:barcode-scanning:17.2.0")
+    implementation("com.google.mlkit:text-recognition:16.0.0")
 
     // CameraX ✅
     implementation("androidx.camera:camera-core:1.2.3")
@@ -79,6 +80,7 @@ dependencies {
 
     // Material
     implementation("com.google.android.material:material:1.11.0")
+    implementation(libs.play.services.mlkit.text.recognition.common)
 
     // Tests
     testImplementation("junit:junit:4.13.2")
