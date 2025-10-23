@@ -2,65 +2,66 @@ package com.example.inventariadosapp.admin.topografo.assign.components
 
 import android.annotation.SuppressLint
 import android.util.Log
-import androidx.camera.core.CameraSelector
-import androidx.camera.core.ImageAnalysis
-import androidx.camera.core.ImageProxy
-import androidx.camera.core.Preview as CameraPreviewCore
+import android.view.ViewGroup
+import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
-import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.common.InputImage
+import com.google.mlkit.vision.text.TextRecognition
+import com.google.mlkit.vision.text.latin.TextRecognizerOptions
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
 @SuppressLint("UnsafeOptInUsageError")
 @Composable
 fun CameraPreview(
     modifier: Modifier = Modifier,
-    onBarcodeDetected: (String) -> Unit
+    onTextFound: (String) -> Unit
 ) {
     val context = LocalContext.current
-    val lifecycleOwner = LocalLifecycleOwner.current
+    val cameraExecutor: ExecutorService = remember { Executors.newSingleThreadExecutor() }
 
     AndroidView(
-        factory = {
-            val previewView = PreviewView(context)
+        factory = { ctx ->
+            val previewView = PreviewView(ctx).apply {
+                layoutParams = ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT
+                )
+            }
 
-            val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
+            val cameraProviderFuture = ProcessCameraProvider.getInstance(ctx)
             cameraProviderFuture.addListener({
                 val cameraProvider = cameraProviderFuture.get()
 
-                // Configuración de la previsualización
-                val preview = CameraPreviewCore.Builder().build().also {
+                val preview = Preview.Builder().build().also {
                     it.setSurfaceProvider(previewView.surfaceProvider)
                 }
 
-                val barcodeScanner = BarcodeScanning.getClient()
-
-                // Configuración del análisis de imagen (lector QR/Barras)
-                val analysis = ImageAnalysis.Builder()
+                val imageAnalyzer = ImageAnalysis.Builder()
                     .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                     .build()
-
-                analysis.setAnalyzer(ContextCompat.getMainExecutor(context)) { imageProxy ->
-                    processImageProxy(barcodeScanner, imageProxy, onBarcodeDetected)
-                }
-
-                val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
+                    .also {
+                        it.setAnalyzer(cameraExecutor, TextAnalyzer(onTextFound))
+                    }
 
                 try {
                     cameraProvider.unbindAll()
                     cameraProvider.bindToLifecycle(
-                        lifecycleOwner, cameraSelector, preview, analysis
+                        ctx as androidx.lifecycle.LifecycleOwner,
+                        CameraSelector.DEFAULT_BACK_CAMERA,
+                        preview,
+                        imageAnalyzer
                     )
                 } catch (exc: Exception) {
                     Log.e("CameraPreview", "Error al iniciar la cámara", exc)
                 }
-            }, ContextCompat.getMainExecutor(context))
+            }, ContextCompat.getMainExecutor(ctx))
 
             previewView
         },
@@ -68,27 +69,46 @@ fun CameraPreview(
     )
 }
 
-@SuppressLint("UnsafeOptInUsageError")
+/**
+ * Analizador de imágenes para detectar texto.
+ */
+private class TextAnalyzer(
+    private val onTextFound: (String) -> Unit
+) : ImageAnalysis.Analyzer {
+
+    private val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
+
+    @androidx.camera.core.ExperimentalGetImage
+    override fun analyze(imageProxy: ImageProxy) {
+        processImageProxy(imageProxy, recognizer, onTextFound)
+    }
+}
+
+@androidx.camera.core.ExperimentalGetImage
 private fun processImageProxy(
-    barcodeScanner: com.google.mlkit.vision.barcode.BarcodeScanner,
     imageProxy: ImageProxy,
-    onBarcodeDetected: (String) -> Unit
+    recognizer: com.google.mlkit.vision.text.TextRecognizer,
+    onTextFound: (String) -> Unit
 ) {
     val mediaImage = imageProxy.image
     if (mediaImage != null) {
         val image = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
 
-        barcodeScanner.process(image)
-            .addOnSuccessListener { barcodes ->
-                for (barcode in barcodes) {
-                    barcode.rawValue?.let {
-                        onBarcodeDetected(it)
-                        return@addOnSuccessListener // Salir después de la primera detección
-                    }
+        recognizer.process(image)
+            .addOnSuccessListener { visionText ->
+                val detectedText = visionText.textBlocks.joinToString(" ") { it.text }
+
+                // 🔍 Filtramos texto que parezca un serial (letra + dígitos/letras)
+                val regex = Regex("\\b[A-Z]{1,2}\\d{3,8}\\b", RegexOption.IGNORE_CASE)
+                val match = regex.find(detectedText)
+
+                match?.value?.let { serial ->
+                    Log.d("TextRecognition", "Serial detectado: $serial")
+                    onTextFound(serial.trim().uppercase()) // Devolvemos solo el serial válido
                 }
             }
             .addOnFailureListener { e ->
-                Log.e("BarcodeScanner", "Error de escaneo: ${e.message}")
+                Log.e("TextRecognition", "Error en OCR", e)
             }
             .addOnCompleteListener {
                 imageProxy.close()

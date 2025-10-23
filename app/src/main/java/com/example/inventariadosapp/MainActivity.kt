@@ -12,15 +12,15 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Inicializa Firebase antes de usar Firestore
+        // ✅ Inicializa Firebase antes de cualquier acceso a Firestore o Auth
         FirebaseApp.initializeApp(this)
 
         setContent {
             InventariadosAppTheme {
-                // 1️⃣ Crear el NavController
+                // ✅ Crea el controlador de navegación
                 val navController = rememberNavController()
 
-                // 2️⃣ Pasar el NavController al gráfico de navegación
+                // ✅ Llama al NavGraph principal del módulo "topógrafo"
                 AssignNavGraph(navController = navController)
             }
         }

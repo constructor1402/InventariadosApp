@@ -1,5 +1,6 @@
 package com.example.inventariadosapp.admin.topografo.assign.assignnavgraph
 
+
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -11,7 +12,7 @@ import com.example.inventariadosapp.admin.topografo.assign.components.models.Ass
 import com.example.inventariadosapp.admin.topografo.assign.components.models.AssignMenuScreen
 
 // ====================================================================
-// Rutas de Navegación
+// 📍 Definición de Rutas
 // ====================================================================
 object AssignRoutes {
     const val MENU = "assign_menu"
@@ -20,7 +21,7 @@ object AssignRoutes {
 }
 
 // ====================================================================
-// NavGraph Principal
+// 🚀 Gráfico de Navegación Principal (NavGraph)
 // ====================================================================
 @Composable
 fun AssignNavGraph(navController: NavHostController) {
@@ -30,27 +31,24 @@ fun AssignNavGraph(navController: NavHostController) {
         navController = navController,
         startDestination = AssignRoutes.MENU
     ) {
-        // Pantalla principal del menú
+        // 🏠 Pantalla principal del menú
         composable(AssignRoutes.MENU) {
-            AssignMenuScreen(
-                onNavigateToCamera = { navController.navigate(AssignRoutes.CAMERA) },
-                onNavigateToManual = { navController.navigate(AssignRoutes.MANUAL) }
-            )
+            AssignMenuScreen(navController = navController)
         }
 
-        // Pantalla de escaneo con cámara (con botón de atrás)
+        // 📷 Pantalla de escaneo con cámara
         composable(AssignRoutes.CAMERA) {
             AssignCameraScreen(
                 viewModel = viewModel,
-                navController = navController // ✅ agregado
+                navController = navController
             )
         }
 
-        // Pantalla de ingreso manual (con botón de atrás)
+        // ✍️ Pantalla de ingreso manual
         composable(AssignRoutes.MANUAL) {
             AssignManualScreen(
                 viewModel = viewModel,
-                navController = navController // ✅ agregado
+                navController = navController
             )
         }
     }

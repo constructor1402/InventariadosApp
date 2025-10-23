@@ -1,7 +1,7 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-    id("org.jetbrains.kotlin.plugin.compose") // ✅ sin versión explícita
+    id("org.jetbrains.kotlin.plugin.compose")
     id("com.google.gms.google-services")
 }
 
@@ -36,10 +36,6 @@ android {
         compose = true
     }
 
-    // ❌ Ya no se usa composeOptions en Kotlin 2.0
-    // composeOptions { kotlinCompilerExtensionVersion = "1.5.15" }
-
-    // ✅ Evita errores de librerías nativas (como ML Kit y CameraX)
     packaging {
         jniLibs {
             useLegacyPackaging = true
@@ -61,20 +57,24 @@ dependencies {
     implementation("androidx.compose.material3:material3:1.3.0")
     implementation("androidx.navigation:navigation-compose:2.8.2")
 
+    // 🖼️ Iconos de Material (para CameraAlt, Edit, etc.)
+    implementation("androidx.compose.material:material-icons-core")
+    implementation("androidx.compose.material:material-icons-extended")
+
     // 🔥 Firebase
     implementation(platform("com.google.firebase:firebase-bom:33.4.0"))
     implementation("com.google.firebase:firebase-analytics-ktx")
     implementation("com.google.firebase:firebase-firestore-ktx:25.1.0")
     implementation("com.google.firebase:firebase-auth-ktx:23.0.0")
 
-    // 📸 CameraX (vista previa y control de cámara)
+    // 📸 CameraX (para usar la cámara del dispositivo)
     implementation("androidx.camera:camera-core:1.3.3")
     implementation("androidx.camera:camera-camera2:1.3.3")
     implementation("androidx.camera:camera-lifecycle:1.3.3")
     implementation("androidx.camera:camera-view:1.3.3")
 
-    // 🤖 ML Kit — Escaneo de códigos QR
-    implementation("com.google.mlkit:barcode-scanning:17.2.0")
+    // 🤖 ML Kit — Reconocimiento de texto (OCR)
+    implementation("com.google.mlkit:text-recognition:16.0.1")
 
     // 🧪 Tests
     testImplementation("junit:junit:4.13.2")

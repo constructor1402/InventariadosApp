@@ -1,16 +1,16 @@
-package com.example.inventariadosapp.admin.topografo.assign.components.models // <-- PACKAGE CORREGIDO
+package com.example.inventariadosapp.admin.topografo.assign.components.models
+
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import com.google.firebase.firestore.FirebaseFirestore
 
 class TopografoAssignViewModel : ViewModel() {
 
     private val db = FirebaseFirestore.getInstance()
 
-    // Campos observables
     private val _serial = MutableStateFlow("")
     val serial: StateFlow<String> = _serial
 
@@ -29,6 +29,7 @@ class TopografoAssignViewModel : ViewModel() {
     private val _error = MutableStateFlow("")
     val error: StateFlow<String> = _error
 
+
     fun updateSerial(value: String) {
         _serial.value = value
     }
@@ -45,21 +46,23 @@ class TopografoAssignViewModel : ViewModel() {
         _obra.value = value
     }
 
-    // Llama a esta función después de escanear el serial
+
+    // 🔎 Buscar equipo por campo 'serial' en Firestore
     fun buscarEquipo(serial: String) {
-        // Limpiar mensajes anteriores
         _mensaje.value = ""
         _error.value = ""
 
         viewModelScope.launch {
-            db.collection("equipos").document(serial).get()
-                .addOnSuccessListener { doc ->
-                    if (doc.exists()) {
+            db.collection("equipos")
+                .whereEqualTo("serial", serial) // 👈 Cambio clave
+                .get()
+                .addOnSuccessListener { result ->
+                    if (!result.isEmpty) {
+                        val doc = result.documents.first()
                         _referencia.value = doc.getString("referencia") ?: ""
                         _tipo.value = doc.getString("tipo") ?: ""
                         _mensaje.value = "✅ Equipo encontrado"
                     } else {
-                        // Limpiar campos si no se encuentra
                         _referencia.value = ""
                         _tipo.value = ""
                         _error.value = "⚠️ No se encontró el equipo con serial: $serial"
@@ -71,6 +74,7 @@ class TopografoAssignViewModel : ViewModel() {
         }
     }
 
+
     fun guardarAsignacion() {
         val serialVal = _serial.value.trim()
         val obraVal = _obra.value.trim()
@@ -80,7 +84,6 @@ class TopografoAssignViewModel : ViewModel() {
             return
         }
 
-        // Asumiendo que solo se guarda si el equipo ha sido encontrado previamente
         if (_referencia.value.isEmpty() || _tipo.value.isEmpty()) {
             _error.value = "⚠️ Debes escanear un equipo válido antes de asignar."
             return
@@ -91,13 +94,15 @@ class TopografoAssignViewModel : ViewModel() {
                 "serial" to serialVal,
                 "referencia" to _referencia.value,
                 "tipo" to _tipo.value,
-                "obra" to obraVal
+                "obra" to obraVal,
+                "estado" to "Asignado",
+                "asignadoPor" to "Usuario no identificado",
+                "fechaAsignacion" to com.google.firebase.Timestamp.now()
             )
 
             db.collection("asignaciones").add(data)
                 .addOnSuccessListener {
                     _mensaje.value = "✅ El equipo ha sido asignado correctamente"
-                    // Limpiar campos después de guardar si es necesario
                     _serial.value = ""
                     _referencia.value = ""
                     _tipo.value = ""
