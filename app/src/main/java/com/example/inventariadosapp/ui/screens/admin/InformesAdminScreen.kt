@@ -39,7 +39,7 @@ fun InformesAdminScreen(adminNavController: NavController) {
                     painter = painterResource(id = R.drawable.ic_arrow_back),
                     contentDescription = "Volver",
                     tint = Color.Unspecified,
-                    modifier = Modifier.size(28.dp)
+                    modifier = Modifier.size(36.dp)
                 )
             }
 
