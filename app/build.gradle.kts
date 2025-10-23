@@ -68,6 +68,7 @@ dependencies {
 
 // Firebase Authentication (opcional, si luego quieres login)
     implementation("com.google.firebase:firebase-auth-ktx:23.0.0")
+    implementation(libs.androidx.compose.material3)
 
 
     // Tests

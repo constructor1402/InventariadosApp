@@ -7,9 +7,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.inventariadosapp.screens.*
 import com.example.inventariadosapp.LoginScreen
-import com.example.inventariadosapp.PanelConsultaScreen
-import com.example.inventariadosapp.PanelTopografoScreen
+//import com.example.inventariadosapp.PanelConsultaScreen
+//import com.example.inventariadosapp.PanelTopografoScreen
 import com.example.inventariadosapp.screens.admin.AdminNavigation
+import com.example.inventariadosapp.screens.admin.InformesAdminScreen
 import com.example.inventariadosapp.ui.screens.WelcomeScreen
 
 @Composable
@@ -44,8 +45,12 @@ fun AppNavigation() {
         }
 
         // Otros roles
-        composable("panel_topografo") { PanelTopografoScreen(navController) }
-        composable("panel_consulta") { PanelConsultaScreen(navController) }
+        //composable("panel_topografo") { PanelTopografoScreen(navController) }
+        //composable("panel_consulta") { PanelConsultaScreen(navController) }
+
+
+
+
     }
 }
 

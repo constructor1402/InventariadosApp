@@ -2,6 +2,7 @@ package com.example.inventariadosapp.screens.admin
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -9,6 +10,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -39,19 +43,62 @@ fun InformesAdminScreen(adminNavController: NavController) {
                 )
             }
 
+
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(top = 80.dp),
+                    .padding(horizontal = 24.dp, vertical = 50.dp),
+                verticalArrangement = Arrangement.spacedBy(30.dp, Alignment.CenterVertically),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(
-                    text = "Informes",
-                    color = colorResource(id = R.color.texto_principal),
-                    fontFamily = Kavoon,
-                    fontSize = 22.sp
+
+                // 🔹 Botón 1: Informe de Equipos
+                BotonInforme(
+                    texto = "Informe de equipos",
+                    colorFondo = Color(0xFF3949AB),
+                    onClick = { adminNavController.navigate("informe_equipos") }
+                )
+
+                // 🔹 Botón 2: Informe de Obras
+                BotonInforme(
+                    texto = "Informe de obras",
+                    colorFondo = Color(0xFF7B1FA2),
+                    onClick = { adminNavController.navigate("informeObras") }
+                )
+
+                // 🔹 Botón 3: Informe de Usuarios
+                BotonInforme(
+                    texto = "Informe de usuarios",
+                    colorFondo = Color(0xFF6686E8),
+                    onClick = { adminNavController.navigate("informeUsuarios") }
                 )
             }
         }
+    }
+}
+@Composable
+fun BotonInforme(
+    texto: String,
+    colorFondo: Color,
+    onClick: () -> Unit
+) {
+    Button(
+        onClick = onClick,
+        colors = ButtonDefaults.buttonColors(colorFondo),
+        modifier = Modifier
+            .width(250.dp)
+            .height(180.dp)
+            .padding(vertical = 20.dp),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Text(
+            text = texto,
+            color = Color.White,
+            fontSize = 20.sp,
+            fontStyle = FontStyle.Italic,
+            fontFamily = Kavoon,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center
+        )
     }
 }
