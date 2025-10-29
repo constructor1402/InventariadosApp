@@ -6,32 +6,27 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.Firebase
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
-/*
-import com.google.firebase.FirebaseStorage
-import com.google.firebase.storage.FirebaseStorage
-*/
-
-
-
 data class Equipo(
     val serial: String = "",
     val referencia: String = "",
     val tipo: String = "",
     val fechaCertificacion: String = "",
-    val certificadoUrl: String = ""
+    val certificadoUrl: String = "",
+    val descripcion: String = "",
+    val estado: String = "",
+    val obra: String = ""
 )
+
 
 class EquiposViewModel : ViewModel(){
 
     private val db = FirebaseFirestore.getInstance()
-   // private val dbEspacio = FirebaseStorage.getInstance()
 
     var serial by mutableStateOf("")
     var referencia by mutableStateOf("")
@@ -51,8 +46,6 @@ class EquiposViewModel : ViewModel(){
 
         viewModelScope.launch {
             try{
-               // val certificadoUrl = certificadoUrl?.let { subirCertificadoFirebase(it) } ?: ""
-
                 val equipo = hashMapOf(
                     "serial" to serial,
                     "referencia" to referencia,
@@ -114,14 +107,6 @@ class EquiposViewModel : ViewModel(){
         _mensaje.value = "Archivo seleccionado: ${uri.lastPathSegment}"
     }
 
-    /*
-    private suspend fun subirCertificadoFirebase(uri: Uri): String {
-        val ref = dbEspacio.reference.child("certificados/${uri.lastPathSegment}")
-        ref.putFile(uri)
-        return ref.downloadUrl.toString()
-    }
-
-     */
 
     // --- LIMPIAR CAMPOS ---
     private fun limpiarCampos() {

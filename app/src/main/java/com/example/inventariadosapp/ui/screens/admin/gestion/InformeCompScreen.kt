@@ -86,7 +86,7 @@ fun InformeCompScreen(
             Button(
                 onClick = {
                     coroutineScope.launch {
-                        val filePath = viewModel.generarInformePDF(equipos)
+                        val filePath = viewModel.generarInformePDFequipos(equipos)
                         snackbarHostState.showSnackbar("PDF generado en: $filePath")
                     }
                 },

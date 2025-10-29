@@ -20,6 +20,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.inventariadosapp.R
 import com.example.inventariadosapp.ui.theme.Kavoon
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -27,9 +28,9 @@ fun InformesEquiposScreen(
     adminNavController: NavController,
     viewModel: InformeEquiposViewModel = viewModel()
 ) {
-    val equipos by viewModel.equipos.collectAsState()
     var codigoBusqueda by remember { mutableStateOf("") }
-    var estadoSeleccionado by remember { mutableStateOf("") }
+    var tipoSeleccionado by remember { mutableStateOf("") }
+    val scope = rememberCoroutineScope()
 
     Scaffold(
         topBar = {
@@ -89,7 +90,7 @@ fun InformesEquiposScreen(
 
             // Campo de búsqueda (opcional)
             Text(
-                "Nombre o Código de equipo",
+                "Serial de equipo",
                 fontFamily = Kavoon,
                 fontWeight = FontWeight.Bold,
                 color = Color.Black
@@ -127,16 +128,18 @@ fun InformesEquiposScreen(
             )
 
             // Dropdowns: Estado y Categoría
-            DropdownEstado(
-                estadoSeleccionado = estadoSeleccionado,
-                onEstadoChange = { estadoSeleccionado = it }
+            DropdownTipo(
+                tipoSeleccionado = tipoSeleccionado,
+                onTypeChange = { tipoSeleccionado = it }
             )
 
             // Botón Buscar
             Button(
                 onClick = {
-                    viewModel.buscarEquipos(codigoBusqueda, estadoSeleccionado)
-                    adminNavController.navigate("resultados_informe")
+                    scope.launch {
+                        viewModel.buscarEquipos(codigoBusqueda, tipoSeleccionado)
+                        adminNavController.navigate("resultados_informe")
+                    }
                 },
                 colors = ButtonDefaults.buttonColors(colorResource(id = R.color.azul_admin)),
                 shape = RoundedCornerShape(16.dp),
@@ -162,34 +165,31 @@ fun InformesEquiposScreen(
 
             Spacer(Modifier.height(12.dp))
 
-
-            //viewModel.TablaEquiposFirebase(equipos)
         }
     }
 }
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DropdownEstado(
-    estadoSeleccionado: String,
-    onEstadoChange: (String) -> Unit
+fun DropdownTipo(
+    tipoSeleccionado: String,
+    onTypeChange: (String) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
-    var estadoSeleccionado by remember { mutableStateOf("Disponible") }
-    val opciones = listOf("Asignado", "Dañado")
+    val opciones = listOf("Herramienta", "Maquinaria", "Vehículo")
 
     ExposedDropdownMenuBox(
         expanded = expanded,
         onExpandedChange = { expanded = !expanded },
         modifier = Modifier
             .fillMaxWidth(0.8f)
-            .clip(RoundedCornerShape(12.dp)) // 🔹 borde redondeado en todo el dropdown
+            .clip(RoundedCornerShape(12.dp))
             .background(colorResource(id = R.color.campo_fondo))
     ) {
         TextField(
-            value = estadoSeleccionado,
+            value = tipoSeleccionado.ifBlank { "Tipo..." },
             onValueChange = {},
             readOnly = true,
-            label = { Text("Estado", fontFamily = Kavoon) },
+            label = { Text("Tipo", fontFamily = Kavoon) },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             modifier = Modifier
                 .menuAnchor()
@@ -200,28 +200,28 @@ fun DropdownEstado(
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent
             ),
-            shape = RoundedCornerShape(12.dp) // 🔹 redondeo también del TextField
+            shape = RoundedCornerShape(12.dp)
         )
 
         ExposedDropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
             modifier = Modifier
-                .clip(RoundedCornerShape(12.dp)) // 🔹 redondeo del menú desplegable
+                .clip(RoundedCornerShape(12.dp))
                 .background(colorResource(id = R.color.campo_fondo))
         ) {
             opciones.forEach { opcion ->
                 DropdownMenuItem(
                     text = { Text(opcion, fontFamily = Kavoon) },
                     onClick = {
-                        estadoSeleccionado = opcion
+                        onTypeChange(opcion) // ✅ se comunica hacia la pantalla padre
                         expanded = false
                     }
                 )
             }
         }
     }
-
 }
+
 
 

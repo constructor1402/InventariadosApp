@@ -1,6 +1,6 @@
 package com.example.inventariadosapp.ui.screens.admin
 
-import android.os.Environment
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -20,11 +20,11 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun InformeCompScreen(
+fun InformeCompObraScreen(
     adminNavController: NavController,
     viewModel: InformeEquiposViewModel = viewModel()
 ) {
-    val equipos by viewModel.equipos.collectAsState()
+    val Obras by viewModel.obras.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -39,7 +39,7 @@ fun InformeCompScreen(
                     .background(colorResource(id = R.color.fondo_claro)),
                 title = {
                     Text(
-                        text = "Informe de equipos",
+                        text = "Informe de Obras",
                         fontFamily = Kavoon,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth()
@@ -77,7 +77,7 @@ fun InformeCompScreen(
                     .padding(12.dp),
                 contentAlignment = Alignment.Center
             ) {
-                viewModel.TablaEquiposFirebase(equipos)
+                viewModel.TablaObrasFirebase(Obras)
             }
 
             Spacer(Modifier.height(20.dp))
@@ -86,7 +86,7 @@ fun InformeCompScreen(
             Button(
                 onClick = {
                     coroutineScope.launch {
-                        val filePath = viewModel.generarInformePDF(equipos)
+                        val filePath = viewModel.generarInformePDFobras(Obras)
                         snackbarHostState.showSnackbar("PDF generado en: $filePath")
                     }
                 },

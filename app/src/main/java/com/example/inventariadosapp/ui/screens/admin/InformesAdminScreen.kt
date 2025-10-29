@@ -63,14 +63,14 @@ fun InformesAdminScreen(adminNavController: NavController) {
                 BotonInforme(
                     texto = "Informe de obras",
                     colorFondo = Color(0xFF7B1FA2),
-                    onClick = { adminNavController.navigate("informeObras") }
+                    onClick = { adminNavController.navigate("informe_Obras") }
                 )
 
                 // 🔹 Botón 3: Informe de Usuarios
                 BotonInforme(
                     texto = "Informe de usuarios",
                     colorFondo = Color(0xFF6686E8),
-                    onClick = { adminNavController.navigate("informeUsuarios") }
+                    onClick = { adminNavController.navigate("informe_Usuarios") }
                 )
             }
         }

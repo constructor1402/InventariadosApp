@@ -8,7 +8,9 @@ import androidx.navigation.compose.rememberNavController
 import com.example.inventariadosapp.screens.admin.gestion.EquiposAdminScreen
 import com.example.inventariadosapp.screens.admin.gestion.ObrasAdminScreen
 import com.example.inventariadosapp.screens.admin.gestion.UsuariosAdminScreen
+import com.example.inventariadosapp.ui.screens.admin.InformeCompObraScreen
 import com.example.inventariadosapp.ui.screens.admin.InformeCompScreen
+import com.example.inventariadosapp.ui.screens.admin.InformeObrasScreen
 import com.example.inventariadosapp.ui.screens.admin.InformesEquiposScreen
 
 
@@ -41,9 +43,11 @@ fun AdminNavigation(mainNavController: NavController) {
         composable("informes_admin") { InformesAdminScreen(adminNavController) }
         composable("informe_equipos") { InformesEquiposScreen(adminNavController) }
         composable("resultados_informe") {InformeCompScreen(adminNavController)}
+        composable("informe_Obras") { InformeObrasScreen(adminNavController) }
+        composable("resultados_informesObra") {InformeCompObraScreen(adminNavController)}
         /*
-        composable("informeObras") { InformesObrasScreen(navController) }
-        composable("informeUsuarios") { InformesUsuariosScreen(navController)}
+
+        composable("informe_Usuarios") { InformesUsuariosScreen(navController)}
          */
 
     }

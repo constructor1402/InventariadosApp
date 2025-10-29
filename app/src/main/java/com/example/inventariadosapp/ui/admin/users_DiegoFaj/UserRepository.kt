@@ -1,18 +1,24 @@
 package com.example.inventariadosapp.ui.admin.users_DiegoFaj
 
+import com.example.inventariadosapp.screens.admin.gestion.Obra
 import com.example.inventariadosapp.ui.screens.admin.gestion.Equipo
-import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import kotlinx.coroutines.tasks.await
 
 class UserRepository {
     private val db = FirebaseFirestore.getInstance()
-    private val collection = db.collection("usuarios")
+    private val collectionUsuarios = db.collection("usuarios")
+    private val collectionEquipos = db.collection("equipos")
+    private val collectionObras = db.collection("obras")
 
-    private val collectionEquipo = db.collection("Equipos")
-
+    // 🔹 Buscar usuario por correo
     suspend fun buscarUsuario(correo: String): UserUiState? {
-        val query = collection.whereEqualTo("correoElectronico", correo).get().await()
+        val query = collectionUsuarios
+            .whereEqualTo("correoElectronico", correo)
+            .get()
+            .await()
+
         if (query.isEmpty) return null
 
         val doc = query.documents.first()
@@ -25,6 +31,7 @@ class UserRepository {
         )
     }
 
+    // 🔹 Guardar usuario
     suspend fun guardarUsuario(user: UserUiState) {
         val usuario = hashMapOf(
             "nombreCompleto" to user.nombre,
@@ -33,32 +40,53 @@ class UserRepository {
             "contrasena" to user.contrasena,
             "rolSeleccionado" to user.rol
         )
-        collection.document(user.correo).set(usuario).await()
+        collectionUsuarios.document(user.correo).set(usuario).await()
     }
 
+    // 🔹 Eliminar usuario
     suspend fun eliminarUsuario(correo: String) {
-        val query = collection.whereEqualTo("correoElectronico", correo).get().await()
+        val query = collectionUsuarios.whereEqualTo("correoElectronico", correo).get().await()
         for (doc in query.documents) {
-            collection.document(doc.id).delete().await()
+            collectionUsuarios.document(doc.id).delete().await()
         }
     }
 
-    suspend fun obtenerEquiposFiltrados(codigo: String, estado: String): List<Equipo> {
-        val query = collectionEquipo
+    // 🔹 Obtener equipos filtrados
+    suspend fun obtenerEquiposFiltrados(codigo: String, tipo: String): List<Equipo> {
+        return try {
+            var query: Query = collectionEquipos
 
-        var queryFinal = query
-        if (codigo.isNotBlank()) {
-            queryFinal = queryFinal.whereEqualTo("codigo", codigo) as CollectionReference
-        }
-        if (estado.isNotBlank()) {
-            queryFinal = queryFinal.whereEqualTo("estado", estado) as CollectionReference
-        }
+            if (tipo.isNotBlank()) {
+                query = query.whereEqualTo("tipo", tipo)
+            }
+            if (codigo.isNotBlank()) {
+                query = query.whereEqualTo("serial", codigo)
+            }
+            
+            query.get().await().toObjects(Equipo::class.java)
 
-        return queryFinal.get().await().toObjects(Equipo::class.java)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emptyList()
+        }
+    }
+
+
+    // 🔹 Obtener obras filtradas
+    suspend fun obtenerObrasFiltradas(nombreObra: String): List<Obra> {
+        return try {
+            var query: Query = collectionObras
+
+            if (nombreObra.isNotBlank()) {
+                query = query.whereEqualTo("nombreObra", nombreObra)
+            }
+
+            query.get().await().toObjects(Obra::class.java)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emptyList()
+        }
     }
 
     companion object
-
 }
-
-
