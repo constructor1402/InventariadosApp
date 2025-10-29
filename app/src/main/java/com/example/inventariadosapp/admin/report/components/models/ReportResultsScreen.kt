@@ -1,0 +1,117 @@
+package com.example.inventariadosapp.admin.report.components.models
+
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import com.example.inventariadosapp.admin.report.reportnavgraph.ReportRoutes
+import com.google.firebase.firestore.FirebaseFirestore
+
+@Composable
+fun ReportResultsScreen(
+    navController: NavController,
+    codigoBuscado: String
+) {
+    val firestore = FirebaseFirestore.getInstance()
+    var equipo by remember { mutableStateOf<Map<String, Any>?>(null) }
+    var cargando by remember { mutableStateOf(true) }
+    var notFound by remember { mutableStateOf(false) }
+
+    LaunchedEffect(codigoBuscado) {
+        cargando = true
+        notFound = false
+        equipo = null
+
+        val query = codigoBuscado.trim().uppercase()
+
+        // 1) Intentar buscar por campo "serial" (mayúsculas)
+        firestore.collection("equipos")
+            .whereEqualTo("serial", query)
+            .get()
+            .addOnSuccessListener { snap ->
+                if (!snap.isEmpty) {
+                    equipo = snap.documents.first().data
+                    cargando = false
+                } else {
+                    // 2) Si no encuentra por campo, buscar por ID del documento
+                    firestore.collection("equipos").document(query).get()
+                        .addOnSuccessListener { doc ->
+                            if (doc.exists()) {
+                                equipo = doc.data
+                            } else {
+                                notFound = true
+                            }
+                            cargando = false
+                        }
+                        .addOnFailureListener {
+                            notFound = true
+                            cargando = false
+                        }
+                }
+            }
+            .addOnFailureListener {
+                notFound = true
+                cargando = false
+            }
+    }
+
+    // UI
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(20.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Top
+    ) {
+        Text(
+            text = "Resultados del Informe",
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        when {
+            cargando -> CircularProgressIndicator()
+            notFound -> {
+                Text("No se encontró el equipo.", color = MaterialTheme.colorScheme.error)
+            }
+            equipo != null -> {
+                // Mostrar datos del equipo encontrado
+                Text("Serial: ${equipo!!["serial"]}", fontSize = 16.sp)
+                Text("Referencia: ${equipo!!["referencia"]}", fontSize = 16.sp)
+                Text("Tipo: ${equipo!!["tipo"]}", fontSize = 16.sp)
+                Text("Descripción: ${equipo!!["descripcion"]}", fontSize = 16.sp)
+                Text("Fecha Certificación: ${equipo!!["fechaCertificacion"]}", fontSize = 16.sp)
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Botón: navegar a Success con el código buscado (la generación real se hace ahí)
+                Button(
+                    onClick = {
+                        // encode para evitar problemas con espacios/caracteres
+                        val encoded = java.net.URLEncoder.encode(codigoBuscado, "UTF-8")
+                        navController.navigate("${ReportRoutes.SUCCESS}/$encoded")
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                ) {
+                    Text("Generar Informe", color = MaterialTheme.colorScheme.onPrimary)
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Button(
+                    onClick = { navController.popBackStack() },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
+                ) {
+                    Text("Atrás", color = MaterialTheme.colorScheme.onSecondary)
+                }
+            }
+        }
+    }
+}

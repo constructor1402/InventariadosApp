@@ -84,4 +84,9 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
+
+    // 📄 Librería para generar PDFs (iText 7)
+    implementation("com.itextpdf:itextpdf:5.5.13.3")
+
+
 }
