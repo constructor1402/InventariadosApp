@@ -23,6 +23,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.inventariadosapp.admin.consulta.navigation.ConsultRoutes
 import com.google.firebase.firestore.FirebaseFirestore
 import com.example.inventariadosapp.ui.theme.Kavoon
 
@@ -208,7 +209,14 @@ fun LoginScreen(navController: NavController) {
                                         when (rol) {
                                             "Admin" -> navController.navigate("panel_admin")
                                             "Topógrafo" -> navController.navigate("panel_topografo")
-                                            "Consulta" -> navController.navigate("panel_consulta")
+                                            "Consulta" ->
+                                                navController.navigate(ConsultRoutes.CONSULT_FLOW) {
+                                                    // 🚨 SOLUCIÓN: PopUp para borrar las pantallas de Login/Bienvenida
+                                                    // La ruta "bienvenida" es la que inicia la app.
+                                                    popUpTo("bienvenida") {
+                                                        inclusive = true // Borra también la pantalla "bienvenida"
+                                                    }
+                                                }
                                             else -> navController.navigate("bienvenida")
                                         }
                                     }
