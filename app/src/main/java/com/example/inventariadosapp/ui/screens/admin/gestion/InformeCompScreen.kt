@@ -1,13 +1,15 @@
 package com.example.inventariadosapp.ui.screens.admin
 
-import android.os.Environment
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
@@ -22,11 +24,12 @@ import kotlinx.coroutines.launch
 @Composable
 fun InformeCompScreen(
     adminNavController: NavController,
-    viewModel: InformeEquiposViewModel = viewModel()
+    viewModel: InformeEquiposViewModel = viewModel(LocalContext.current as androidx.activity.ComponentActivity)
 ) {
     val equipos by viewModel.equipos.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
+    val scrollState = rememberScrollState() // 👈 Scroll agregado
 
     Scaffold(
         modifier = Modifier
@@ -59,20 +62,19 @@ fun InformeCompScreen(
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .verticalScroll(scrollState) // 👈 Habilita desplazamiento vertical
                 .padding(padding)
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            // 📊 Tabla centrada
+            // 📊 Tabla centrada con los equipos filtrados
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f)
                     .background(Color.White, shape = MaterialTheme.shapes.medium)
                     .padding(12.dp),
                 contentAlignment = Alignment.Center
@@ -86,8 +88,30 @@ fun InformeCompScreen(
             Button(
                 onClick = {
                     coroutineScope.launch {
-                        val filePath = viewModel.generarInformePDFequipos(equipos)
-                        snackbarHostState.showSnackbar("PDF generado en: $filePath")
+                        val userData = viewModel.obtenerUsuarioActual()
+
+                        if (userData == null) {
+                            snackbarHostState.showSnackbar("No se encontró un usuario autenticado.")
+                            return@launch
+                        }
+
+                        val (usuarioId, correoUser) = userData
+                        val usuarioNombre = correoUser.substringBefore("@")
+
+                        // Generar el informe con los datos del usuario
+                        val filePath = viewModel.generarInformePDFequipos(
+                            equipos = equipos,
+                            usuarioNombre = usuarioNombre,
+                            usuarioCorreo = correoUser
+                        )
+
+                        if (!filePath.startsWith("Error")) {
+                            // Subir el informe a Firebase
+                            viewModel.guardarInformeEnFirebase(usuarioId, filePath, "equipos")
+                            snackbarHostState.showSnackbar("Informe generado y subido correctamente.")
+                        } else {
+                            snackbarHostState.showSnackbar(filePath)
+                        }
                     }
                 },
                 colors = ButtonDefaults.buttonColors(Color(0xFF6686E8)),
@@ -101,12 +125,10 @@ fun InformeCompScreen(
                     tint = Color.White
                 )
                 Spacer(Modifier.width(8.dp))
-                Text(
-                    "Generar informe",
-                    color = Color.White,
-                    fontFamily = Kavoon
-                )
+                Text("Generar informe", color = Color.White, fontFamily = Kavoon)
             }
+
+            Spacer(Modifier.height(40.dp))
         }
     }
 }

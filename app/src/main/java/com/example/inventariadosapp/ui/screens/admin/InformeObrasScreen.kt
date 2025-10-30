@@ -37,9 +37,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.inventariadosapp.R
+import com.example.inventariadosapp.screens.admin.gestion.Obra
 import com.example.inventariadosapp.ui.theme.Kavoon
 import kotlinx.coroutines.launch
 
@@ -47,10 +47,11 @@ import kotlinx.coroutines.launch
 @Composable
 fun InformeObrasScreen(
     adminNavController: NavController,
-    viewModel: InformeEquiposViewModel = viewModel()
+    viewModel: InformeEquiposViewModel,
+    onResultadosObtenidos: (List<Obra>) -> Unit
 ) {
     var nombreObra by remember { mutableStateOf("") }
-    val scope = rememberCoroutineScope()
+    val coroutineScope = rememberCoroutineScope()
 
     Scaffold(
         topBar = {
@@ -116,7 +117,7 @@ fun InformeObrasScreen(
                 onValueChange = { nombreObra = it },
                 placeholder = {
                     Text(
-                        "Opcional",
+                        "Nombre de la obra",
                         fontFamily = Kavoon,
                         fontStyle = FontStyle.Italic,
                         color = Color(0xFF8D8EB5),
@@ -139,9 +140,9 @@ fun InformeObrasScreen(
 
             Button(
                 onClick = {
-                    scope.launch {
+                    coroutineScope.launch {
                         viewModel.buscarObras(nombreObra)
-                        adminNavController.navigate("resultados_informesObra")
+                        onResultadosObtenidos(viewModel.obras.value)
                     }
                 },
                 colors = ButtonDefaults.buttonColors(colorResource(id = R.color.azul_admin)),

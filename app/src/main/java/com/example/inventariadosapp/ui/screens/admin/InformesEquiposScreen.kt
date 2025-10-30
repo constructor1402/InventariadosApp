@@ -9,6 +9,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
@@ -26,11 +27,12 @@ import kotlinx.coroutines.launch
 @Composable
 fun InformesEquiposScreen(
     adminNavController: NavController,
-    viewModel: InformeEquiposViewModel = viewModel()
+    viewModel: InformeEquiposViewModel = viewModel(LocalContext.current as androidx.activity.ComponentActivity)
 ) {
-    var codigoBusqueda by remember { mutableStateOf("") }
-    var tipoSeleccionado by remember { mutableStateOf("") }
-    val scope = rememberCoroutineScope()
+    var serial by remember { mutableStateOf("") }
+    var tipo by remember { mutableStateOf("") }
+    val coroutineScope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     Scaffold(
         topBar = {
@@ -97,8 +99,8 @@ fun InformesEquiposScreen(
             )
 
             TextField(
-                value = codigoBusqueda,
-                onValueChange = {codigoBusqueda = it},
+                value = serial,
+                onValueChange = {serial = it},
                 placeholder = {
                     Text(
                         "Opcional",
@@ -129,15 +131,14 @@ fun InformesEquiposScreen(
 
             // Dropdowns: Estado y Categoría
             DropdownTipo(
-                tipoSeleccionado = tipoSeleccionado,
-                onTypeChange = { tipoSeleccionado = it }
+                tipoSeleccionado = tipo,
+                onTypeChange = { tipo = it }
             )
 
-            // Botón Buscar
             Button(
                 onClick = {
-                    scope.launch {
-                        viewModel.buscarEquipos(codigoBusqueda, tipoSeleccionado)
+                    coroutineScope.launch {
+                        viewModel.buscarEquipos(serial, tipo)
                         adminNavController.navigate("resultados_informe")
                     }
                 },
@@ -161,10 +162,6 @@ fun InformesEquiposScreen(
                     modifier = Modifier.size(50.dp)
                 )
             }
-
-
-            Spacer(Modifier.height(12.dp))
-
         }
     }
 }
@@ -222,6 +219,3 @@ fun DropdownTipo(
         }
     }
 }
-
-
-
