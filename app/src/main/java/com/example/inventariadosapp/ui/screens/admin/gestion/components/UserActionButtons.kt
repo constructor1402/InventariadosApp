@@ -1,85 +1,76 @@
 package com.example.inventariadosapp.ui.screens.admin.gestion.components
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Save
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.inventariadosapp.ui.screens.admin.gestion.UserViewModel
-
+import com.example.inventariadosapp.R
+import com.example.inventariadosapp.ui.screens.admin.gestion.users.UserViewModel
+import com.example.inventariadosapp.ui.theme.Kavoon
 
 @Composable
 fun UserActionButtons(viewModel: UserViewModel) {
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         // 💾 Guardar
-        Button(
-            onClick = { viewModel.guardarUsuario() },
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50)), // verde
-            shape = MaterialTheme.shapes.medium,
-            modifier = Modifier
-                .fillMaxWidth(0.9f)
-                .height(50.dp)
-        ) {
-            Icon(Icons.Filled.Save, contentDescription = "Guardar", tint = Color.White)
-            Spacer(Modifier.width(8.dp))
-            Text(
-                text = "Guardar",
-                color = Color.White,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
+        StyledActionButton(
+            text = "Guardar",
+            color = Color(0xFF4CAF50),
+            icon = R.drawable.ic_save,
+            onClick = { viewModel.guardarUsuario() }
+        )
 
         // 🔍 Buscar
-        Button(
-            onClick = { viewModel.buscarUsuario() },
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1976D2)), // azul
-            shape = MaterialTheme.shapes.medium,
-            modifier = Modifier
-                .fillMaxWidth(0.9f)
-                .height(50.dp)
-        ) {
-            Icon(Icons.Default.Search, contentDescription = "Buscar", tint = Color.White)
-            Spacer(Modifier.width(8.dp))
-            Text(
-                text = "Buscar",
-                color = Color.White,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
+        StyledActionButton(
+            text = "Buscar",
+            color = Color(0xFF2196F3),
+            icon = R.drawable.ic_search,
+            onClick = { viewModel.buscarUsuario() }
+        )
 
         // 🗑️ Eliminar
-        Button(
-            onClick = { viewModel.eliminarUsuario() },
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE53935)), // rojo
-            shape = MaterialTheme.shapes.medium,
-            modifier = Modifier
-                .fillMaxWidth(0.9f)
-                .height(50.dp)
-        ) {
-            Icon(Icons.Default.Delete, contentDescription = "Eliminar", tint = Color.White)
-            Spacer(Modifier.width(8.dp))
-            Text(
-                text = "Eliminar",
-                color = Color.White,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
+        StyledActionButton(
+            text = "Eliminar",
+            color = Color(0xFFE53935),
+            icon = R.drawable.ic_delete,
+            onClick = { viewModel.eliminarUsuario() }
+        )
     }
 }
 
-
+@Composable
+fun StyledActionButton(text: String, color: Color, icon: Int, onClick: () -> Unit) {
+    Button(
+        onClick = onClick,
+        colors = ButtonDefaults.buttonColors(containerColor = color),
+        shape = RoundedCornerShape(16.dp),
+        modifier = Modifier
+            .fillMaxWidth(0.8f)
+            .height(52.dp)
+            .shadow(elevation = 6.dp, shape = RoundedCornerShape(16.dp))
+    ) {
+        Icon(
+            painter = painterResource(id = icon),
+            contentDescription = text,
+            tint = Color.White,
+            modifier = Modifier.size(20.dp)
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+            text = text,
+            color = Color.White,
+            fontSize = 18.sp,
+            fontFamily = Kavoon
+        )
+    }
+}

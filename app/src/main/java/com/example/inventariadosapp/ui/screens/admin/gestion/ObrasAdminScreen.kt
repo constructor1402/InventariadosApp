@@ -22,7 +22,7 @@ import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.inventariadosapp.R
-import com.example.inventariadosapp.ui.screens.admin.gestion.components.ActionButton
+import com.example.inventariadosapp.ui.screens.admin.gestion.components.ActionButtons
 import com.example.inventariadosapp.ui.screens.admin.gestion.components.CustomTextField
 import com.example.inventariadosapp.ui.theme.Kavoon
 
@@ -91,15 +91,12 @@ fun ObrasAdminScreen(navController: NavController) {
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    ActionButton("Guardar", Color(0xFF4CAF50), R.drawable.ic_check_circle) {
-                        viewModel.guardarObra()
-                    }
-                    ActionButton("Buscar", Color(0xFF2196F3), R.drawable.ic_search) {
-                        viewModel.buscarObra()
-                    }
-                    ActionButton("Eliminar", Color(0xFFE53935), R.drawable.ic_delete) {
-                        viewModel.eliminarObra()
-                    }
+                    ActionButtons(
+                        onGuardar = { viewModel.guardarObra() },
+                        onBuscar = { viewModel.buscarObra() },
+                        onEliminar = { viewModel.eliminarObra() }
+                    )
+
                 }
 
                 // Mensaje dinámico
