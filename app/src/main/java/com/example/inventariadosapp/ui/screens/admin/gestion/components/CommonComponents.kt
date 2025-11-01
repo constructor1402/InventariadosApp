@@ -4,104 +4,66 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.inventariadosapp.R
 import com.example.inventariadosapp.ui.theme.Kavoon
 
-// 🔹 Campo de texto reutilizable (idéntico para Obras y Equipos)
 @Composable
 fun CustomTextField(
     label: String,
     placeholder: String,
     value: String,
     onValueChange: (String) -> Unit,
-    readOnly: Boolean = false
+    modifier: Modifier = Modifier
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 6.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
+    Column(modifier = modifier.fillMaxWidth(0.85f)) {
         Text(
             text = label,
-            color = colorResource(id = R.color.texto_principal),
-            fontFamily = Kavoon,
             fontSize = 18.sp,
-            modifier = Modifier.padding(bottom = 4.dp)
+            fontWeight = FontWeight.Bold,
+            fontFamily = Kavoon,
+            color = Color.Black,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
         )
 
-        OutlinedTextField(
+        Spacer(modifier = Modifier.height(4.dp))
+
+        TextField(
             value = value,
             onValueChange = onValueChange,
-            readOnly = readOnly,
             placeholder = {
                 Text(
                     text = placeholder,
-                    color = Color.Gray,
-                    fontSize = 14.sp,
+                    color = Color(0xFF6D6D6D),
                     fontFamily = Kavoon,
-                    textAlign = TextAlign.Center
+                    fontSize = 14.sp
                 )
             },
-            textStyle = androidx.compose.ui.text.TextStyle(
-                color = Color.Black,
-                fontSize = 16.sp,
-                fontFamily = Kavoon,
-                textAlign = TextAlign.Center
-            ),
-            shape = RoundedCornerShape(16.dp),
             colors = TextFieldDefaults.colors(
-                focusedContainerColor = Color(0xFFEDEDED),
-                unfocusedContainerColor = Color(0xFFEDEDED),
-                focusedIndicatorColor = colorResource(id = R.color.boton_principal),
-                unfocusedIndicatorColor = Color.Gray,
-                cursorColor = colorResource(id = R.color.boton_principal)
+                focusedContainerColor = Color(0xFFBEBFF5),
+                unfocusedContainerColor = Color(0xFFBEBFF5),
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+                cursorColor = Color.Black
             ),
-            modifier = Modifier
-                .fillMaxWidth(0.9f)
-                .height(52.dp)
+            shape = RoundedCornerShape(12.dp),
+            textStyle = TextStyle(
+                color = Color.Black,
+                fontFamily = Kavoon,
+                fontSize = 16.sp
+            ),
+            modifier = Modifier.fillMaxWidth()
         )
     }
 }
 
-// 🔹 Botón de acción reutilizable (Guardar, Buscar, Eliminar)
-@Composable
-fun ActionButton(text: String, color: Color, icon: Int, onClick: () -> Unit) {
-    Button(
-        onClick = onClick,
-        colors = ButtonDefaults.buttonColors(containerColor = color),
-        shape = RoundedCornerShape(12.dp),
-        modifier = Modifier
-            .width(156.dp)
-            .height(45.dp)
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Text(
-                text = text,
-                color = Color.White,
-                fontSize = 17.sp,
-                fontFamily = Kavoon,
-                modifier = Modifier.padding(end = 6.dp)
-            )
-            Icon(
-                painter = painterResource(id = icon),
-                contentDescription = text,
-                tint = Color.White,
-                modifier = Modifier.size(20.dp)
-            )
-        }
-    }
-}
+
+
 

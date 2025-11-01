@@ -1,4 +1,4 @@
-package com.example.inventariadosapp.ui.screens.Topografo.assign.models // o .components.models
+package com.example.inventariadosapp.ui.screens.Topografo.assign.models
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -10,13 +10,13 @@ import androidx.navigation.NavHostController
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.util.Date
 
+// 🧩 Modelo de datos del equipo
 data class EquipoAsignado(
     val serial: String = "",
     val estado: String = "",
@@ -25,23 +25,21 @@ data class EquipoAsignado(
     val referencia: String = ""
 )
 
-// Data class para el log de historial
+// 🧩 Modelo de datos del historial de asignación
 data class AsignacionLog(
-    // Datos del Equipo
     val serial: String,
     val tipo: String,
     val referencia: String,
-    // Datos de la Asignación
     val obraAsignada: String,
     val fechaAsignacion: Timestamp,
     val estadoPrevio: String,
-    // Datos del Usuario (Topógrafo) - LOS AÑADIREMOS DESPUÉS
     val usuarioUid: String,
     val usuarioEmail: String,
     val usuarioNombre: String
 )
 
 class TopografoAssignViewModel : ViewModel() {
+
     private val db = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
 
@@ -58,19 +56,17 @@ class TopografoAssignViewModel : ViewModel() {
         cargarObras()
     }
 
-    //  👇 --- ¡FUNCIÓN AÑADIDA! ---
-    // Esto arregla el error en GestionTopografoScreen
+    // 🔹 Limpia la selección actual
     fun clearSelectedEquipo() {
         selectedEquipo = EquipoAsignado()
     }
 
+    // 🔹 Carga todas las obras disponibles
     private fun cargarObras() {
         viewModelScope.launch {
             try {
                 val snapshot = db.collection("obras").get().await()
-                val obras = snapshot.documents.mapNotNull { doc ->
-                    doc.getString("nombreObra")
-                }
+                val obras = snapshot.documents.mapNotNull { it.getString("nombreObra") }
                 listaDeObras.clear()
                 listaDeObras.addAll(obras)
             } catch (e: Exception) {
@@ -79,20 +75,23 @@ class TopografoAssignViewModel : ViewModel() {
         }
     }
 
-    //  👇 --- ¡NOMBRE ESTANDARIZADO! ---
+    // 🔹 Obtiene los datos del equipo según el serial escaneado
     fun fetchEquipoData(serial: String, onComplete: (Boolean) -> Unit = {}) {
         if (serial.isBlank()) {
             onComplete(false)
             return
         }
+
         isLoading = true
         val upperCaseSerial = serial.uppercase()
+
         viewModelScope.launch {
             try {
                 val querySnapshot = db.collection("equipos")
                     .whereEqualTo("serial", upperCaseSerial)
                     .get()
                     .await()
+
                 if (!querySnapshot.isEmpty) {
                     val doc = querySnapshot.documents[0]
                     selectedEquipo = EquipoAsignado(
@@ -102,15 +101,16 @@ class TopografoAssignViewModel : ViewModel() {
                         tipo = doc.getString("tipo") ?: "Sin tipo",
                         referencia = doc.getString("referencia") ?: "Sin referencia"
                     )
+                    _uiEvent.emit("Equipo encontrado ✅")
                     onComplete(true)
                 } else {
                     selectedEquipo = EquipoAsignado(serial = upperCaseSerial)
-                    _uiEvent.emit("Serial no encontrado")
+                    _uiEvent.emit("Serial no encontrado en la base de datos ❌")
                     onComplete(false)
                 }
             } catch (e: Exception) {
                 selectedEquipo = EquipoAsignado(serial = upperCaseSerial)
-                _uiEvent.emit("Error de red: ${e.message}")
+                _uiEvent.emit("Error al obtener datos: ${e.message}")
                 onComplete(false)
             } finally {
                 isLoading = false
@@ -118,10 +118,12 @@ class TopografoAssignViewModel : ViewModel() {
         }
     }
 
+    // 🔹 Cambia la obra seleccionada
     fun onObraChange(value: String) {
         selectedEquipo = selectedEquipo.copy(obra = value)
     }
 
+    // 🔹 Guarda la asignación del equipo y registra el historial
     fun guardarAsignacion(navController: NavHostController) {
         val currentUser = auth.currentUser
         if (currentUser == null) {
@@ -130,23 +132,31 @@ class TopografoAssignViewModel : ViewModel() {
         }
 
         if (selectedEquipo.serial.isEmpty() || selectedEquipo.obra.isEmpty() || selectedEquipo.obra == "Seleccione La Obra") {
-            viewModelScope.launch { _uiEvent.emit("Error: Faltan datos") }
+            viewModelScope.launch { _uiEvent.emit("Error: Faltan datos del equipo u obra.") }
             return
         }
+
         if (selectedEquipo.estado.equals("Asignado", ignoreCase = true)) {
-            viewModelScope.launch { _uiEvent.emit("Este equipo ya está asignado") }
+            viewModelScope.launch { _uiEvent.emit("⚠️ Este equipo ya está asignado.") }
             return
         }
 
         isLoading = true
         viewModelScope.launch {
             try {
-                // 1. Buscar el nombre del usuario
-                val userDoc = db.collection("usuarios").document(currentUser.uid).get().await()
-                val userName = userDoc.getString("nombreCompleto") ?: currentUser.email ?: "Usuario Desconocido"
-                val userEmail = userDoc.getString("correoElectronico") ?: currentUser.email ?: "Sin Email"
+                // 🔹 Buscar usuario por UID o correo electrónico
+                val userQuery = db.collection("usuarios")
+                    .whereEqualTo("correoElectronico", currentUser.email)
+                    .get()
+                    .await()
 
-                // 2. Crear el objeto de Log
+                val userDoc = if (!userQuery.isEmpty) userQuery.documents.first() else
+                    db.collection("usuarios").document(currentUser.uid).get().await()
+
+                val userName = userDoc?.getString("nombreCompleto") ?: currentUser.email ?: "Usuario desconocido"
+                val userEmail = userDoc?.getString("correoElectronico") ?: currentUser.email ?: "Sin email"
+
+                // 🔹 Crear registro de historial
                 val log = AsignacionLog(
                     serial = selectedEquipo.serial,
                     tipo = selectedEquipo.tipo,
@@ -159,12 +169,12 @@ class TopografoAssignViewModel : ViewModel() {
                     usuarioNombre = userName
                 )
 
-                // 3. Guardar el log
+                // 🔹 Guardar historial
                 db.collection("asignaciones")
                     .add(log)
                     .await()
 
-                // 4. Actualizar el equipo
+                // 🔹 Actualizar estado del equipo
                 db.collection("equipos")
                     .document(selectedEquipo.serial)
                     .update(
@@ -175,12 +185,12 @@ class TopografoAssignViewModel : ViewModel() {
                     )
                     .await()
 
-                _uiEvent.emit("¡Asignado correctamente!")
-                clearSelectedEquipo() // Limpiamos el VM
+                _uiEvent.emit("✅ Equipo asignado correctamente")
+                clearSelectedEquipo()
                 navController.popBackStack()
 
             } catch (e: Exception) {
-                _uiEvent.emit("Error al guardar: ${e.message}")
+                _uiEvent.emit("Error al guardar la asignación: ${e.message}")
             } finally {
                 isLoading = false
             }
