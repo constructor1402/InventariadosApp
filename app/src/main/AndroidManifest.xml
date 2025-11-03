@@ -2,16 +2,15 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Permisos necesarios -->
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.INTERNET" />
 
-    <!-- Recomendado para CameraX -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" />
+
     <uses-feature
         android:name="android.hardware.camera"
         android:required="false" />
 
-    <!-- IMPORTANTE: habilita orientación fija si usas PreviewView -->
     <uses-feature
         android:name="android.hardware.camera.autofocus"
         android:required="false" />
@@ -26,6 +25,16 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.InventariadosApp"
         tools:targetApi="31">
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.example.inventariadosapp.provider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/filepaths" />
+        </provider>
 
         <activity
             android:name=".MainActivity"

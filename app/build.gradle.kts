@@ -91,8 +91,11 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
+
     // Storage Firebase
     implementation("com.google.firebase:firebase-storage:20.3.0")
     implementation("com.google.firebase:firebase-firestore:24.11.1")
+    implementation("com.itextpdf:itextg:5.5.10")
+
 }
 
