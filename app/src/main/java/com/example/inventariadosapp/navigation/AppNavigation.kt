@@ -40,8 +40,9 @@ fun AppNavigation() {
         }
 
         // 👇 Panel administrador (flujo interno)
-        composable("panel_admin") {
-            AdminNavigation(navController) // ✅ pasamos el controlador principal
+        composable("panel_admin/{userCorreo}") { backStackEntry ->
+            val userCorreo = backStackEntry.arguments?.getString("userCorreo") ?: ""
+            AdminNavigation(navController, userCorreo) // ✅ pasamos el controlador principal
         }
 
         // Otros roles

@@ -20,7 +20,7 @@ import com.example.inventariadosapp.R
 import com.example.inventariadosapp.ui.theme.Kavoon
 
 @Composable
-fun InformesAdminScreen(adminNavController: NavController) {
+fun InformesAdminScreen(adminNavController: NavController,userCorreo: String) {
     Scaffold { padding ->
         Box(
             modifier = Modifier
@@ -30,7 +30,7 @@ fun InformesAdminScreen(adminNavController: NavController) {
         ) {
             // 🔙 Flecha hacia atrás que vuelve al inicio
             IconButton(
-                onClick = { adminNavController.navigate("inicio_admin") },
+                onClick = { adminNavController.navigate("inicio_admin/$userCorreo") },
                 modifier = Modifier
                     .align(Alignment.TopStart)
                     .padding(start = 16.dp, top = 12.dp)
@@ -56,14 +56,14 @@ fun InformesAdminScreen(adminNavController: NavController) {
                 BotonInforme(
                     texto = "Informe de equipos",
                     colorFondo = Color(0xFF3949AB),
-                    onClick = { adminNavController.navigate("informe_equipos") }
+                    onClick = { adminNavController.navigate("informe_equipos/$userCorreo") }
                 )
 
                 // 🔹 Botón 2: Informe de Obras
                 BotonInforme(
                     texto = "Informe de obras",
                     colorFondo = Color(0xFF7B1FA2),
-                    onClick = { adminNavController.navigate("informe_Obras") }
+                    onClick = { adminNavController.navigate("informe_Obras/$userCorreo") }
                 )
 
                 // 🔹 Botón 3: Informe de Usuarios

@@ -48,6 +48,7 @@ import kotlinx.coroutines.launch
 fun InformeObrasScreen(
     adminNavController: NavController,
     viewModel: InformeEquiposViewModel,
+    userCorreo: String,
     onResultadosObtenidos: (List<Obra>) -> Unit
 ) {
     var nombreObra by remember { mutableStateOf("") }
@@ -72,7 +73,7 @@ fun InformeObrasScreen(
                 },
                 navigationIcon = {
                     IconButton(
-                        onClick = { adminNavController.navigate("informes_admin") },
+                        onClick = { adminNavController.navigate("informes_admin/$userCorreo") },
                         modifier = Modifier.padding(start = 8.dp)
                     ) {
                         Icon(

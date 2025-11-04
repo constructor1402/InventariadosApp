@@ -99,7 +99,7 @@ fun InformeCompUsers(
                             onClick = {
                                 usuarioSeleccionado = usuario
                                 coroutineScope.launch {
-                                    viewModel.cargarInformesUsuario(usuario.correo)
+                                   // viewModel.cargarInformesUsuarioActual()
                                 }
                             },
                             modifier = Modifier

@@ -27,12 +27,13 @@ import kotlinx.coroutines.launch
 @Composable
 fun InformesEquiposScreen(
     adminNavController: NavController,
+    userCorreo: String,
     viewModel: InformeEquiposViewModel = viewModel(LocalContext.current as androidx.activity.ComponentActivity)
+
 ) {
     var serial by remember { mutableStateOf("") }
     var tipo by remember { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
-    val snackbarHostState = remember { SnackbarHostState() }
 
     Scaffold(
         topBar = {
@@ -53,7 +54,7 @@ fun InformesEquiposScreen(
                 },
                 navigationIcon = {
                     IconButton(
-                        onClick = { adminNavController.navigate("informes_admin") },
+                        onClick = { adminNavController.navigate("informes_admin/$userCorreo") },
                         modifier = Modifier.padding(start = 8.dp)
                     ) {
                         Icon(
@@ -139,7 +140,7 @@ fun InformesEquiposScreen(
                 onClick = {
                     coroutineScope.launch {
                         viewModel.buscarEquipos(serial, tipo)
-                        adminNavController.navigate("resultados_informe")
+                        adminNavController.navigate("resultados_informe/$userCorreo")
                     }
                 },
                 colors = ButtonDefaults.buttonColors(colorResource(id = R.color.azul_admin)),

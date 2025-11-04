@@ -17,12 +17,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.inventariadosapp.R
+import com.example.inventariadosapp.screens.admin.DashboardCard
 import com.example.inventariadosapp.ui.theme.Kavoon
 
 @Composable
 fun InicioAdminScreen(
     adminNavController: NavController,
-    mainNavController: NavController
+    mainNavController: NavController,
+    userCorreo: String
 ) {
     val darkTheme = isSystemInDarkTheme()
 
@@ -30,7 +32,7 @@ fun InicioAdminScreen(
         bottomBar = {
             val bgColor = if (darkTheme) Color(0xFF2C2C2C) else Color(0xFFF5F5F5)
             val textColor = if (darkTheme) Color.White else Color.Black
-            BottomNavigationBar(adminNavController, "inicio_admin", bgColor, textColor)
+            BottomNavigationBar(adminNavController, "inicio_admin/$userCorreo", bgColor, textColor,userCorreo)
         }
     ) { padding ->
         Box(
@@ -129,7 +131,8 @@ fun BottomNavigationBar(
     navController: NavController,
     currentRoute: String,
     bgColor: Color,
-    textColor: Color
+    textColor: Color,
+    userCorreo: String
 ) {
     Surface(
         color = bgColor,
@@ -150,8 +153,8 @@ fun BottomNavigationBar(
             BottomNavItem(
                 icon = R.drawable.ic_home,
                 label = "Inicio",
-                isSelected = currentRoute == "inicio_admin",
-                onClick = { if (currentRoute != "inicio_admin") navController.navigate("inicio_admin") },
+                isSelected = currentRoute == "inicio_admin/$userCorreo",
+                onClick = { if (currentRoute != "inicio_admin/$userCorreo") navController.navigate("inicio_admin/$userCorreo") },
                 textColor = textColor
             )
             BottomNavItem(
@@ -164,8 +167,8 @@ fun BottomNavigationBar(
             BottomNavItem(
                 icon = R.drawable.ic_informes,
                 label = "Informes",
-                isSelected = currentRoute == "informes_admin",
-                onClick = { if (currentRoute != "informes_admin") navController.navigate("informes_admin") },
+                isSelected = currentRoute.startsWith("informes_admin"),
+                onClick = { if (currentRoute != "informes_admin/$userCorreo" ) navController.navigate("informes_admin/$userCorreo") },
                 textColor = textColor
             )
         }

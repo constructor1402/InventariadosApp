@@ -2,6 +2,7 @@ package com.example.inventariadosapp.ui.screens.admin
 
 
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -28,7 +29,8 @@ import kotlinx.coroutines.launch
 fun InformeCompObraScreen(
     adminNavController: NavController,
     obrasFiltradas: List<Obra>,
-    viewModel: InformeEquiposViewModel
+    viewModel: InformeEquiposViewModel,
+    userCorreo: String
 ) {
     val coroutineScope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -50,7 +52,7 @@ fun InformeCompObraScreen(
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = { adminNavController.navigate("informes_admin") }) {
+                    IconButton(onClick = { adminNavController.navigate("informes_admin/$userCorreo") }) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_arrow_back),
                             contentDescription = "Volver",
@@ -80,7 +82,7 @@ fun InformeCompObraScreen(
                 fontSize = 15.sp
             )
 
-            viewModel.TablaObrasFirebase(obrasFiltradas)
+            TablaObrasFirebase(obrasFiltradas)
 
             Spacer(modifier = Modifier.height(20.dp))
 
@@ -88,17 +90,24 @@ fun InformeCompObraScreen(
             Button(
                 onClick = {
                     coroutineScope.launch {
-                        val usuarioActual = viewModel.obtenerUsuarioActual()
-                        if (usuarioActual != null) {
-                            val (uid, correo) = usuarioActual
-                            val nombre = correo.substringBefore("@")
-                            val path = viewModel.generarInformePDFobras(obrasFiltradas, nombre, correo)
-                            viewModel.guardarInformeEnFirebase(uid, path, "Informe de Obras")
-                            snackbarHostState.showSnackbar("Informe generado y subido correctamente.")
+                        if (userCorreo.isBlank()) {
+                            snackbarHostState.showSnackbar("Error: usuario no identificado.")
+                            return@launch
+                        }
+
+                        val filePath = viewModel.generarInformePDFobras(
+                            obras = obrasFiltradas,
+                            userCorreo = userCorreo
+                        )
+
+                        if (!filePath.startsWith("Error")) {
+                            viewModel.guardarInformeEnFirebase(filePath, tipo = "obras", userCorreo)
+                            snackbarHostState.showSnackbar("Informe generado y subido.")
                         } else {
-                            snackbarHostState.showSnackbar("No se encontró un usuario autenticado.")
+                            snackbarHostState.showSnackbar(filePath)
                         }
                     }
+
                 },
                 colors = ButtonDefaults.buttonColors(Color(0xFF6686E8)),
                 modifier = Modifier
@@ -121,4 +130,81 @@ fun InformeCompObraScreen(
         }
     }
 }
+@Composable
+fun TablaObrasFirebase(obras: List<Obra>) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp)
+    ) {
+        // 🧭 Encabezado de la tabla
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color(0xFF6686E8)) // azul suave
+                .padding(vertical = 10.dp, horizontal = 6.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            listOf("ID Obra", "Nombre Obra", "Ubicación", "Cliente").forEach {
+                Text(
+                    text = it,
+                    color = Color.White,
+                    fontFamily = Kavoon,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.weight(1f),
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(6.dp))
+
+        // 📋 Filas de datos
+        obras.forEachIndexed { index, eq ->
+            val fondoFila = if (index % 2 == 0) Color(0xFFEFF1F9) else Color.White
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(fondoFila)
+                    .padding(vertical = 8.dp, horizontal = 6.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = eq.idObra,
+                    fontFamily = Kavoon,
+                    fontSize = 12.sp,
+                    modifier = Modifier.weight(1f),
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    text = eq.nombreObra,
+                    fontFamily = Kavoon,
+                    fontSize = 12.sp,
+                    modifier = Modifier.weight(1f),
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    text = eq.ubicacion,
+                    fontFamily = Kavoon,
+                    fontSize = 12.sp,
+                    modifier = Modifier.weight(1f),
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    text = eq.clienteNombre,
+                    fontFamily = Kavoon,
+                    fontSize = 12.sp,
+                    modifier = Modifier.weight(1f),
+                    textAlign = TextAlign.Center
+                )
+            }
+
+            Spacer(modifier = Modifier.height(6.dp))
+        }
+    }
+}
+
 

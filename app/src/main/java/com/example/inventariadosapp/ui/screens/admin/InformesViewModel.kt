@@ -22,7 +22,6 @@ import com.example.inventariadosapp.ui.admin.users_DiegoFaj.UserRepository
 import com.example.inventariadosapp.ui.admin.users_DiegoFaj.UserUiState
 import com.example.inventariadosapp.ui.screens.admin.gestion.Equipo
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -30,11 +29,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.io.File
 import java.io.FileOutputStream
-import java.text.SimpleDateFormat
-import java.util.*
 import androidx.compose.ui.graphics.Color
-
-
 class InformeEquiposViewModel : ViewModel() {
 
     private val db = FirebaseFirestore.getInstance()
@@ -153,57 +148,98 @@ class InformeEquiposViewModel : ViewModel() {
             _users.value = emptyList()
         }
     }
-    suspend fun cargarInformesUsuario(correoUsuario: String) {
-        try {
-            val snapshot = db.collection("informes")
-                .whereEqualTo("usuarioCorreo", correoUsuario)
-                .get()
-                .await()
-
-            _informesUsuario.value = snapshot.documents.map { it.data ?: emptyMap() }
-        } catch (e: Exception) {
-            android.util.Log.e("Firebase", "Error cargando informes del usuario", e)
-            _informesUsuario.value = emptyList()
-        }
-    }
-    fun obtenerUsuarioActual(): Pair<String, String>? {
-        val auth = com.google.firebase.auth.FirebaseAuth.getInstance()
-        val user = auth.currentUser
-        return if (user != null) {
-            val uid = user.uid
-            val correo = user.email ?: "Sin correo"
-            Pair(uid, correo)
-        } else {
-            null
-        }
-    }
 
     suspend fun generarInformePDFequipos(
         equipos: List<Equipo>,
-        usuarioNombre: String,
         usuarioCorreo: String
     ): String {
         val pdfDocument = android.graphics.pdf.PdfDocument()
-        val pageInfo = android.graphics.pdf.PdfDocument.PageInfo.Builder(595, 842, 1).create()
-        val page = pdfDocument.startPage(pageInfo)
-        val canvas = page.canvas
+        var pageNumber = 1
+        var pageInfo = android.graphics.pdf.PdfDocument.PageInfo.Builder(595, 842, pageNumber).create()
+        var page = pdfDocument.startPage(pageInfo)
+        var canvas = page.canvas
 
-        val paint = android.graphics.Paint().apply {
-            textSize = 14f
+        val titlePaint = android.graphics.Paint().apply {
+            textSize = 18f
             isFakeBoldText = true
         }
 
+        val headerPaint = android.graphics.Paint().apply {
+            textSize = 14f
+            isFakeBoldText = true
+            color = android.graphics.Color.rgb(102, 134, 232) // Azul similar al de la app
+        }
+
+        val cellPaint = android.graphics.Paint().apply {
+            textSize = 12f
+        }
+
+        // 🔹 Márgenes y separaciones
+        val startX = 40f
         var y = 60
-        canvas.drawText("Informe de Equipos", 200f, 40f, paint)
 
-        paint.isFakeBoldText = false
-        canvas.drawText("Generado por: $usuarioNombre ($usuarioCorreo)", 40f, (y + 20).toFloat(), paint)
-        y += 60
+        // 🔹 Título y usuario
+        canvas.drawText("Informe de Equipos", 200f, 40f, titlePaint)
+        canvas.drawText("Generado por:", startX, y.toFloat(), cellPaint)
+        y += 20
+        canvas.drawText(" $usuarioCorreo", startX, y.toFloat(), cellPaint)
+        y += 30 // Separación adicional
 
+        // 🔹 Encabezado de tabla
+        val headers = listOf("Serial", "Referencia", "Tipo", "Fecha")
+        val colWidth = 130f
+        var x = startX
+
+        headers.forEach {
+            canvas.drawText(it, x, y.toFloat(), headerPaint)
+            x += colWidth
+        }
+
+        y += 25
+
+        // 🔹 Filas de datos
         equipos.forEachIndexed { index, equipo ->
-            val text = "${index + 1}. ${equipo.serial} | ${equipo.referencia} | ${equipo.tipo} | ${equipo.fechaCertificacion}"
-            canvas.drawText(text, 40f, y.toFloat(), paint)
-            y += 25
+            // Si llega al final de la página → nueva
+            if (y > 800) {
+                pdfDocument.finishPage(page)
+                pageNumber++
+                pageInfo = android.graphics.pdf.PdfDocument.PageInfo.Builder(595, 842, pageNumber).create()
+                page = pdfDocument.startPage(pageInfo)
+                canvas = page.canvas
+                y = 60
+
+                canvas.drawText("Informe de Equipos (cont.)", 200f, 40f, titlePaint)
+                y += 30
+                x = startX
+                headers.forEach {
+                    canvas.drawText(it, x, y.toFloat(), headerPaint)
+                    x += colWidth
+                }
+                y += 25
+            }
+
+            // Alternar color de fondo en filas
+            val bgPaint = android.graphics.Paint().apply {
+                color = if (index % 2 == 0) android.graphics.Color.rgb(247, 248, 252)
+                else android.graphics.Color.WHITE
+                style = android.graphics.Paint.Style.FILL
+            }
+
+            // Dibujar fondo de fila
+            canvas.drawRect(startX - 10, (y - 15).toFloat(), 560f, (y + 10).toFloat(), bgPaint)
+
+            // Dibujar datos
+            x = startX
+            listOf(
+                equipo.serial,
+                equipo.referencia,
+                equipo.tipo,
+                equipo.fechaCertificacion
+            ).forEach {
+                canvas.drawText(it, x, y.toFloat(), cellPaint)
+                x += colWidth
+            }
+            y += 22
         }
 
         pdfDocument.finishPage(page)
@@ -222,36 +258,134 @@ class InformeEquiposViewModel : ViewModel() {
     }
 
 
+
     suspend fun generarInformePDFobras(
         obras: List<Obra>,
-        usuarioNombre: String,
-        usuarioCorreo: String
+        userCorreo: String
     ): String {
         val pdfDocument = PdfDocument()
-        val pageInfo = PdfDocument.PageInfo.Builder(595, 842, 1).create()
-        val page = pdfDocument.startPage(pageInfo)
-        val canvas = page.canvas
+        var pageNumber = 1
 
-        val paint = android.graphics.Paint().apply {
-            textSize = 14f
+        // 📄 Tamaño A4 horizontal (842x595)
+        var pageInfo = PdfDocument.PageInfo.Builder(842, 595, pageNumber).create()
+        var page = pdfDocument.startPage(pageInfo)
+        var canvas = page.canvas
+
+        // 🎨 Estilos
+        val titlePaint = android.graphics.Paint().apply {
+            textSize = 20f
             isFakeBoldText = true
+            textAlign = android.graphics.Paint.Align.CENTER
         }
 
-        var y = 60
-        canvas.drawText("Informe de Obras", 200f, 40f, paint)
+        val subtitlePaint = android.graphics.Paint().apply {
+            textSize = 12f
+            textAlign = android.graphics.Paint.Align.CENTER
+            color = android.graphics.Color.DKGRAY
+        }
 
-        paint.isFakeBoldText = false
-        canvas.drawText("Generado por: $usuarioNombre ($usuarioCorreo)", 40f, (y + 20).toFloat(), paint)
-        y += 60
+        val headerPaint = android.graphics.Paint().apply {
+            textSize = 14f
+            isFakeBoldText = true
+            color = android.graphics.Color.WHITE
+            textAlign = android.graphics.Paint.Align.CENTER
+        }
 
+        val cellPaint = android.graphics.Paint().apply {
+            textSize = 12f
+            textAlign = android.graphics.Paint.Align.CENTER
+        }
+
+        val idPaint = android.graphics.Paint().apply {
+            textSize = 11f
+            textAlign = android.graphics.Paint.Align.CENTER
+            color = android.graphics.Color.rgb(120, 120, 120)
+        }
+
+        val bgHeaderPaint = android.graphics.Paint().apply {
+            color = android.graphics.Color.rgb(102, 134, 232)
+        }
+
+        val bgRowEven = android.graphics.Paint().apply {
+            color = android.graphics.Color.rgb(239, 241, 249)
+        }
+
+        val bgRowOdd = android.graphics.Paint().apply {
+            color = android.graphics.Color.WHITE
+        }
+
+        val linePaint = android.graphics.Paint().apply {
+            color = android.graphics.Color.LTGRAY
+            strokeWidth = 1f
+        }
+
+        // 📐 Márgenes y ancho total
+        val left = 40f
+        val right = 802f
+        var y = 80f
+
+        // 🧭 Título centrado con más espacio entre título y correo
+        canvas.drawText("Informe de Obras", 421f, 60f, titlePaint)
+        canvas.drawText("Generado para el usuario: $userCorreo", 421f, 85f, subtitlePaint)
+        y = 115f // 🔹 empezamos la tabla un poco más abajo
+
+        // 🧱 Encabezado
+        val columnWidths = listOf(120f, 250f, 200f, 170f) // más espacio horizontal
+        val headers = listOf("ID Obra", "Nombre Obra", "Ubicación", "Cliente")
+        val rowHeight = 28f
+
+        var x = left
+        canvas.drawRect(left, y - 18, right, y + rowHeight, bgHeaderPaint)
+        headers.forEachIndexed { i, header ->
+            val cellCenter = x + columnWidths[i] / 2
+            canvas.drawText(header, cellCenter, y + 3, headerPaint)
+            x += columnWidths[i]
+        }
+        y += rowHeight + 10
+
+        // 📋 Filas
         obras.forEachIndexed { index, obra ->
-            val text = "${index + 1}. ${obra.idObra} | ${obra.nombreObra} | ${obra.ubicacion} | ${obra.clienteNombre}"
-            canvas.drawText(text, 40f, y.toFloat(), paint)
-            y += 25
+            val bgPaint = if (index % 2 == 0) bgRowEven else bgRowOdd
+
+            // Nueva página si se llena el espacio
+            if (y + rowHeight > 560f) {
+                pdfDocument.finishPage(page)
+                pageNumber++
+                pageInfo = PdfDocument.PageInfo.Builder(842, 595, pageNumber).create()
+                page = pdfDocument.startPage(pageInfo)
+                canvas = page.canvas
+                y = 80f
+                canvas.drawText("Informe de Obras (cont.)", 421f, 50f, titlePaint)
+            }
+
+            // Fondo fila
+            canvas.drawRect(left, y - 15, right, y + rowHeight, bgPaint)
+
+            // Contenido
+            val idCorto = if (obra.idObra.length > 10) obra.idObra.take(10) + "..." else obra.idObra
+            val values = listOf(
+                idCorto,
+                obra.nombreObra,
+                obra.ubicacion,
+                obra.clienteNombre
+            )
+
+            x = left
+            values.forEachIndexed { i, text ->
+                val cellCenter = x + columnWidths[i] / 2
+                val paintToUse = if (i == 0) idPaint else cellPaint
+                canvas.drawText(text, cellCenter, y + 3, paintToUse)
+                x += columnWidths[i]
+            }
+
+            // Línea separadora
+            canvas.drawLine(left, y + rowHeight, right, y + rowHeight, linePaint)
+            y += rowHeight + 10
         }
 
         pdfDocument.finishPage(page)
 
+        // 💾 Guardar
         return try {
             val downloads = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
             val file = File(downloads, "Informe_Obras_${System.currentTimeMillis()}.pdf")
@@ -265,22 +399,27 @@ class InformeEquiposViewModel : ViewModel() {
         }
     }
 
-    suspend fun guardarInformeEnFirebase(usuarioId: String, filePath: String, tipo: String) {
+
+
+
+
+
+    suspend fun guardarInformeEnFirebase(filePath: String, tipo: String, userCorreo: String) {
         val storage = com.google.firebase.storage.FirebaseStorage.getInstance()
         val db = com.google.firebase.firestore.FirebaseFirestore.getInstance()
 
         try {
             val file = java.io.File(filePath)
             val fileUri = android.net.Uri.fromFile(file)
-            val storageRef = storage.reference.child("informes/${file.name}")
+            val storageRef = storage.reference.child("informes/$userCorreo/${file.name}")
 
             // Subir PDF al Storage
-            val uploadTask = storageRef.putFile(fileUri).await()
+            storageRef.putFile(fileUri).await()
             val downloadUrl = storageRef.downloadUrl.await().toString()
 
             // Guardar registro en Firestore
             val informeData = hashMapOf(
-                "usuarioId" to usuarioId,
+                "correoUsuario" to userCorreo,
                 "tipo" to tipo,
                 "fecha" to com.google.firebase.Timestamp.now(),
                 "nombreArchivo" to file.name,
@@ -295,44 +434,6 @@ class InformeEquiposViewModel : ViewModel() {
         }
     }
 
-
-
-    @Composable
-    fun TablaEquiposFirebase(equipos: List<Equipo>) {
-        Column(Modifier.fillMaxWidth()) {
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                listOf("Serial", "Referencia", "Tipo", "Fecha").forEach {
-                    Text(it, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-                }
-            }
-            equipos.forEach { eq ->
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text(eq.serial, modifier = Modifier.weight(1f))
-                    Text(eq.referencia, modifier = Modifier.weight(1f))
-                    Text(eq.tipo, modifier = Modifier.weight(1f))
-                    Text(eq.fechaCertificacion, modifier = Modifier.weight(1f))
-                }
-            }
-        }
-    }
-    @Composable
-    fun TablaObrasFirebase(obras: List<Obra>) {
-        Column(Modifier.fillMaxWidth()) {
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                listOf("ID Obra", "Nombre Obra", "Ubicacion", "Nombre Cliente").forEach {
-                    Text(it, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-                }
-            }
-            obras.forEach { eq ->
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text(eq.idObra, modifier = Modifier.weight(1f))
-                    Text(eq.nombreObra, modifier = Modifier.weight(1f))
-                    Text(eq.ubicacion, modifier = Modifier.weight(1f))
-                    Text(eq.clienteNombre, modifier = Modifier.weight(1f))
-                }
-            }
-        }
-    }
     @Composable
     fun TablaInformesUsuario(informes: List<Map<String, Any>>) {
         val context = LocalContext.current

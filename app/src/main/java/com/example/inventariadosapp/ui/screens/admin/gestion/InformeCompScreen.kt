@@ -12,11 +12,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.inventariadosapp.R
+import com.example.inventariadosapp.ui.screens.admin.gestion.Equipo
 import com.example.inventariadosapp.ui.theme.Kavoon
 import kotlinx.coroutines.launch
 
@@ -24,12 +27,13 @@ import kotlinx.coroutines.launch
 @Composable
 fun InformeCompScreen(
     adminNavController: NavController,
+    userCorreo: String,
     viewModel: InformeEquiposViewModel = viewModel(LocalContext.current as androidx.activity.ComponentActivity)
 ) {
     val equipos by viewModel.equipos.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
-    val scrollState = rememberScrollState() // 👈 Scroll agregado
+    val scrollState = rememberScrollState()
 
     Scaffold(
         modifier = Modifier
@@ -49,7 +53,7 @@ fun InformeCompScreen(
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = { adminNavController.navigate("informes_admin") }) {
+                    IconButton(onClick = { adminNavController.navigate("informes_admin/$userCorreo") }) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_arrow_back),
                             contentDescription = "Volver",
@@ -62,52 +66,52 @@ fun InformeCompScreen(
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
-        Column(
+
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(scrollState) // 👈 Habilita desplazamiento vertical
                 .padding(padding)
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
-            // 📊 Tabla centrada con los equipos filtrados
-            Box(
+            // 📜 Contenido desplazable centrado
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color.White, shape = MaterialTheme.shapes.medium)
-                    .padding(12.dp),
-                contentAlignment = Alignment.Center
+                    .align(Alignment.Center)
+                    .verticalScroll(scrollState)
+                    .padding(horizontal = 16.dp)
+                    .padding(bottom = 90.dp), // deja espacio para el botón
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             ) {
-                viewModel.TablaEquiposFirebase(equipos)
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color.White, shape = MaterialTheme.shapes.medium)
+                        .padding(12.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    TablaEquiposFirebase(equipos)
+                }
             }
 
-            Spacer(Modifier.height(20.dp))
-
-            // 📄 Botón para generar informe PDF
+            // 📄 Botón fijo en la parte inferior
             Button(
                 onClick = {
                     coroutineScope.launch {
-                        val userData = viewModel.obtenerUsuarioActual()
-
-                        if (userData == null) {
-                            snackbarHostState.showSnackbar("No se encontró un usuario autenticado.")
+                        if (userCorreo.isBlank()) {
+                            snackbarHostState.showSnackbar("No se encontró el Correo del usuario.")
                             return@launch
                         }
 
-                        val (usuarioId, correoUser) = userData
-                        val usuarioNombre = correoUser.substringBefore("@")
+                        val usuarioCorreo = userCorreo
 
-                        // Generar el informe con los datos del usuario
                         val filePath = viewModel.generarInformePDFequipos(
                             equipos = equipos,
-                            usuarioNombre = usuarioNombre,
-                            usuarioCorreo = correoUser
+                            usuarioCorreo = usuarioCorreo
                         )
 
                         if (!filePath.startsWith("Error")) {
-                            // Subir el informe a Firebase
-                            viewModel.guardarInformeEnFirebase(usuarioId, filePath, "equipos")
+                            viewModel.guardarInformeEnFirebase(filePath, "equipos", userCorreo)
                             snackbarHostState.showSnackbar("Informe generado y subido correctamente.")
                         } else {
                             snackbarHostState.showSnackbar(filePath)
@@ -116,8 +120,11 @@ fun InformeCompScreen(
                 },
                 colors = ButtonDefaults.buttonColors(Color(0xFF6686E8)),
                 modifier = Modifier
+                    .align(Alignment.BottomCenter)
                     .fillMaxWidth()
-                    .height(52.dp)
+                    .padding(16.dp)
+                    .height(52.dp),
+                shape = MaterialTheme.shapes.medium
             ) {
                 Icon(
                     painterResource(id = R.drawable.ic_informes),
@@ -127,8 +134,58 @@ fun InformeCompScreen(
                 Spacer(Modifier.width(8.dp))
                 Text("Generar informe", color = Color.White, fontFamily = Kavoon)
             }
-
-            Spacer(Modifier.height(40.dp))
         }
     }
 }
+
+@Composable
+fun TablaEquiposFirebase(equipos: List<Equipo>) {
+    val encabezadoColor = Color(0xFF6686E8)
+    val filaPar = Color(0xFFF7F8FC)
+    val filaImpar = Color(0xFFFFFFFF)
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 8.dp)
+    ) {
+        // 🔹 Encabezado
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(encabezadoColor)
+                .padding(vertical = 10.dp, horizontal = 6.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            listOf("Serial", "Referencia", "Tipo", "Fecha").forEach {
+                Text(
+                    text = it,
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = Kavoon,
+                    fontSize = 13.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+
+        // 🔹 Filas con colores alternados
+        equipos.forEachIndexed { index, eq ->
+            val fondo = if (index % 2 == 0) filaPar else filaImpar
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(fondo)
+                    .padding(vertical = 8.dp, horizontal = 6.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(eq.serial, modifier = Modifier.weight(1f), fontSize = 12.sp)
+                Text(eq.referencia, modifier = Modifier.weight(1f), fontSize = 12.sp)
+                Text(eq.tipo, modifier = Modifier.weight(1f), fontSize = 12.sp)
+                Text(eq.fechaCertificacion, modifier = Modifier.weight(1f), fontSize = 12.sp)
+            }
+        }
+    }
+}
+

@@ -198,6 +198,8 @@ fun LoginScreen(navController: NavController) {
                                         val userDoc = documents.first()
                                         val rol = userDoc.getString("rolSeleccionado")
                                         val nombre = userDoc.getString("nombreCompleto")
+                                        val userCorreo = userDoc.getString("correoElectronico")
+
 
                                         Toast.makeText(
                                             navController.context,
@@ -206,7 +208,8 @@ fun LoginScreen(navController: NavController) {
                                         ).show()
 
                                         when (rol) {
-                                            "Admin" -> navController.navigate("panel_admin")
+                                            "Admin" -> navController.navigate("panel_admin/$userCorreo")
+                                            "Supervisor" -> navController.navigate("panel_supervisor")
                                             "Topógrafo" -> navController.navigate("panel_topografo")
                                             "Consulta" -> navController.navigate("panel_consulta")
                                             else -> navController.navigate("bienvenida")
