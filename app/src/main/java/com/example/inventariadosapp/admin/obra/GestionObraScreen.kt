@@ -114,7 +114,7 @@ fun GestionObraScreen(
                     text = "Buscar",
                     color = Color(0xFF64B5F6),
                     icon = Icons.Filled.Search, // ✅ Cambiado a ImageVector
-                    onClick = { viewModel.buscarObra(viewModel.nombreObra) },
+                    onClick = { viewModel.buscarObra() },
                 )
             }
 
@@ -131,7 +131,7 @@ fun GestionObraScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             // Mensaje de estado (éxito/error)
-            viewModel.mensajeStatus?.let { msg ->
+            viewModel.mensaje?.let { msg ->
                 Text(
                     text = msg,
                     color = if (msg.startsWith("✅")) Color(0xFF2E7D32) else Color(0xFFD32F2F),
@@ -143,3 +143,5 @@ fun GestionObraScreen(
         }
     }
 }
+
+
