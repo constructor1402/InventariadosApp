@@ -92,7 +92,7 @@ fun LoginScreen(navController: NavController) {
                 Text(
                     text = stringResource(id = R.string.email_label),
                     fontFamily = Kavoon,
-                    color = Color.Black,
+                    color = colorResource(id = R.color.texto_principal),
                     fontSize = 15.sp,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -120,7 +120,7 @@ fun LoginScreen(navController: NavController) {
                 Text(
                     text = stringResource(id = R.string.password_label),
                     fontFamily = Kavoon,
-                    color = Color.Black,
+                    color = colorResource(id = R.color.texto_principal),
                     fontSize = 15.sp,
                     modifier = Modifier.fillMaxWidth()
                 )

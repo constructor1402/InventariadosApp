@@ -1,22 +1,17 @@
 package com.example.inventariadosapp.ui.screens.Topografo.assign.models
 
-// --- Importaciones Clave ---
-import android.widget.Toast //  👈  IMPORTACIÓN AÑADIDA
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll //  👈  IMPORTACIÓN AÑADIDA
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext //  👈  IMPORTACIÓN AÑADIDA
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -29,17 +24,16 @@ import com.example.inventariadosapp.ui.theme.Kavoon
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AssignManualScreen(navController: NavHostController, viewModel: TopografoAssignViewModel) {
+    val context = LocalContext.current
     val selectedEquipo = viewModel.selectedEquipo
+    var manualSerial by remember { mutableStateOf(selectedEquipo.serial) }
+    var manualTipo by remember { mutableStateOf(selectedEquipo.tipo) }
+    var manualReferencia by remember { mutableStateOf(selectedEquipo.referencia) }
 
-    //  👇  --- LÓGICA PARA BLOQUEAR CAMPOS ---
-    val isAsignado = selectedEquipo.estado.equals("Asignado", ignoreCase = true)
-
-    // Estado para el Dropdown
     var isObrasExpanded by remember { mutableStateOf(false) }
     val obrasList = viewModel.listaDeObras
+    val isAsignado = selectedEquipo.estado.equals("Asignado", ignoreCase = true)
 
-    //  👇  --- PARA MOSTRAR LOS MENSAJES (TOAST) ---
-    val context = LocalContext.current
     LaunchedEffect(key1 = true) {
         viewModel.uiEvent.collect { message ->
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
@@ -47,7 +41,6 @@ fun AssignManualScreen(navController: NavHostController, viewModel: TopografoAss
     }
 
     Scaffold(
-        // Barra superior (con tu estilo blanco original)
         topBar = {
             Row(
                 modifier = Modifier
@@ -58,9 +51,9 @@ fun AssignManualScreen(navController: NavHostController, viewModel: TopografoAss
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Formulario de asignación",
+                    text = "Formulario de asignación manual",
                     fontWeight = FontWeight.Bold,
-                    fontSize = 22.sp,
+                    fontSize = 20.sp,
                     color = Color.Black
                 )
                 IconButton(onClick = { navController.popBackStack() }) {
@@ -73,76 +66,72 @@ fun AssignManualScreen(navController: NavHostController, viewModel: TopografoAss
             }
         }
     ) { padding ->
-        //  👇  --- USAMOS TU 'fondo_claro' ---
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .background(colorResource(id = R.color.fondo_claro))
                 .padding(padding)
                 .padding(24.dp)
-                .verticalScroll(rememberScrollState()), // Añadido scroll
-            verticalArrangement = Arrangement.spacedBy(16.dp), // Espacio entre campos
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            //  👇  --- Mensaje si ya está asignado ---
-            if (isAsignado) {
-                Text(
-                    text = "Este equipo ya está asignado. Debe ser devuelto antes de poder re-asignarlo.",
-                    color = colorResource(id = R.color.azul_admin), // Un color que resalte
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(colorResource(id = R.color.campo_fondo), RoundedCornerShape(8.dp))
-                        .padding(12.dp)
+            // --- Serial manual ---
+            OutlinedTextField(
+                value = manualSerial,
+                onValueChange = { manualSerial = it.uppercase() },
+                label = { Text("Serial del equipo") },
+                modifier = Modifier.fillMaxWidth(),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = colorResource(id = R.color.boton_principal)
                 )
+            )
+
+            Button(
+                onClick = {
+                    if (manualSerial.isNotBlank()) {
+                        viewModel.fetchEquipoData(manualSerial) { success ->
+                            if (success) {
+                                manualTipo = viewModel.selectedEquipo.tipo
+                                manualReferencia = viewModel.selectedEquipo.referencia
+                                Toast.makeText(context, "Equipo encontrado ✅", Toast.LENGTH_SHORT).show()
+                            } else {
+                                Toast.makeText(context, "No encontrado, ingrese manualmente los datos", Toast.LENGTH_LONG).show()
+                            }
+                        }
+                    } else {
+                        Toast.makeText(context, "Ingrese un serial válido", Toast.LENGTH_SHORT).show()
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.azul_admin)),
+                shape = RoundedCornerShape(10.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp)
+            ) {
+                Text("Buscar equipo", color = Color.White, fontWeight = FontWeight.Bold)
             }
 
-            // --- Campo Serial ---
+            // --- Tipo ---
             OutlinedTextField(
-                value = selectedEquipo.serial,
-                onValueChange = { },
-                label = { Text("Serial del equipo") },
-                readOnly = true, // Siempre solo lectura
-                modifier = Modifier.fillMaxWidth(),
-                colors = OutlinedTextFieldDefaults.colors(
-                    disabledBorderColor = Color.Gray,
-                    disabledTextColor = Color.DarkGray
-                ),
-                enabled = false // Deshabilitado para que se vea gris
-            )
-
-            // --- Campo Tipo ---
-            OutlinedTextField(
-                value = selectedEquipo.tipo,
-                onValueChange = { },
+                value = manualTipo,
+                onValueChange = { manualTipo = it },
                 label = { Text("Tipo de equipo") },
-                readOnly = true,
-                modifier = Modifier.fillMaxWidth(),
-                colors = OutlinedTextFieldDefaults.colors(
-                    disabledBorderColor = Color.Gray,
-                    disabledTextColor = Color.DarkGray
-                ),
-                enabled = false
+                modifier = Modifier.fillMaxWidth()
             )
 
-            // --- Campo Referencia ---
+            // --- Referencia ---
             OutlinedTextField(
-                value = selectedEquipo.referencia,
-                onValueChange = { },
+                value = manualReferencia,
+                onValueChange = { manualReferencia = it },
                 label = { Text("Referencia") },
-                readOnly = true,
-                modifier = Modifier.fillMaxWidth(),
-                colors = OutlinedTextFieldDefaults.colors(
-                    disabledBorderColor = Color.Gray,
-                    disabledTextColor = Color.DarkGray
-                ),
-                enabled = false
+                modifier = Modifier.fillMaxWidth()
             )
 
-            // --- Campo Estado ---
+            // --- Estado actual ---
             OutlinedTextField(
-                value = selectedEquipo.estado,
+                value = if (selectedEquipo.estado.isNotBlank()) selectedEquipo.estado else "Disponible",
                 onValueChange = { },
                 label = { Text("Estado actual") },
                 readOnly = true,
@@ -156,81 +145,69 @@ fun AssignManualScreen(navController: NavHostController, viewModel: TopografoAss
 
             // --- Dropdown Obras ---
             ExposedDropdownMenuBox(
-                expanded = isObrasExpanded && !isAsignado, // No se expande si está asignado
-                onExpandedChange = {
-                    if (!isAsignado) isObrasExpanded = it // No cambia si está asignado
-                },
+                expanded = isObrasExpanded,
+                onExpandedChange = { isObrasExpanded = it },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 OutlinedTextField(
-                    value = selectedEquipo.obra,
+                    value = selectedEquipo.obra.ifBlank { "Seleccione la obra" },
                     onValueChange = {},
                     label = { Text("Asignar a obra") },
                     readOnly = true,
-                    trailingIcon = {
-                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = isObrasExpanded)
-                    },
-                    colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(
-                        // Colores de deshabilitado
-                        disabledBorderColor = Color.Gray,
-                        disabledTextColor = Color.DarkGray,
-                        disabledTrailingIconColor = Color.Gray,
-                        disabledLabelColor = Color.Gray
-                    ),
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isObrasExpanded) },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .menuAnchor(),
-                    enabled = !isAsignado //  👈  DESHABILITADO SI YA ESTÁ ASIGNADO
+                        .menuAnchor()
                 )
 
                 ExposedDropdownMenu(
-                    expanded = isObrasExpanded && !isAsignado,
+                    expanded = isObrasExpanded,
                     onDismissRequest = { isObrasExpanded = false }
                 ) {
-                    if (obrasList.isEmpty()) {
+                    obrasList.forEach { obra ->
                         DropdownMenuItem(
-                            text = { Text("Cargando obras...") },
-                            onClick = { },
-                            enabled = false
+                            text = { Text(obra) },
+                            onClick = {
+                                viewModel.onObraChange(obra)
+                                isObrasExpanded = false
+                            }
                         )
-                    } else {
-                        obrasList.forEach { obraNombre ->
-                            DropdownMenuItem(
-                                text = { Text(obraNombre) },
-                                onClick = {
-                                    viewModel.onObraChange(obraNombre)
-                                    isObrasExpanded = false
-                                }
-                            )
-                        }
                     }
                 }
             }
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // --- Botón Guardar ---
+            // --- Guardar asignación ---
             Button(
                 onClick = {
+                    // ✅ Si no vino de Firebase, actualizamos manualmente los valores
+                    if (viewModel.selectedEquipo.serial.isBlank()) {
+                        viewModel.setSelectedEquipo(
+                            EquipoAsignado(
+                                serial = manualSerial,
+                                tipo = manualTipo,
+                                referencia = manualReferencia,
+                                obra = viewModel.selectedEquipo.obra
+                            )
+                        )
+
+                    }
                     viewModel.guardarAsignacion(navController)
                 },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = colorResource(id = R.color.verde_admin),
-                    disabledContainerColor = Color.LightGray // Color si está deshabilitado
-                ),
+                colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.verde_admin)),
                 shape = RoundedCornerShape(16.dp),
                 modifier = Modifier
-                    .fillMaxWidth(0.85f)
-                    .height(60.dp),
-                enabled = !isAsignado //  👈  DESHABILITADO SI YA ESTÁ ASIGNADO
+                    .fillMaxWidth(0.9f)
+                    .height(60.dp)
             ) {
-                Text(
-                    text = "Confirmar asignación",
-                    fontFamily = Kavoon,
-                    color = Color.White,
-                    fontSize = 18.sp
-                )
+                Text("Confirmar asignación", fontFamily = Kavoon, color = Color.White, fontSize = 18.sp)
             }
         }
     }
+}
+
+private fun TopografoAssignViewModel.setSelectedEquipo(
+    equipoAsignado: EquipoAsignado
+) {
 }

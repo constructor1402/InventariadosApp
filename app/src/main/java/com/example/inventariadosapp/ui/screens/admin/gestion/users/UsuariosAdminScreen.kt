@@ -19,7 +19,7 @@ import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.inventariadosapp.R
-import com.example.inventariadosapp.ui.screens.admin.gestion.components.UserActionButtons
+import com.example.inventariadosapp.ui.screens.admin.gestion.components.ActionButtons
 import com.example.inventariadosapp.ui.screens.admin.gestion.components.UserForm
 import com.example.inventariadosapp.ui.screens.admin.gestion.components.BottomNavGestionBar
 import com.example.inventariadosapp.ui.theme.Kavoon
@@ -84,7 +84,12 @@ fun UsuariosAdminScreen(navController: NavController, viewModel: UserViewModel =
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                UserActionButtons(viewModel = viewModel)
+                ActionButtons(
+                    onGuardar = { viewModel.guardarUsuario() },
+                    onBuscar = { viewModel.buscarUsuario() },
+                    onEliminar = { viewModel.eliminarUsuario() }
+                )
+
 
                 // 🔔 Muestra snackbar cuando cambia el mensaje
                 val mensaje = viewModel.mensajeEstado

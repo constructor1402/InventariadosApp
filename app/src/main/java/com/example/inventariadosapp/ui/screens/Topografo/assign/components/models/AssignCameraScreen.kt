@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.inventariadosapp.R
-import com.example.inventariadosapp.admin.topografo.assign.components.CameraPreview // Asegúrate que esta ruta sea correcta
+import com.example.inventariadosapp.admin.topografo.assign.components.CameraPreview
 import com.example.inventariadosapp.ui.screens.Topografo.assign.AssignNavGraph.AssignRoutes
 import com.example.inventariadosapp.ui.theme.Kavoon
 
@@ -32,8 +32,8 @@ fun AssignCameraScreen(navController: NavHostController, viewModel: TopografoAss
 
     val backgroundColor = colorResource(id = R.color.fondo_claro)
     val textColor = colorResource(id = R.color.texto_principal)
-
     val context = LocalContext.current
+
     LaunchedEffect(key1 = true) {
         viewModel.uiEvent.collect { message ->
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
@@ -114,6 +114,7 @@ fun AssignCameraScreen(navController: NavHostController, viewModel: TopografoAss
             }
         }
 
+        // 🔹 ALERT DIALOG CORREGIDO
         if (scannedSerial != null) {
             AlertDialog(
                 onDismissRequest = {
@@ -137,9 +138,19 @@ fun AssignCameraScreen(navController: NavHostController, viewModel: TopografoAss
                 confirmButton = {
                     Button(
                         onClick = {
-                            //  👇  --- NOMBRE DE FUNCIÓN CORREGIDO ---
-                            viewModel.fetchEquipoData(scannedSerial!!) {
-                                navController.navigate(AssignRoutes.MANUAL)
+                            // ✅ Esperar a que Firebase cargue los datos ANTES de navegar
+                            viewModel.fetchEquipoData(scannedSerial!!) { success ->
+                                if (success) {
+                                    Toast.makeText(context, "Datos cargados", Toast.LENGTH_SHORT).show()
+                                    navController.navigate(AssignRoutes.MANUAL)
+                                } else {
+                                    Toast.makeText(
+                                        context,
+                                        "No se encontró el equipo con serial $scannedSerial",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                    scannedSerial = null
+                                }
                             }
                         },
                         enabled = !isLoading
