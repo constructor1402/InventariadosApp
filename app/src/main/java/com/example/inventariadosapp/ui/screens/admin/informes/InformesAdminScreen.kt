@@ -70,7 +70,7 @@ fun InformesAdminScreen(adminNavController: NavController,userCorreo: String) {
                 BotonInforme(
                     texto = "Informe de usuarios",
                     colorFondo = Color(0xFF6686E8),
-                    onClick = { adminNavController.navigate("informe_Usuarios") }
+                    onClick = { adminNavController.navigate("informe_Usuarios/$userCorreo") }
                 )
             }
         }

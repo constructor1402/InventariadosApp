@@ -1,32 +1,10 @@
 package com.example.inventariadosapp.ui.screens.admin.informes
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -40,6 +18,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.inventariadosapp.R
+import com.example.inventariadosapp.ui.screens.admin.gestion.users.UserUiState
 import com.example.inventariadosapp.ui.theme.Kavoon
 import kotlinx.coroutines.launch
 
@@ -47,11 +26,17 @@ import kotlinx.coroutines.launch
 @Composable
 fun InformeUsuariosScreen(
     adminNavController: NavController,
+    userCorreo: String,
     viewModel: InformeEquiposViewModel = viewModel()
-){
+) {
     var usuarioBusqueda by remember { mutableStateOf("") }
     var correoUsuario by remember { mutableStateOf("") }
     val scope = rememberCoroutineScope()
+
+    // Aquí obtenemos la lista de usuarios de forma reactiva
+    val usuarios by viewModel.users.collectAsState(initial = emptyList()) // usar observeAsState() si es LiveData
+    var expanded by remember { mutableStateOf(false) }
+    var selectedUser by remember { mutableStateOf<UserUiState?>(null) }
 
     Scaffold(
         topBar = {
@@ -72,7 +57,7 @@ fun InformeUsuariosScreen(
                 },
                 navigationIcon = {
                     IconButton(
-                        onClick = { adminNavController.navigate("informes_admin") },
+                        onClick = { adminNavController.navigate("informes_admin/$userCorreo") },
                         modifier = Modifier.padding(start = 8.dp)
                     ) {
                         Icon(
@@ -88,7 +73,7 @@ fun InformeUsuariosScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(colorResource(id = R.color.fondo_claro))
-    ) {padding ->
+    ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -96,8 +81,7 @@ fun InformeUsuariosScreen(
                 .padding(horizontal = 20.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(24.dp, Alignment.CenterVertically)
-
-        ){
+        ) {
             Icon(
                 painter = painterResource(id = R.drawable.icon_user),
                 contentDescription = "Usuarios",
@@ -106,6 +90,7 @@ fun InformeUsuariosScreen(
                     .size(90.dp)
                     .padding(top = 8.dp)
             )
+
             Text(
                 "Nombre de Usuario",
                 fontFamily = Kavoon,
@@ -114,7 +99,7 @@ fun InformeUsuariosScreen(
             )
             TextField(
                 value = usuarioBusqueda,
-                onValueChange = {usuarioBusqueda = it},
+                onValueChange = { usuarioBusqueda = it },
                 placeholder = {
                     Text(
                         "Digite el nombre de usuario",
@@ -135,6 +120,7 @@ fun InformeUsuariosScreen(
                     unfocusedIndicatorColor = Color.Transparent
                 )
             )
+
             Text(
                 "Correo del Usuario",
                 fontFamily = Kavoon,
@@ -143,7 +129,7 @@ fun InformeUsuariosScreen(
             )
             TextField(
                 value = correoUsuario,
-                onValueChange = {correoUsuario = it},
+                onValueChange = { correoUsuario = it },
                 placeholder = {
                     Text(
                         "Digite el correo del usuario",
@@ -164,34 +150,68 @@ fun InformeUsuariosScreen(
                     unfocusedIndicatorColor = Color.Transparent
                 )
             )
-            Button(
-                    onClick = {
-                        scope.launch {
-                            viewModel.buscarUsuarios(usuarioBusqueda,correoUsuario)
-                            adminNavController.navigate("resultados_users")
-                        }
-                    },
-            colors = ButtonDefaults.buttonColors(colorResource(id = R.color.azul_admin)),
-            shape = RoundedCornerShape(16.dp),
-            modifier = Modifier
-                .fillMaxWidth(0.5f)
-                .height(55.dp)
-                .padding(top = 12.dp)
-            ) {
-            Text(
-                "Buscar",
-                fontFamily = Kavoon,
-                fontStyle = FontStyle.Italic,
-                color = Color.White
-            )
-            Spacer(Modifier.width(6.dp))
-            Icon(
-                painterResource(id = R.drawable.ic_search),
-                contentDescription = null,
-                modifier = Modifier.size(50.dp)
-            )
-        }
-        }
 
+            Button(
+                onClick = {
+                    scope.launch {
+                        viewModel.buscarUsuarios(usuarioBusqueda, correoUsuario)
+                        if (usuarios.size == 1) {
+                            val correo = usuarios.first().correo
+                            viewModel.cargarInformesUsuario(correo)
+                            adminNavController.navigate("resultados_users/$correo")
+                        } else {
+                            expanded = true
+                        }
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(colorResource(id = R.color.azul_admin)),
+                shape = RoundedCornerShape(16.dp),
+                modifier = Modifier
+                    .fillMaxWidth(0.5f)
+                    .height(55.dp)
+                    .padding(top = 12.dp)
+            ) {
+                Text(
+                    "Buscar",
+                    fontFamily = Kavoon,
+                    fontStyle = FontStyle.Italic,
+                    color = Color.White
+                )
+                Spacer(Modifier.width(6.dp))
+                Icon(
+                    painterResource(id = R.drawable.ic_search),
+                    contentDescription = null,
+                    modifier = Modifier.size(50.dp)
+                )
+            }
+
+            // DropDownMenu para seleccionar usuario si hay más de uno
+            if (usuarios.size > 1) {
+                Text("Selecciona un usuario:")
+                Box {
+                    Button(onClick = { expanded = true }) {
+                        Text(selectedUser?.nombre ?: "Elegir usuario")
+                    }
+                    DropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }
+                    ) {
+                        usuarios.forEach { usuario ->
+                            DropdownMenuItem(
+                                text = { Text(usuario.nombre) },
+                                onClick = {
+                                    expanded = false
+                                    selectedUser = usuario
+                                    scope.launch {
+                                        viewModel.cargarInformesUsuario(usuario.correo)
+                                        adminNavController.navigate("resultados_users/${usuario.correo}")
+                                    }
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+        }
     }
 }

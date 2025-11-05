@@ -403,12 +403,6 @@ class InformeEquiposViewModel : ViewModel() {
             "Error al generar PDF: ${e.message}"
         }
     }
-
-
-
-
-
-
     suspend fun guardarInformeEnFirebase(filePath: String, tipo: String, userCorreo: String) {
         val storage = FirebaseStorage.getInstance()
         val db = FirebaseFirestore.getInstance()
@@ -438,6 +432,88 @@ class InformeEquiposViewModel : ViewModel() {
             Log.e("Firebase", "Error guardando informe", e)
         }
     }
+    suspend fun cargarInformesUsuario(correo: String) {
+        try {
+            val snapshot = db.collection("informes")
+                .whereEqualTo("correoUsuario", correo)
+                .get()
+                .await()
+
+            _informesUsuario.value = snapshot.documents.mapNotNull { it.data }
+        } catch (e: Exception) {
+            Log.e("Firebase", "Error cargando informes del usuario", e)
+            _informesUsuario.value = emptyList()
+        }
+    }
+
+    // Generar informe general (tabla de informes)
+    suspend fun generarInformePDFinformes(
+        informes: List<Map<String, Any>>,
+        userCorreo: String
+    ): String {
+        val pdfDocument = PdfDocument()
+        val pageInfo = PdfDocument.PageInfo.Builder(595, 842, 1).create()
+        val page = pdfDocument.startPage(pageInfo)
+        val canvas = page.canvas
+
+        val titlePaint = Paint().apply {
+            textSize = 18f
+            isFakeBoldText = true
+        }
+
+        val headerPaint = Paint().apply {
+            textSize = 14f
+            isFakeBoldText = true
+            color = android.graphics.Color.rgb(102, 134, 232)
+        }
+
+        val textPaint = Paint().apply {
+            textSize = 12f
+            color = android.graphics.Color.BLACK
+        }
+
+        val startX = 40f
+        var y = 60f
+
+        canvas.drawText("Informe de Actividad de Usuario", 150f, 40f, titlePaint)
+        canvas.drawText("Usuario: $userCorreo", startX, y, textPaint)
+        y += 30f
+
+        val headers = listOf("Nombre Archivo", "Tipo", "Fecha")
+        val colWidth = 170f
+        var x = startX
+        headers.forEach {
+            canvas.drawText(it, x, y, headerPaint)
+            x += colWidth
+        }
+        y += 25f
+
+        informes.forEach {
+            val nombre = it["nombreArchivo"]?.toString() ?: "-"
+            val tipo = it["tipo"]?.toString() ?: "-"
+            val fecha = it["fecha"]?.toString()?.substringBefore("Timestamp") ?: "-"
+            x = startX
+            listOf(nombre, tipo, fecha).forEach { text ->
+                canvas.drawText(text, x, y, textPaint)
+                x += colWidth
+            }
+            y += 20f
+        }
+
+        pdfDocument.finishPage(page)
+
+        return try {
+            val downloads = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+            val file = File(downloads, "Informe_Usuario_${System.currentTimeMillis()}.pdf")
+            pdfDocument.writeTo(FileOutputStream(file))
+            pdfDocument.close()
+            file.absolutePath
+        } catch (e: Exception) {
+            pdfDocument.close()
+            "Error al generar PDF: ${e.message}"
+        }
+    }
+
 
     @Composable
     fun TablaInformesUsuario(informes: List<Map<String, Any>>) {

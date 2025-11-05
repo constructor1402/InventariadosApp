@@ -1,5 +1,7 @@
 package com.example.inventariadosapp.ui.screens.admin
 
+import android.content.Intent
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -9,6 +11,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -21,18 +24,18 @@ import com.example.inventariadosapp.ui.screens.admin.gestion.users.UserUiState
 import com.example.inventariadosapp.ui.screens.admin.informes.InformeEquiposViewModel
 import com.example.inventariadosapp.ui.theme.Kavoon
 import kotlinx.coroutines.launch
-
+import androidx.core.net.toUri
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InformeCompUsers(
     adminNavController: NavController,
-    viewModel: InformeEquiposViewModel
+    viewModel: InformeEquiposViewModel,
+    userCorreo : String
 ) {
-    val users by viewModel.users.collectAsState()
     val informesUsuario by viewModel.informesUsuario.collectAsState()
-    val scrollState = rememberScrollState()
     val coroutineScope = rememberCoroutineScope()
     var usuarioSeleccionado by remember { mutableStateOf<UserUiState?>(null) }
+    val context = LocalContext.current // ✅ Contexto guardado correctamente
 
     Scaffold(
         topBar = {
@@ -49,7 +52,7 @@ fun InformeCompUsers(
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = { adminNavController.navigate("informes_admin") }) {
+                    IconButton(onClick = { adminNavController.navigate("informes_admin/$userCorreo") }) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_arrow_back),
                             contentDescription = "Volver",
@@ -66,74 +69,65 @@ fun InformeCompUsers(
             modifier = Modifier
                 .padding(innerPadding)
                 .padding(horizontal = 16.dp)
-                .verticalScroll(scrollState)
+                .verticalScroll(rememberScrollState())
                 .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(Modifier.height(10.dp))
+            Text(
+                text = "Usuario: ${usuarioSeleccionado?.nombre} (${usuarioSeleccionado?.correo})",
+                fontFamily = Kavoon,
+                color = Color.Black,
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp,
+                modifier = Modifier.padding(top = 16.dp)
+            )
 
-            if (users.isEmpty()) {
-                Text(
-                    "No se encontraron usuarios.",
-                    fontFamily = Kavoon,
-                    color = Color(0xFF8D8EB5),
-                    fontSize = 16.sp,
-                    textAlign = TextAlign.Center
-                )
+            Spacer(Modifier.height(12.dp))
+
+            if (informesUsuario.isEmpty()) {
+                Text("No hay informes generados.", color = Color.Gray)
             } else {
-                users.forEach { usuario ->
-                    Column(
-                        modifier = Modifier
+                informesUsuario.forEach { inf ->
+                    Row(
+                        Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 10.dp)
-                            .padding(horizontal = 8.dp)
-                    ) {
-                        Text(
-                            text = "👤 ${usuario.nombre} (${usuario.correo})",
-                            fontFamily = Kavoon,
-                            fontStyle = FontStyle.Italic,
-                            color = Color(0xFF1E3A8A),
-                            fontSize = 17.sp
-                        )
-
-                        Button(
-                            onClick = {
-                                usuarioSeleccionado = usuario
-                                coroutineScope.launch {
-                                   // viewModel.cargarInformesUsuarioActual()
-                                }
+                            .padding(vertical = 8.dp)
+                            .clickable {
+                                val url = inf["url"].toString()
+                                val intent = Intent(Intent.ACTION_VIEW, url.toUri())
+                                context.startActivity(intent) // ✅ Usar el context guardado
                             },
-                            modifier = Modifier
-                                .padding(top = 6.dp)
-                                .height(40.dp),
-                            colors = ButtonDefaults.buttonColors(Color(0xFF6686E8)),
-                            shape = RoundedCornerShape(10.dp)
-                        ) {
-                            Text("Ver informes", color = Color.White, fontFamily = Kavoon)
-                        }
-
-                        if (usuarioSeleccionado == usuario) {
-                            Spacer(modifier = Modifier.height(10.dp))
-                            if (informesUsuario.isEmpty()) {
-                                Text(
-                                    "Este usuario no tiene informes generados.",
-                                    fontFamily = Kavoon,
-                                    color = Color.Gray,
-                                    fontSize = 14.sp
-                                )
-                            } else {
-                                viewModel.TablaInformesUsuario(informesUsuario)
-                            }
-                        }
-
-                        Divider(
-                            color = Color(0xFFD1D5DB),
-                            thickness = 1.dp,
-                            modifier = Modifier.padding(vertical = 10.dp)
-                        )
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(inf["tipo"].toString(), modifier = Modifier.weight(1f))
+                        Text(inf["fecha"].toString(), modifier = Modifier.weight(1f))
+                        Text("Abrir", color = Color(0xFF1E3A8A), modifier = Modifier.weight(1f))
                     }
                 }
+            }
+
+            Spacer(Modifier.height(20.dp))
+
+            Button(
+                onClick = {
+                    coroutineScope.launch {
+                        val pdfPath = viewModel.generarInformePDFinformes(
+                            informesUsuario,
+                            usuarioSeleccionado?.correo ?: ""
+                        )
+                        viewModel.guardarInformeEnFirebase(
+                            pdfPath,
+                            "Resumen de informes",
+                            usuarioSeleccionado?.correo ?: ""
+                        )
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(Color(0xFF6686E8)),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text("Generar Informe", color = Color.White, fontFamily = Kavoon)
             }
         }
     }
 }
+

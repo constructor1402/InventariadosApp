@@ -92,8 +92,13 @@ fun AdminNavigation(mainNavController: NavController, userCorreo: String) {
                 userCorreo
             )
         }
-        composable("informe_Usuarios") { InformeUsuariosScreen(adminNavController)}
-        composable("resultados_users") { InformeCompUsers(adminNavController, viewModel = viewModel())}
+        composable("informe_Usuarios/{userCorreo}") { backStackEntry ->
+            val userCorreo = backStackEntry.arguments?.getString("userCorreo") ?: ""
+            InformeUsuariosScreen(adminNavController,userCorreo)
+        }
+        composable("resultados_users/{userCorreo}") { backStackEntry ->
+            val userCorreo = backStackEntry.arguments?.getString("userCorreo") ?: ""
+            InformeCompUsers(adminNavController, viewModel = viewModel(),userCorreo)}
 
 
     }
