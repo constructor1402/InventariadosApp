@@ -1,136 +1,122 @@
-package com.example.inventariadosapp.admin.report.components.models
+package com.example.inventariadosapp.admin.report.repository
 
 import android.content.Context
 import android.os.Environment
 import android.util.Log
-import android.widget.Toast
-import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.Timestamp
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import com.itextpdf.text.Document
+import com.itextpdf.text.Element
 import com.itextpdf.text.Paragraph
+import com.itextpdf.text.pdf.PdfPCell
+import com.itextpdf.text.pdf.PdfPTable
 import com.itextpdf.text.pdf.PdfWriter
 import java.io.File
 import java.io.FileOutputStream
 import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import java.util.*
 
+object ReportRepository {
 
-class ReportRepository {
-
-    private val firestore = FirebaseFirestore.getInstance()
-
-
-    // 🔹 CONSULTAR EQUIPOS EN FIRESTORE
-
-    fun obtenerEquipos(
-        codigoOBusqueda: String?,
-        estado: String?,
-        categoria: String?,
-        onSuccess: (List<Map<String, Any>>) -> Unit,
-        onError: (String) -> Unit
-    ) {
-        var query = firestore.collection("equipos").limit(50)
-
-        if (!codigoOBusqueda.isNullOrEmpty()) {
-            query = query.whereEqualTo("serial", codigoOBusqueda)
-        }
-        if (!estado.isNullOrEmpty()) {
-            query = query.whereEqualTo("estado", estado)
-        }
-        if (!categoria.isNullOrEmpty()) {
-            query = query.whereEqualTo("tipo", categoria)
-        }
-
-        query.get()
-            .addOnSuccessListener { snapshot ->
-                val equipos = snapshot.documents.mapNotNull { it.data }
-                onSuccess(equipos)
-            }
-            .addOnFailureListener { e ->
-                onError("Error al obtener los equipos: ${e.message}")
-            }
-    }
-
-
-    // 🔹 GUARDAR INFORME EN FIRESTORE
-
-    fun guardarInformeEnFirestore(
-        equipos: List<Map<String, Any>>,
+    /**
+     * Genera un informe PDF con datos de la colección "asignaciones",
+     * lo guarda localmente y lo sube a Firebase Storage.
+     */
+    fun generarPDFAsignaciones(
+        context: Context,
+        asignaciones: List<Map<String, Any>>,
         nombreInforme: String,
-        onSuccess: () -> Unit,
-        onError: (String) -> Unit
+        onUploadComplete: (String?) -> Unit // devuelve la URL de descarga
     ) {
-        val fechaActual = Timestamp.now()
-
-        val data = hashMapOf(
-            "nombreInforme" to nombreInforme,
-            "fechaCreacion" to fechaActual,
-            "totalEquipos" to equipos.size,
-            "detalles" to equipos
-        )
-
-        firestore.collection("informes")
-            .add(data)
-            .addOnSuccessListener {
-                onSuccess()
-            }
-            .addOnFailureListener { e ->
-                onError("Error al guardar el informe: ${e.message}")
-            }
-    }
-
-
-    // 🔹 GENERAR PDF LOCAL
-
-    fun generarPDF(context: Context, equipos: List<Map<String, Any>>, nombreInforme: String) {
         try {
-            val downloadsDir =
-                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-            val pdfFile = File(downloadsDir, "$nombreInforme.pdf")
+            val sdf = SimpleDateFormat("dd-MM-yyyy_HH-mm", Locale.getDefault())
+            val fechaActual = sdf.format(Date())
+
+            // Carpeta de descargas del dispositivo
+            val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+            val file = File(downloadsDir, "${nombreInforme}_$fechaActual.pdf")
 
             val document = Document()
-            PdfWriter.getInstance(document, FileOutputStream(pdfFile))
+            PdfWriter.getInstance(document, FileOutputStream(file))
             document.open()
 
-            val date = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(Date())
+            // Encabezado del informe
+            val titulo = Paragraph("Informe de Asignaciones\n\n")
+            titulo.alignment = Element.ALIGN_CENTER
+            document.add(titulo)
 
-            document.add(Paragraph("📋 $nombreInforme\n\n"))
-            document.add(Paragraph("Fecha de generación: $date\n\n"))
-            document.add(Paragraph("Total de equipos: ${equipos.size}\n\n"))
+            val fechaParrafo = Paragraph("Fecha de generación: $fechaActual\n\n")
+            fechaParrafo.alignment = Element.ALIGN_RIGHT
+            document.add(fechaParrafo)
 
-            equipos.forEachIndexed { index, equipo ->
-                document.add(Paragraph("Equipo ${index + 1}:"))
-                document.add(Paragraph("• Serial: ${equipo["serial"] ?: "N/A"}"))
-                document.add(Paragraph("• Referencia: ${equipo["referencia"] ?: "N/A"}"))
-                document.add(Paragraph("• Tipo: ${equipo["tipo"] ?: "N/A"}"))
-                document.add(Paragraph("• Descripción: ${equipo["descripcion"] ?: "N/A"}"))
-                document.add(Paragraph("• Fecha Certificación: ${equipo["fechaCertificacion"] ?: "N/A"}"))
-                document.add(Paragraph("• Estado: ${equipo["estado"] ?: "N/A"}"))
-                document.add(Paragraph("\n------------------------------\n"))
+            // Tabla con la información de las asignaciones
+            val table = PdfPTable(7)
+            table.widthPercentage = 100f
+
+            val headers = listOf("Serial", "Tipo", "Referencia", "Obra", "Estado Previo", "Usuario", "Fecha Asignación")
+            headers.forEach {
+                val cell = PdfPCell(Paragraph(it))
+                cell.horizontalAlignment = Element.ALIGN_CENTER
+                cell.backgroundColor = com.itextpdf.text.BaseColor.LIGHT_GRAY
+                table.addCell(cell)
             }
 
+            for (a in asignaciones) {
+                table.addCell((a["serial"] ?: "-").toString())
+                table.addCell((a["tipo"] ?: "-").toString())
+                table.addCell((a["referencia"] ?: "-").toString())
+                table.addCell((a["obraAsignada"] ?: "-").toString())
+                table.addCell((a["estadoPrevio"] ?: "-").toString())
+                table.addCell((a["usuarioNombre"] ?: "-").toString())
+
+                val fecha = (a["fechaAsignacion"] as? com.google.firebase.Timestamp)?.toDate()
+                val fechaStr = fecha?.let {
+                    SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(it)
+                } ?: "-"
+                table.addCell(fechaStr)
+            }
+
+            document.add(table)
             document.close()
 
-            Toast.makeText(
-                context,
-                "✅ Informe guardado en Descargas como '$nombreInforme.pdf'",
-                Toast.LENGTH_LONG
-            ).show()
+            // 📤 Subir el PDF a Firebase Storage
+            val storageRef = FirebaseStorage.getInstance().reference
+            val pdfRef = storageRef.child("informes_asignaciones/${file.name}")
 
+            val uploadTask = pdfRef.putFile(android.net.Uri.fromFile(file))
+            uploadTask.addOnSuccessListener {
+                pdfRef.downloadUrl.addOnSuccessListener { uri ->
+                    val url = uri.toString()
 
-            guardarInformeEnFirestore(equipos, nombreInforme,
-                onSuccess = {
-                    Log.d("ReportRepository", "Informe guardado exitosamente en Firestore.")
-                },
-                onError = {
-                    Log.e("ReportRepository", it)
+                    // Guardar metadatos en Firestore
+                    val firestore = FirebaseFirestore.getInstance()
+                    val docData = mapOf(
+                        "nombreInforme" to file.name,
+                        "fechaGeneracion" to Timestamp.now(),
+                        "urlDescarga" to url,
+                        "totalRegistros" to asignaciones.size
+                    )
+
+                    firestore.collection("informes_asignaciones")
+                        .add(docData)
+                        .addOnSuccessListener {
+                            Log.d("ReportRepository", "Informe guardado correctamente en Firestore.")
+                        }
+                        .addOnFailureListener { e ->
+                            Log.e("ReportRepository", "Error al guardar en Firestore", e)
+                        }
+
+                    onUploadComplete(url)
                 }
-            )
+            }.addOnFailureListener { e ->
+                Log.e("ReportRepository", "Error al subir PDF a Storage", e)
+                onUploadComplete(null)
+            }
 
         } catch (e: Exception) {
-            Toast.makeText(context, "Error al generar PDF: ${e.message}", Toast.LENGTH_LONG).show()
-            Log.e("ReportRepository", "Error al generar PDF", e)
+            Log.e("ReportRepository", "Error generando el informe PDF", e)
+            onUploadComplete(null)
         }
     }
 }
