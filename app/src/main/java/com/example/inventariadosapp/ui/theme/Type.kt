@@ -7,6 +7,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
 import com.example.inventariadosapp.R
 
@@ -32,6 +33,7 @@ val AppTypography = Typography(
         fontSize = 16.sp
     )
 )
+
 
 // Función auxiliar para acceder más fácil desde las pantallas
 @Composable

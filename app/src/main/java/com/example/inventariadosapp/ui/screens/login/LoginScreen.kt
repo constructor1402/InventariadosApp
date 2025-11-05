@@ -26,7 +26,6 @@ import androidx.navigation.NavController
 import com.example.inventariadosapp.admin.consulta.navigation.ConsultRoutes
 import com.google.firebase.firestore.FirebaseFirestore
 import com.example.inventariadosapp.ui.theme.Kavoon
-import com.example.inventariadosapp.utils.PreferencesHelper
 
 @Composable
 fun LoginScreen(navController: NavController) {
@@ -200,8 +199,6 @@ fun LoginScreen(navController: NavController) {
                                         val userDoc = documents.first()
                                         val rol = userDoc.getString("rolSeleccionado")
                                         val nombre = userDoc.getString("nombreCompleto")
-                                        PreferencesHelper.guardarNombreActivo(navController.context, nombre ?: "")
-
 
                                         Toast.makeText(
                                             navController.context,

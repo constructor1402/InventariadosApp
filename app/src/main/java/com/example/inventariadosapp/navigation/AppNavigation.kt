@@ -6,15 +6,13 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-
-import com.example.inventariadosapp.admin.consulta.navigation.ConsultRoutes
 import com.example.inventariadosapp.admin.consulta.navigation.consultNavGraph
 import com.example.inventariadosapp.screens.*
 import com.example.inventariadosapp.ui.screens.login.WelcomeScreen
 import com.example.inventariadosapp.ui.screens.Topografo.TopografoNavigation
 import com.example.inventariadosapp.screens.admin.AdminNavigation
 import com.example.inventariadosapp.LoginScreen
-import com.example.inventariadosapp.PanelConsultaScreen
+
 
 @Composable
 fun AppNavigation() {
@@ -40,15 +38,16 @@ fun AppNavigation() {
         }
 
 
+        // 👇 Panel administrador (flujo interno)
+        composable("panel_admin/{userCorreo}") { backStackEntry ->
+            val userCorreo = backStackEntry.arguments?.getString("userCorreo") ?: ""
+            AdminNavigation(navController, userCorreo) // ✅ pasamos el controlador principal
+        }
 
 
         consultNavGraph(navController)
 
         // 🟡 FLUJOS DE ADMIN Y TOPÓGRAFO
-        composable("panel_admin") { AdminNavigation(navController) }
         composable("panel_topografo") { TopografoNavigation(navController) }
-
-
-        composable("panel_consulta") { PanelConsultaScreen(navController) }
     }
 }
