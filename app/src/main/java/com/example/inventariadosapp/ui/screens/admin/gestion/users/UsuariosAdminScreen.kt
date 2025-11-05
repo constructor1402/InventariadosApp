@@ -86,7 +86,7 @@ fun UsuariosAdminScreen(navController: NavController, viewModel: UserViewModel =
 
                 ActionButtons(
                     onGuardar = { viewModel.guardarUsuario() },
-                    onBuscar = { viewModel.buscarUsuario() },
+                    onBuscar = { viewModel.buscarUsuarioPorCorreo() },
                     onEliminar = { viewModel.eliminarUsuario() }
                 )
 

@@ -1,5 +1,6 @@
 package com.example.inventariadosapp.ui.screens.admin.gestion.equipos
 
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.inventariadosapp.data.repository.EquiposRepository
@@ -26,6 +27,7 @@ class EquiposViewModel : ViewModel() {
     var certificadoUrl = MutableStateFlow("")
         private set
 
+
     // Listado de tipos disponibles
     private val _tiposEquipos = MutableStateFlow<List<String>>(emptyList())
     val tiposEquipos = _tiposEquipos.asStateFlow()
@@ -33,6 +35,9 @@ class EquiposViewModel : ViewModel() {
     // Mensajes para mostrar en pantalla
     private val _mensaje = MutableStateFlow("")
     val mensaje = _mensaje.asStateFlow()
+
+    var isEditing = mutableStateOf(false)
+
 
     init {
         obtenerTipos()
@@ -45,10 +50,12 @@ class EquiposViewModel : ViewModel() {
     fun onTipoChange(value: String) { tipo.value = value }
     fun onFechaChange(value: String) { fechaCertificacion.value = value }
 
-    // 🔹 Guarda o actualiza un equipo
+    // 🔹 Guarda un equipo (verifica si ya existe antes de crear)
     fun guardarEquipo() {
         viewModelScope.launch {
             try {
+                val existe = repository.buscarEquipo(serial.value) != null
+
                 val equipo = Equipo(
                     serial = serial.value,
                     referencia = referencia.value,
@@ -57,13 +64,23 @@ class EquiposViewModel : ViewModel() {
                     fechaCertificacion = fechaCertificacion.value,
                     certificadoUrl = certificadoUrl.value
                 )
-                repository.guardarEquipo(equipo)
-                _mensaje.value = "✅ Equipo guardado correctamente"
+
+                if (existe) {
+                    repository.actualizarEquipo(equipo)
+                    _mensaje.value = "🔄 Equipo actualizado correctamente"
+                    limpiarCampos()
+                } else {
+                    repository.guardarEquipo(equipo)
+                    _mensaje.value = "✅ Equipo guardado correctamente"
+                    limpiarCampos()
+                }
+
             } catch (e: Exception) {
                 _mensaje.value = "❌ Error al guardar: ${e.message}"
             }
         }
     }
+
 
     // 🔹 Buscar equipo por serial
     fun buscarEquipo() {
@@ -76,34 +93,44 @@ class EquiposViewModel : ViewModel() {
                     tipo.value = equipo.tipo
                     fechaCertificacion.value = equipo.fechaCertificacion
                     certificadoUrl.value = equipo.certificadoUrl
+
+                    // ✅ Activar modo edición
+                    isEditing.value = true
+
                     _mensaje.value = "🔍 Equipo encontrado"
                 } else {
                     _mensaje.value = "⚠️ No se encontró el equipo"
+
+                    // 🔹 Si no existe, aseguramos que no esté en modo edición
+                    isEditing.value = false
                 }
             } catch (e: Exception) {
                 _mensaje.value = "❌ Error al buscar: ${e.message}"
+                isEditing.value = false
             }
         }
     }
 
-    // 🔹 Eliminar equipo
+
+    // 🔹 Eliminar equipo y limpiar campos
     fun eliminarEquipo() {
         viewModelScope.launch {
             try {
-                repository.eliminarEquipo(serial.value)
+                repository.eliminarEquipo(serial.value, certificadoUrl.value)
                 limpiarCampos()
-                _mensaje.value = "🗑️ Equipo eliminado correctamente"
+                _mensaje.value = "🗑️ Equipo y certificado eliminados correctamente"
             } catch (e: Exception) {
                 _mensaje.value = "❌ Error al eliminar: ${e.message}"
             }
         }
     }
 
-    // 🔹 Subir certificado
+    // 🔹 Subir certificado (reemplaza si ya existe)
     fun subirCertificado(bytes: ByteArray) {
         viewModelScope.launch {
             try {
-                val url = repository.subirCertificado(serial.value, bytes)
+                // Pasamos también la URL anterior al repositorio
+                val url = repository.subirCertificado(serial.value, bytes, certificadoUrl.value)
                 certificadoUrl.value = url
                 _mensaje.value = "📄 Certificado subido correctamente"
             } catch (e: Exception) {
@@ -111,6 +138,8 @@ class EquiposViewModel : ViewModel() {
             }
         }
     }
+
+
 
     // 🔹 Obtener tipos desde Firebase
     private fun obtenerTipos() {
@@ -127,17 +156,25 @@ class EquiposViewModel : ViewModel() {
     fun agregarNuevoTipo(nombre: String) {
         viewModelScope.launch {
             try {
+                if (nombre.isBlank()) {
+                    _mensaje.value = "⚠️ Escribe un nombre válido"
+                    return@launch
+                }
+
                 repository.agregarNuevoTipo(nombre)
-                obtenerTipos()
-                _mensaje.value = "🆕 Tipo agregado correctamente"
+                obtenerTipos() // 🔄 Actualiza la lista en pantalla
+                tipo.value = nombre // Asigna el nuevo tipo seleccionado automáticamente
+                _mensaje.value = "✅ Tipo agregado correctamente"
+
             } catch (e: Exception) {
                 _mensaje.value = "❌ Error al agregar tipo: ${e.message}"
             }
         }
     }
 
+
     // 🔹 Limpia los campos del formulario
-    private fun limpiarCampos() {
+    fun limpiarCampos() {
         serial.value = ""
         referencia.value = ""
         descripcion.value = ""

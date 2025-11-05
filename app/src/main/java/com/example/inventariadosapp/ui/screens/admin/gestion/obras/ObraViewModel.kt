@@ -1,167 +1,113 @@
-package com.example.inventariadosapp.screens.admin.gestion
+package com.example.inventariadosapp.ui.screens.admin.gestion.obras
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import com.google.firebase.firestore.FirebaseFirestore
-
-data class Obra(
-    val idObra: String = "",
-    val nombreObra: String = "",
-    val ubicacion: String = "",
-    val clienteNombre: String = ""
-)
+import androidx.lifecycle.viewModelScope
+import com.example.inventariadosapp.data.repository.ObraRepository
+import com.example.inventariadosapp.domain.model.Obra
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 class ObraViewModel : ViewModel() {
 
-    private val db = FirebaseFirestore.getInstance()
+    private val repository = ObraRepository()
 
-    // Campos observables para la UI
-    var nombreObra by mutableStateOf("")
-        private set
-    var ubicacion by mutableStateOf("")
-        private set
-    var clienteNombre by mutableStateOf("")
-        private set
+    // Campos del formulario
+    val nombreObra = MutableStateFlow("")
+    val ubicacion = MutableStateFlow("")
+    val clienteNombre = MutableStateFlow("")
 
-    // Mensaje dinámico
-    var mensaje by mutableStateOf("")
-        private set
+    // Mensaje de estado para mostrar en pantalla
+    private val _mensaje = MutableStateFlow("")
+    val mensaje = _mensaje.asStateFlow()
 
-    // Validaciones visuales
-    var nombreObraError by mutableStateOf(false)
-        private set
-    var ubicacionError by mutableStateOf(false)
-        private set
-
-    // 🔹 Actualizadores
-    fun updateNombreObra(valor: String) {
-        nombreObra = valor
-        nombreObraError = false
+    // 🔹 Actualiza campos (se conectan con los CustomTextField)
+    fun updateNombreObra(nuevo: String) {
+        nombreObra.value = nuevo
     }
 
-    fun updateUbicacion(valor: String) {
-        ubicacion = valor
-        ubicacionError = false
+    fun updateUbicacion(nueva: String) {
+        ubicacion.value = nueva
     }
 
-    fun updateCliente(valor: String) {
-        clienteNombre = valor
+    fun updateCliente(nuevo: String) {
+        clienteNombre.value = nuevo
     }
 
-    // 🔹 GUARDAR (con validación de duplicado y normalización)
-    fun guardarObra() {
-        if (nombreObra.isBlank()) {
-            nombreObraError = true
-            mensaje = "⚠️ El nombre de la obra es obligatorio."
-            return
-        }
-        if (ubicacion.isBlank()) {
-            ubicacionError = true
-            mensaje = "⚠️ La ubicación es obligatoria."
-            return
-        }
-
-        val obrasRef = db.collection("obras")
-        val nombreNormalizado = nombreObra.trim().lowercase()
-
-        // Verificar duplicados ignorando mayúsculas/minúsculas
-        obrasRef.whereEqualTo("nombreObraLower", nombreNormalizado)
-            .get()
-            .addOnSuccessListener { snapshot ->
-                if (!snapshot.isEmpty) {
-                    mensaje = "⚠️ Ya existe una obra con ese nombre."
-                } else {
-                    val nuevaObra = hashMapOf(
-                        "idObra" to db.collection("obras").document().id,
-                        "nombreObra" to nombreObra.trim(),
-                        "nombreObraLower" to nombreNormalizado,
-                        "ubicacion" to ubicacion.trim(),
-                        "clienteNombre" to clienteNombre.trim()
-                    )
-
-                    obrasRef.add(nuevaObra)
-                        .addOnSuccessListener {
-                            mensaje = "✅ Obra guardada correctamente."
-                            limpiarCampos()
-                        }
-                        .addOnFailureListener {
-                            mensaje = "❌ Error al guardar la obra: ${it.message}"
-                        }
-                }
-            }
-            .addOnFailureListener {
-                mensaje = "❌ Error al verificar duplicados: ${it.message}"
-            }
-    }
-
-    // 🔹 BUSCAR (sin importar mayúsculas/minúsculas)
-    fun buscarObra() {
-        if (nombreObra.isBlank()) {
-            mensaje = "⚠️ Escribe el nombre de la obra a buscar."
-            return
-        }
-
-        val nombreNormalizado = nombreObra.trim().lowercase()
-
-        db.collection("obras")
-            .whereEqualTo("nombreObraLower", nombreNormalizado)
-            .get()
-            .addOnSuccessListener { snapshot ->
-                if (snapshot.isEmpty) {
-                    mensaje = "❌ No se encontró la obra."
-                } else {
-                    val doc = snapshot.documents.first()
-                    nombreObra = doc.getString("nombreObra") ?: ""
-                    ubicacion = doc.getString("ubicacion") ?: ""
-                    clienteNombre = doc.getString("clienteNombre") ?: ""
-                    mensaje = "✅ Obra encontrada y cargada."
-                }
-            }
-            .addOnFailureListener {
-                mensaje = "❌ Error al buscar: ${it.message}"
-            }
-    }
-
-    // 🔹 ELIMINAR (por nombre, sin importar mayúsculas)
-    fun eliminarObra() {
-        if (nombreObra.isBlank()) {
-            mensaje = "⚠️ Escribe el nombre de la obra a eliminar."
-            return
-        }
-
-        val nombreNormalizado = nombreObra.trim().lowercase()
-        val obrasRef = db.collection("obras")
-
-        obrasRef.whereEqualTo("nombreObraLower", nombreNormalizado)
-            .get()
-            .addOnSuccessListener { snapshot ->
-                if (snapshot.isEmpty) {
-                    mensaje = "❌ No se encontró la obra para eliminar."
-                } else {
-                    val id = snapshot.documents.first().id
-                    obrasRef.document(id).delete()
-                        .addOnSuccessListener {
-                            mensaje = "🗑️ Obra eliminada correctamente."
-                            limpiarCampos()
-                        }
-                        .addOnFailureListener {
-                            mensaje = "❌ Error al eliminar la obra: ${it.message}"
-                        }
-                }
-            }
-            .addOnFailureListener {
-                mensaje = "❌ Error al buscar la obra: ${it.message}"
-            }
-    }
-
-    // 🔹 Limpiar campos después de guardar/eliminar
+    // 🔹 Limpia los campos del formulario
     private fun limpiarCampos() {
-        nombreObra = ""
-        ubicacion = ""
-        clienteNombre = ""
-        nombreObraError = false
-        ubicacionError = false
+        nombreObra.value = ""
+        ubicacion.value = ""
+        clienteNombre.value = ""
+    }
+
+    // 🔹 Buscar obra por nombre
+    fun buscarObra() {
+        viewModelScope.launch {
+            try {
+                val obra = repository.buscarObra(nombreObra.value)
+                if (obra != null) {
+                    nombreObra.value = obra.nombreObra
+                    ubicacion.value = obra.ubicacion
+                    clienteNombre.value = obra.clienteNombre
+                    _mensaje.value = "🔍 Obra encontrada"
+                } else {
+                    _mensaje.value = "⚠️ No se encontró la obra"
+                }
+            } catch (e: Exception) {
+                _mensaje.value = "❌ Error al buscar: ${e.message}"
+            }
+        }
+    }
+
+    // 🔹 Guardar o actualizar obra (con validación de duplicado)
+    fun guardarObra() {
+        viewModelScope.launch {
+            try {
+                val nombreNormalizado = nombreObra.value.trim().lowercase()
+                val obraExistente = repository.buscarObra(nombreNormalizado)
+
+                // Si ya existe una obra con el mismo nombre, mostrar mensaje y salir
+                if (obraExistente != null) {
+                    _mensaje.value = "⚠️ Ya existe una obra con este nombre. Usa 'Buscar' para actualizarla."
+                    return@launch
+                }
+
+                // Si no existe, se crea nueva
+                val nuevaObra = Obra(
+                    idObra = "", // Firebase lo generará automáticamente
+                    nombreObra = nombreObra.value,
+                    nombreObraLower = nombreNormalizado,
+                    ubicacion = ubicacion.value,
+                    clienteNombre = clienteNombre.value
+                )
+
+                repository.guardarObra(nuevaObra)
+                _mensaje.value = "✅ Obra guardada correctamente"
+
+                limpiarCampos()
+            } catch (e: Exception) {
+                _mensaje.value = "❌ Error al guardar: ${e.message}"
+            }
+        }
+    }
+
+
+    // 🔹 Eliminar obra
+    fun eliminarObra() {
+        viewModelScope.launch {
+            try {
+                val obra = repository.buscarObra(nombreObra.value)
+                if (obra != null) {
+                    repository.eliminarObra(obra.idObra)
+                    limpiarCampos()
+                    _mensaje.value = "🗑️ Obra eliminada correctamente"
+                } else {
+                    _mensaje.value = "⚠️ No se encontró la obra a eliminar"
+                }
+            } catch (e: Exception) {
+                _mensaje.value = "❌ Error al eliminar: ${e.message}"
+            }
+        }
     }
 }

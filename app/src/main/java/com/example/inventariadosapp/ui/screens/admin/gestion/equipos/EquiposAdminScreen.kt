@@ -179,15 +179,13 @@ fun EquiposAdminScreen(navController: NavController, viewModel: EquiposViewModel
                             .menuAnchor()
                             .fillMaxWidth()
                             .height(52.dp)
-
-
-
                     )
 
                     ExposedDropdownMenu(
                         expanded = expanded,
                         onDismissRequest = { expanded = false }
                     ) {
+                        // 🔹 Mostrar todos los tipos existentes
                         viewModel.tiposEquipos.collectAsState().value.forEach { opcion ->
                             DropdownMenuItem(
                                 text = { Text(opcion, fontFamily = Kavoon) },
@@ -197,8 +195,70 @@ fun EquiposAdminScreen(navController: NavController, viewModel: EquiposViewModel
                                 }
                             )
                         }
+
+                        // 🔹 Agregar opción "➕ Otros"
+                        DropdownMenuItem(
+                            text = { Text("➕ Otros", fontFamily = Kavoon) },
+                            onClick = {
+                                expanded = false
+                                viewModel.onTipoChange("➕ Otros")
+                            }
+                        )
                     }
                 }
+
+// 🔸 Campo para escribir un nuevo tipo (ahora correctamente fuera del menú)
+                if (viewModel.tipo.collectAsState().value == "➕ Otros") {
+                    var nuevoTipo by remember { mutableStateOf("") }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+                    OutlinedTextField(
+                        value = nuevoTipo,
+                        onValueChange = { nuevoTipo = it },
+                        label = { Text("Escriba nuevo tipo de equipo") },
+                        shape = RoundedCornerShape(16.dp),
+                        modifier = Modifier.fillMaxWidth(0.9f),
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color(0xFFBEBFF5),
+                            unfocusedContainerColor = Color(0xFFBEBFF5),
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent
+                        ),
+                        textStyle = androidx.compose.ui.text.TextStyle(
+                            color = Color.Black,
+                            fontSize = 16.sp,
+                            fontFamily = Kavoon
+                        )
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Button(
+                        onClick = {
+                            if (nuevoTipo.isNotEmpty()) {
+                                // Formatear para guardar con mayúscula inicial
+                                val tipoFormateado = nuevoTipo.trim().replaceFirstChar { it.uppercase() }
+                                viewModel.agregarNuevoTipo(tipoFormateado)
+                                nuevoTipo = ""
+                            }
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = colorResource(id = R.color.campo_fondo)
+                        ),
+                        shape = RoundedCornerShape(16.dp),
+                        modifier = Modifier
+                            .fillMaxWidth(0.9f)
+                            .height(45.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_add),
+                            contentDescription = "Agregar tipo",
+                            tint = Color(0xFF000000)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text("Guardar nuevo tipo", color = Color(0xFF000000), fontFamily = Kavoon)
+                    }
+                }
+
 
                 // 📅 Fecha de certificación
                 Text(
@@ -237,7 +297,7 @@ fun EquiposAdminScreen(navController: NavController, viewModel: EquiposViewModel
                 Spacer(modifier = Modifier.height(16.dp))
 
 
-// 📁 Certificado
+                // 📁 Certificado
                 Text(
                     text = "Certificado",
                     color = colorResource(id = R.color.texto_principal),
@@ -249,7 +309,7 @@ fun EquiposAdminScreen(navController: NavController, viewModel: EquiposViewModel
 
                 val certificadoUrl = viewModel.certificadoUrl.collectAsState().value
 
-// 🔹 Si NO hay certificado subido, muestra botón "Subir Archivo"
+                // 🔹 Si NO hay certificado subido, muestra botón "Subir Archivo"
                 if (certificadoUrl.isEmpty()) {
                     Button(
                         onClick = { launcher.launch("application/pdf") },

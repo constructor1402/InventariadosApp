@@ -9,6 +9,7 @@ import androidx.compose.runtime.setValue
 
 class UserViewModel : ViewModel() {
 
+    var idUsuario by mutableStateOf("")
     var nombre by mutableStateOf("")
     var celular by mutableStateOf("")
     var correo by mutableStateOf("")
@@ -34,49 +35,65 @@ class UserViewModel : ViewModel() {
 
     fun guardarUsuario() {
         viewModelScope.launch {
-            if (nombre.isBlank() || celular.isBlank() || correo.isBlank() ||
-                contrasena.isBlank() || rol.isBlank()
-            ) {
-                mensajeEstado = "Por favor completa todos los campos ⚠️"
-                return@launch
-            }
+            try {
+                if (nombre.isBlank() || celular.isBlank() || correo.isBlank() ||
+                    contrasena.isBlank() || rol.isBlank()
+                ) {
+                    mensajeEstado = "⚠️ Por favor completa todos los campos"
+                    return@launch
+                }
 
-            if (!correo.contains("@") || !correo.contains(".")) {
-                mensajeEstado = "Correo electrónico inválido ❌"
-                return@launch
-            }
+                if (!correo.contains("@") || !correo.contains(".")) {
+                    mensajeEstado = "❌ Correo electrónico inválido"
+                    return@launch
+                }
 
-            val usuario = UserUiState(nombre, celular, correo, contrasena, rol)
-            repository.guardarOActualizarUsuario(usuario)
+                val usuario = UserUiState(
+                    idUsuario = idUsuario,
+                    nombre = nombre,
+                    celular = celular,
+                    correo = correo,
+                    contrasena = contrasena,
+                    rol = rol
+                )
 
-            // 🧹 Limpia los campos después de guardar
-            limpiarCampos()
+                repository.guardarOActualizarUsuario(usuario)
 
-            mensajeEstado = "Usuario guardado o actualizado correctamente ✅"
-        }
-    }
-
-
-    fun buscarUsuario() {
-        viewModelScope.launch {
-            if (correo.isBlank()) {
-                mensajeEstado = "Ingresa un correo para buscar ⚠️"
-                return@launch
-            }
-
-            val user = repository.buscarUsuario(correo)
-            if (user != null) {
-                nombre = user.nombre
-                celular = user.celular
-                contrasena = user.contrasena
-                rol = user.rol
-                mensajeEstado = "Usuario encontrado con éxito ✅"
-            } else {
                 limpiarCampos()
-                mensajeEstado = "Usuario no encontrado ❌"
+                mensajeEstado = "✅ Usuario guardado correctamente"
+
+            } catch (e: Exception) {
+                mensajeEstado = e.message ?: "❌ Error al guardar el usuario"
             }
         }
     }
+
+
+
+    fun buscarUsuarioPorCorreo() {
+
+        viewModelScope.launch {
+            try {
+                val resultado = repository.buscarUsuario(correo)
+                if (resultado != null) {
+                    // ✅ Asigna los datos encontrados
+                    idUsuario = resultado.idUsuario
+                    nombre = resultado.nombre
+                    celular = resultado.celular
+                    correo = resultado.correo
+                    contrasena = resultado.contrasena
+                    rol = resultado.rol
+
+                    mensajeEstado = "✅ Usuario encontrado"
+                } else {
+                    mensajeEstado = "❌ No se encontró ningún usuario con ese correo"
+                }
+            } catch (e: Exception) {
+                mensajeEstado = "⚠️ Error al buscar: ${e.message}"
+            }
+        }
+    }
+
 
     fun eliminarUsuario() {
         viewModelScope.launch {
@@ -100,12 +117,5 @@ class UserViewModel : ViewModel() {
     }
 }
 
-data class UserUiState(
-    val nombre: String = "",
-    val celular: String = "",
-    val correo: String = "",
-    val contrasena: String = "",
-    val rol: String = ""
-)
 
 

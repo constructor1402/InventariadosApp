@@ -23,6 +23,7 @@ import androidx.navigation.NavController
 import com.example.inventariadosapp.R
 import com.example.inventariadosapp.ui.screens.admin.gestion.components.ActionButtons
 import com.example.inventariadosapp.ui.screens.admin.gestion.components.CustomTextField
+import com.example.inventariadosapp.ui.screens.admin.gestion.obras.ObraViewModel
 import com.example.inventariadosapp.ui.theme.Kavoon
 
 
@@ -62,25 +63,28 @@ fun ObrasAdminScreen(navController: NavController) {
                 Spacer(modifier = Modifier.height(12.dp))
 
                 // Campos conectados al ViewModel
+                // Nombre de la Obra
                 CustomTextField(
                     label = "Nombre de Obra",
                     placeholder = "Escribe nombre de la obra",
-                    value = viewModel.nombreObra,
-                    onValueChange = { viewModel.updateNombreObra(it) }
+                    value = viewModel.nombreObra.collectAsState().value,
+                    onValueChange = { nuevo -> viewModel.updateNombreObra(nuevo) }
                 )
 
+                // Ubicación
                 CustomTextField(
                     label = "Ubicación",
-                    placeholder = "Ingresa ubicación",
-                    value = viewModel.ubicacion,
-                    onValueChange = { viewModel.updateUbicacion(it) }
+                    placeholder = "Ingrese ubicación",
+                    value = viewModel.ubicacion.collectAsState().value,
+                    onValueChange = { nuevo -> viewModel.updateUbicacion(nuevo) }
                 )
 
+                // Cliente
                 CustomTextField(
                     label = "Cliente",
                     placeholder = "Cliente asociado",
-                    value = viewModel.clienteNombre,
-                    onValueChange = { viewModel.updateCliente(it) }
+                    value = viewModel.clienteNombre.collectAsState().value,
+                    onValueChange = { nuevo -> viewModel.updateCliente(nuevo) }
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
@@ -99,14 +103,18 @@ fun ObrasAdminScreen(navController: NavController) {
                 }
 
                 // Mensaje dinámico
-                viewModel.mensaje.let { mensaje ->
+                // 🟢 Mensaje dinámico
+                val mensaje = viewModel.mensaje.collectAsState().value
+
+                if (mensaje.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(10.dp))
                     Text(
                         text = mensaje,
                         color = when {
-                            mensaje.startsWith("✅") -> Color(0xFF2E7D32)
-                            mensaje.startsWith("⚠️") -> Color(0xFFFFA000)
-                            else -> Color(0xFFD32F2F)
+                            mensaje.startsWith("✅") -> Color(0xFF2E7D32) // verde éxito
+                            mensaje.startsWith("⚠️") -> Color(0xFFFFA000) // amarillo advertencia
+                            mensaje.startsWith("❌") -> Color(0xFFD32F2F) // rojo error
+                            else -> Color.Black
                         },
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp,
@@ -114,6 +122,7 @@ fun ObrasAdminScreen(navController: NavController) {
                         modifier = Modifier.fillMaxWidth(0.9f)
                     )
                 }
+
             }
 
             // 🔙 Flecha hacia atrás (con zIndex para estar arriba del contenido)
