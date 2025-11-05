@@ -174,7 +174,7 @@ fun DropdownTipo(
     onTypeChange: (String) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
-    val opciones = listOf("Herramienta", "Maquinaria", "Vehículo")
+    val opciones = listOf("EQ TOPOGRÁFICO", "PROTECCIÓN", "PORTATIL")
 
     ExposedDropdownMenuBox(
         expanded = expanded,
