@@ -14,11 +14,13 @@ import com.example.inventariadosapp.ui.screens.Topografo.assign.AssignNavGraph.A
 import com.example.inventariadosapp.ui.screens.Topografo.assign.models.AssignCameraScreen
 import com.example.inventariadosapp.ui.screens.Topografo.assign.models.AssignManualScreen
 import com.example.inventariadosapp.ui.screens.Topografo.assign.models.TopografoAssignViewModel
+import com.example.inventariadosapp.ui.screens.Topografo.informes.InformesTopografoScreen
 
 
 @Composable
-fun TopografoNavigation(parentNavController: NavController) {
-    val navController: NavHostController = rememberNavController()
+fun TopografoNavigation(parentNavController: NavHostController) {
+    val navController = rememberNavController()
+
 
     //INICIALIZA EL VIEWMODEL PARA ASIGNAR
     val assignViewModel: TopografoAssignViewModel = viewModel()
@@ -27,14 +29,14 @@ fun TopografoNavigation(parentNavController: NavController) {
         navController = navController,
         startDestination = "inicio_topografo"
     ) {
-        // 🏠 Pantalla principal del topógrafo
+        // 🏠 Pantalla de inicio
         composable(route = "inicio_topografo") {
-            //  👇  --- ARREGLO 1 (Error 'parentNavController') ---
             InicioTopografoScreen(
                 navController = navController,
                 parentNavController = parentNavController
             )
         }
+
 
         // ⚙️ Pantalla de gestión (Asignar / Devolver)
         composable(route = "gestion_topografo") {
@@ -83,5 +85,10 @@ fun TopografoNavigation(parentNavController: NavController) {
                 }
             )
         }
+        // 📊 Pantalla de Informes del Topógrafo
+        composable(route = "informes_topografo") {
+            InformesTopografoScreen(navController)
+        }
+
     }
 }

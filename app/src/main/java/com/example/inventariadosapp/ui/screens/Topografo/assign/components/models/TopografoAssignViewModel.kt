@@ -1,5 +1,6 @@
 package com.example.inventariadosapp.ui.screens.Topografo.assign.models
 
+import android.content.Context
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -7,6 +8,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
+import com.example.inventariadosapp.utils.PreferencesHelper
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -124,9 +126,11 @@ class TopografoAssignViewModel : ViewModel() {
     }
 
     // 🔹 Guarda la asignación del equipo y registra el historial
-    fun guardarAsignacion(navController: NavHostController) {
-        val currentUser = auth.currentUser
-        if (currentUser == null) {
+    fun guardarAsignacion(navController: NavHostController, context: Context) {
+        // ✅ Obtener el contexto y el nombre del usuario activo desde preferencias
+        val nombreActivo = PreferencesHelper.obtenerNombreActivo(context)
+
+        if (nombreActivo.isNullOrEmpty()) {
             viewModelScope.launch { _uiEvent.emit("Error: No se pudo identificar al usuario.") }
             return
         }
@@ -144,17 +148,22 @@ class TopografoAssignViewModel : ViewModel() {
         isLoading = true
         viewModelScope.launch {
             try {
-                // 🔹 Buscar usuario por UID o correo electrónico
+                // 🔹 Buscar usuario en la colección 'usuarios' por nombre
                 val userQuery = db.collection("usuarios")
-                    .whereEqualTo("correoElectronico", currentUser.email)
+                    .whereEqualTo("nombreCompleto", nombreActivo)
                     .get()
                     .await()
 
-                val userDoc = if (!userQuery.isEmpty) userQuery.documents.first() else
-                    db.collection("usuarios").document(currentUser.uid).get().await()
+                if (userQuery.isEmpty) {
+                    _uiEvent.emit("⚠️ No se encontró el usuario en la base de datos.")
+                    isLoading = false
+                    return@launch
+                }
 
-                val userName = userDoc?.getString("nombreCompleto") ?: currentUser.email ?: "Usuario desconocido"
-                val userEmail = userDoc?.getString("correoElectronico") ?: currentUser.email ?: "Sin email"
+                val userDoc = userQuery.documents.first()
+                val userName = userDoc.getString("nombreCompleto") ?: nombreActivo
+                val userEmail = userDoc.getString("correoElectronico") ?: "Sin correo"
+                val userUid = userDoc.id  // usamos el ID del documento como identificador único
 
                 // 🔹 Crear registro de historial
                 val log = AsignacionLog(
@@ -164,12 +173,12 @@ class TopografoAssignViewModel : ViewModel() {
                     obraAsignada = selectedEquipo.obra,
                     fechaAsignacion = Timestamp(Date()),
                     estadoPrevio = selectedEquipo.estado,
-                    usuarioUid = currentUser.uid,
+                    usuarioUid = userUid,
                     usuarioEmail = userEmail,
                     usuarioNombre = userName
                 )
 
-                // 🔹 Guardar historial
+                // 🔹 Guardar historial en la colección 'asignaciones'
                 db.collection("asignaciones")
                     .add(log)
                     .await()
@@ -196,4 +205,5 @@ class TopografoAssignViewModel : ViewModel() {
             }
         }
     }
+
 }

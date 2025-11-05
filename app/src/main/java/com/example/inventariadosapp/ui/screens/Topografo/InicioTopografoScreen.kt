@@ -1,5 +1,6 @@
 package com.example.inventariadosapp.ui.screens.Topografo
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -16,9 +17,23 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.inventariadosapp.R
 import com.example.inventariadosapp.ui.theme.Kavoon
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.navigation.NavHostController
+import com.example.inventariadosapp.utils.PreferencesHelper
+
 
 @Composable
-fun InicioTopografoScreen(navController: NavController, parentNavController: NavController) {
+
+fun InicioTopografoScreen(
+    navController: NavHostController,
+    parentNavController: NavHostController
+)
+
+
+{
     Scaffold(
         bottomBar = {
             BottomNavTopografo(
@@ -33,10 +48,11 @@ fun InicioTopografoScreen(navController: NavController, parentNavController: Nav
                 .background(colorResource(id = R.color.fondo_claro))
                 .padding(padding)
         ) {
-            // 🔴 Botón cerrar sesión (X roja)
+            // Botón cerrar sesión
             IconButton(
                 onClick = {
-                    navController.navigate("login") {
+                    PreferencesHelper.guardarNombreActivo(parentNavController.context, "")
+                    parentNavController.navigate("login") {
                         popUpTo("panel_topografo") { inclusive = true }
                         launchSingleTop = true
                     }
@@ -52,6 +68,7 @@ fun InicioTopografoScreen(navController: NavController, parentNavController: Nav
                     modifier = Modifier.size(36.dp)
                 )
             }
+
 
             Column(
                 modifier = Modifier
@@ -74,6 +91,13 @@ fun InicioTopografoScreen(navController: NavController, parentNavController: Nav
                 Spacer(modifier = Modifier.height(24.dp))
 
                 // 🟪 Tarjeta de equipos disponibles
+                val viewModel: InicioTopografoViewModel = viewModel()
+                val equiposDisponibles by viewModel.equiposDisponibles.collectAsState()
+
+                LaunchedEffect(Unit) {
+                    viewModel.cargarEquiposDisponibles()
+                }
+
                 Card(
                     modifier = Modifier
                         .width(190.dp)
@@ -101,11 +125,12 @@ fun InicioTopografoScreen(navController: NavController, parentNavController: Nav
                         Spacer(modifier = Modifier.height(4.dp))
 
                         Text(
-                            text = "8",
+                            text = equiposDisponibles.toString(),
                             color = Color.White,
                             fontFamily = Kavoon,
                             fontSize = 28.sp
                         )
+
 
                         Text(
                             text = "Equipos Disponibles",
@@ -179,6 +204,33 @@ fun InicioTopografoScreen(navController: NavController, parentNavController: Nav
                         color = Color.White
                     )
                 }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // 📊 Botón Informes
+                Button(
+                    onClick = { navController.navigate("informes_topografo") },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = colorResource(id = R.color.azul_admin)
+                    ),
+                    shape = MaterialTheme.shapes.medium,
+                    modifier = Modifier.fillMaxWidth(0.85f)
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_informes),
+                        contentDescription = "Informes",
+                        tint = Color.White,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Informes",
+                        fontFamily = Kavoon,
+                        fontSize = 16.sp,
+                        color = Color.White
+                    )
+                }
+
             }
         }
     }
