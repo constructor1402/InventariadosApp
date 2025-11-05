@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -30,6 +31,7 @@ import kotlinx.coroutines.tasks.await
 import java.io.File
 import java.io.FileOutputStream
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import com.example.inventariadosapp.ui.screens.admin.gestion.users.UserRepository
 import com.example.inventariadosapp.ui.screens.admin.gestion.users.UserUiState
 import com.google.firebase.Timestamp
@@ -160,95 +162,123 @@ class InformeEquiposViewModel : ViewModel() {
     ): String {
         val pdfDocument = PdfDocument()
         var pageNumber = 1
-        var pageInfo = PdfDocument.PageInfo.Builder(595, 842, pageNumber).create()
+
+        // 📄 Tamaño A4 horizontal
+        var pageInfo = PdfDocument.PageInfo.Builder(842, 595, pageNumber).create()
         var page = pdfDocument.startPage(pageInfo)
         var canvas = page.canvas
 
+        // 🎨 Estilos
         val titlePaint = Paint().apply {
-            textSize = 18f
+            textSize = 20f
             isFakeBoldText = true
+            textAlign = Paint.Align.CENTER
+        }
+
+        val subtitlePaint = Paint().apply {
+            textSize = 12f
+            textAlign = Paint.Align.CENTER
+            color = android.graphics.Color.DKGRAY
         }
 
         val headerPaint = Paint().apply {
-            textSize = 14f
+            textSize = 13f
             isFakeBoldText = true
-            color = android.graphics.Color.rgb(102, 134, 232) // Azul similar al de la app
+            color = android.graphics.Color.WHITE
+            textAlign = Paint.Align.CENTER
         }
 
         val cellPaint = Paint().apply {
-            textSize = 12f
+            textSize = 11f
+            textAlign = Paint.Align.CENTER
+            color = android.graphics.Color.BLACK
         }
 
-        // 🔹 Márgenes y separaciones
-        val startX = 40f
-        var y = 60
-
-        // 🔹 Título y usuario
-        canvas.drawText("Informe de Equipos", 200f, 40f, titlePaint)
-        canvas.drawText("Generado por:", startX, y.toFloat(), cellPaint)
-        y += 20
-        canvas.drawText(" $usuarioCorreo", startX, y.toFloat(), cellPaint)
-        y += 30 // Separación adicional
-
-        // 🔹 Encabezado de tabla
-        val headers = listOf("Serial", "Referencia", "Tipo", "Fecha")
-        val colWidth = 130f
-        var x = startX
-
-        headers.forEach {
-            canvas.drawText(it, x, y.toFloat(), headerPaint)
-            x += colWidth
+        val bgHeaderPaint = Paint().apply {
+            color = android.graphics.Color.rgb(102, 134, 232)
         }
 
-        y += 25
+        val bgRowEven = Paint().apply {
+            color = android.graphics.Color.rgb(247, 248, 252)
+        }
 
-        // 🔹 Filas de datos
+        val bgRowOdd = Paint().apply {
+            color = android.graphics.Color.WHITE
+        }
+
+        val linePaint = Paint().apply {
+            color = android.graphics.Color.LTGRAY
+            strokeWidth = 1f
+        }
+
+        // 📐 Márgenes y disposición general
+        val left = 30f
+        val right = 812f
+        var y = 100f
+
+        // 🧭 Título centrado
+        canvas.drawText("Informe de Equipos", 421f, 50f, titlePaint)
+        canvas.drawText("Generado por: $usuarioCorreo", 421f, 70f, subtitlePaint)
+
+        // 🧱 Encabezado de tabla
+        val headers = listOf("Serial", "Referencia", "Tipo", "Estado", "Obra", "Fecha", "Descripción")
+        val colWidths = listOf(80f, 100f, 80f, 80f, 120f, 100f, 180f)
+        val rowHeight = 26f
+
+        var x = left
+        canvas.drawRect(left, y - 18, right, y + rowHeight, bgHeaderPaint)
+        headers.forEachIndexed { i, header ->
+            val cellCenter = x + colWidths[i] / 2
+            canvas.drawText(header, cellCenter, y + 3, headerPaint)
+            x += colWidths[i]
+        }
+        y += rowHeight + 10
+
+        // 📋 Filas de datos
         equipos.forEachIndexed { index, equipo ->
-            // Si llega al final de la página → nueva
-            if (y > 800) {
+            val bgPaint = if (index % 2 == 0) bgRowEven else bgRowOdd
+
+            // Salto de página si se llena
+            if (y + rowHeight > 550f) {
                 pdfDocument.finishPage(page)
                 pageNumber++
-                pageInfo = PdfDocument.PageInfo.Builder(595, 842, pageNumber).create()
+                pageInfo = PdfDocument.PageInfo.Builder(842, 595, pageNumber).create()
                 page = pdfDocument.startPage(pageInfo)
                 canvas = page.canvas
-                y = 60
-
-                canvas.drawText("Informe de Equipos (cont.)", 200f, 40f, titlePaint)
-                y += 30
-                x = startX
-                headers.forEach {
-                    canvas.drawText(it, x, y.toFloat(), headerPaint)
-                    x += colWidth
-                }
-                y += 25
+                y = 80f
+                canvas.drawText("Informe de Equipos (cont.)", 421f, 50f, titlePaint)
             }
 
-            // Alternar color de fondo en filas
-            val bgPaint = Paint().apply {
-                color = if (index % 2 == 0) android.graphics.Color.rgb(247, 248, 252)
-                else android.graphics.Color.WHITE
-                style = Paint.Style.FILL
-            }
+            // Fondo de fila
+            canvas.drawRect(left, y - 15, right, y + rowHeight, bgPaint)
 
-            // Dibujar fondo de fila
-            canvas.drawRect(startX - 10, (y - 15).toFloat(), 560f, (y + 10).toFloat(), bgPaint)
-
-            // Dibujar datos
-            x = startX
-            listOf(
+            // Datos
+            val descripcionCorta = equipo.descripcion.take(40) + if (equipo.descripcion.length > 40) "..." else ""
+            val values = listOf(
                 equipo.serial,
                 equipo.referencia,
                 equipo.tipo,
-                equipo.fechaCertificacion
-            ).forEach {
-                canvas.drawText(it, x, y.toFloat(), cellPaint)
-                x += colWidth
+                equipo.estado,
+                equipo.obra,
+                equipo.fechaCertificacion,
+                descripcionCorta
+            )
+
+            x = left
+            values.forEachIndexed { i, value ->
+                val cellCenter = x + colWidths[i] / 2
+                canvas.drawText(value, cellCenter, y + 3, cellPaint)
+                x += colWidths[i]
             }
-            y += 22
+
+            // Línea separadora
+            canvas.drawLine(left, y + rowHeight, right, y + rowHeight, linePaint)
+            y += rowHeight + 10
         }
 
         pdfDocument.finishPage(page)
 
+        // 💾 Guardar archivo
         return try {
             val downloads = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
             val file = File(downloads, "Informe_Equipos_${System.currentTimeMillis()}.pdf")
@@ -261,6 +291,8 @@ class InformeEquiposViewModel : ViewModel() {
             "Error al generar PDF: ${e.message}"
         }
     }
+
+
 
 
 
@@ -518,31 +550,69 @@ class InformeEquiposViewModel : ViewModel() {
     @Composable
     fun TablaInformesUsuario(informes: List<Map<String, Any>>) {
         val context = LocalContext.current
+
         Column(Modifier.fillMaxWidth()) {
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            if (informes.isEmpty()) {
+                Text(
+                    text = "No hay informes generados todavía.",
+                    color = Color.Gray,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 16.dp),
+                    fontWeight = FontWeight.Medium
+                )
+                return
+            }
+
+            // Encabezado
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 6.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
                 listOf("Tipo", "Fecha", "Archivo").forEach {
-                    Text(it, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+                    Text(
+                        text = it,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.weight(1f)
+                    )
                 }
             }
+
+            // Filas
             informes.forEach { inf ->
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text(inf["tipo"].toString(), modifier = Modifier.weight(1f))
-                    Text(inf["fecha"].toString(), modifier = Modifier.weight(1f))
+                val tipo = inf["tipo"]?.toString() ?: "-"
+                val url = inf["url"]?.toString() ?: ""
+                val timestamp = inf["fecha"] as? com.google.firebase.Timestamp
+                val fechaFormateada = timestamp?.toDate()?.let {
+                    java.text.SimpleDateFormat("dd/MM/yyyy HH:mm", java.util.Locale.getDefault()).format(it)
+                } ?: "-"
+
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(tipo, modifier = Modifier.weight(1f))
+                    Text(fechaFormateada, modifier = Modifier.weight(1f))
                     Text(
-                        text = "Abrir",
+                        text = if (url.isNotEmpty()) "Abrir" else "-",
                         modifier = Modifier
                             .weight(1f)
-                            .clickable {
-                                val url = inf["urlPDF"].toString()
+                            .clickable(enabled = url.isNotEmpty()) {
                                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
                                 context.startActivity(intent)
                             },
-                        color =Color(0xFF1E3A8A)
+                        color = if (url.isNotEmpty()) Color(0xFF1E3A8A) else Color.Gray,
+                        fontWeight = FontWeight.SemiBold
                     )
                 }
             }
         }
     }
+
 
 
 

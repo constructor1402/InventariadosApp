@@ -59,6 +59,7 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.8.2")
     implementation("androidx.compose.material:material-icons-core:1.7.0")
     implementation("androidx.compose.material:material-icons-extended:1.7.0")
+    implementation("androidx.work:work-runtime-ktx:2.9.0")
 
     // Firebase (BOM gestiona versiones)
     implementation(platform("com.google.firebase:firebase-bom:33.4.0"))
@@ -97,6 +98,7 @@ dependencies {
     implementation("com.google.firebase:firebase-storage:20.3.0")
     implementation("com.google.firebase:firebase-firestore:24.11.1")
     implementation("com.itextpdf:itextg:5.5.10")
+
 
 }
 
