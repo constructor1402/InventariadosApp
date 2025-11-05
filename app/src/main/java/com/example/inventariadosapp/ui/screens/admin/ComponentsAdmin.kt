@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.inventariadosapp.R
+import com.example.inventariadosapp.screens.admin.BottomNavItem
 import com.example.inventariadosapp.ui.theme.Kavoon
 
 @Composable

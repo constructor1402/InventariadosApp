@@ -15,6 +15,7 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
         maven(url = "https://maven.google.com") // ✅ aquí también
+        gradlePluginPortal()
     }
 }
 
