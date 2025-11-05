@@ -35,7 +35,13 @@ fun InicioAdminScreen(
         bottomBar = {
             val bgColor = if (darkTheme) Color(0xFF2C2C2C) else Color(0xFFF5F5F5)
             val textColor = if (darkTheme) Color.White else Color.Black
-            BottomNavigationBar(adminNavController, "inicio_admin", bgColor, textColor)
+            BottomNavigationBar(
+                navController = adminNavController,
+                currentRoute = "inicio_admin",
+                bgColor = bgColor,
+                textColor = textColor,
+                userCorreo = userCorreo
+            )
         }
     ) { padding ->
         Box(
@@ -142,7 +148,9 @@ fun BottomNavigationBar(
     navController: NavController,
     currentRoute: String,
     bgColor: Color,
-    textColor: Color
+    textColor: Color,
+    userCorreo: String
+
 ) {
     Surface(
         color = bgColor,
@@ -178,7 +186,7 @@ fun BottomNavigationBar(
                 icon = R.drawable.ic_informes,
                 label = "Informes",
                 isSelected = currentRoute == "informes_admin",
-                onClick = { if (currentRoute != "informes_admin") navController.navigate("informes_admin") },
+                onClick = { if (currentRoute != "informes_admin") navController.navigate("informes_admin/$userCorreo") },
                 textColor = textColor
             )
         }
