@@ -129,4 +129,28 @@ class EquiposRepository {
         }
     }
 
+    // 🔹 Obtener equipos filtrados por código y/o tipo
+    suspend fun obtenerEquiposFiltrados(codigo: String, tipo: String): List<Equipo> {
+        val query = equiposCollection
+        var ref = query as com.google.firebase.firestore.Query
+
+        // Si se envía código, se filtra por él
+        if (codigo.isNotEmpty()) {
+            ref = ref.whereEqualTo("codigo", codigo)
+        }
+
+        // Si se envía tipo, se filtra también
+        if (tipo.isNotEmpty()) {
+            ref = ref.whereEqualTo("tipo", tipo)
+        }
+
+        return try {
+            val snapshot = ref.get().await()
+            snapshot.toObjects(Equipo::class.java)
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
+
 }

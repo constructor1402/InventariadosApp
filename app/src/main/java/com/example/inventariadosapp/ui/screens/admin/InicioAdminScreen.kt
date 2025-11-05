@@ -6,6 +6,8 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -15,14 +17,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.inventariadosapp.R
+import com.example.inventariadosapp.ui.screens.admin.InicioAdminViewModel
 import com.example.inventariadosapp.ui.theme.Kavoon
 
 @Composable
 fun InicioAdminScreen(
     adminNavController: NavController,
-    mainNavController: NavController
+    mainNavController: NavController,
+    userCorreo: String
 ) {
     val darkTheme = isSystemInDarkTheme()
 
@@ -76,15 +81,23 @@ fun InicioAdminScreen(
                     textAlign = TextAlign.Center
                 )
 
+                // 🔹 ViewModel y estados
+                val viewModel: InicioAdminViewModel = viewModel()
+                val equiposDisponibles by viewModel.equiposDisponibles.collectAsState()
+                val equiposAsignados by viewModel.equiposAsignados.collectAsState()
+                val usuariosCreados by viewModel.usuariosCreados.collectAsState()
+
                 // 📊 Tarjetas distribuidas verticalmente
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(24.dp)
                 ) {
-                    DashboardCard(Color(0xFF3949AB), "8", "Equipos Disponibles")
-                    DashboardCard(Color(0xFF7B1FA2), "12", "Equipos en Uso")
-                    DashboardCard(Color(0xFF43A047), "5", "Usuarios Creados")
+                    DashboardCard(Color(0xFF3949AB), equiposDisponibles.toString(), "Equipos Disponibles")
+                    DashboardCard(Color(0xFF7B1FA2), equiposAsignados.toString(), "Equipos Asignados")
+                    DashboardCard(Color(0xFF43A047), usuariosCreados.toString(), "Usuarios Creados")
                 }
+
+
             }
         }
     }

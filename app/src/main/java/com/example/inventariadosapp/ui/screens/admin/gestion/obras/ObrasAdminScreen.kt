@@ -127,7 +127,7 @@ fun ObrasAdminScreen(navController: NavController) {
 
             // 🔙 Flecha hacia atrás (con zIndex para estar arriba del contenido)
             IconButton(
-                onClick = { navController.navigate("inicio_admin") },
+                onClick = { navController.popBackStack() },
                 modifier = Modifier
                     .align(Alignment.TopStart)
                     .padding(start = 12.dp, top = 12.dp)

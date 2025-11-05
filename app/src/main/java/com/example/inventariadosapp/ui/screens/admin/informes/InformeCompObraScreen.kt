@@ -18,10 +18,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.inventariadosapp.R
-import com.example.inventariadosapp.screens.admin.gestion.Obra
-import com.example.inventariadosapp.ui.screens.admin.informes.InformeEquiposViewModel
+import com.example.inventariadosapp.domain.model.Obra
+import com.example.inventariadosapp.ui.screens.admin.informes.viewmodels.InformeEquiposViewModel
+import com.example.inventariadosapp.ui.screens.admin.informes.viewmodels.InformeObrasViewModel
 import com.example.inventariadosapp.ui.theme.Kavoon
 import kotlinx.coroutines.launch
 
@@ -86,6 +88,8 @@ fun InformeCompObraScreen(
             TablaObrasFirebase(obrasFiltradas)
 
             Spacer(modifier = Modifier.height(20.dp))
+
+            val viewModel: InformeObrasViewModel = viewModel()
 
             // 🔹 Botón generar informe
             Button(

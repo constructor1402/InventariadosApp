@@ -36,10 +36,11 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import com.example.inventariadosapp.admin.consulta.navigation.ConsultRoutes
 import com.example.inventariadosapp.admin.consulta.viewmodel.ConsultViewModel
 import com.example.inventariadosapp.admin.consulta.models.MetricData
-
 import com.example.inventariadosapp.admin.report.reportnavgraph.ReportRoutes
-
-
+import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import com.example.inventariadosapp.R
 
 
 sealed class BottomNavItem(val route: String, val icon: ImageVector, val label: String) {
@@ -53,6 +54,7 @@ sealed class BottomNavItem(val route: String, val icon: ImageVector, val label: 
 val bottomNavItems = listOf(BottomNavItem.Inicio, BottomNavItem.Informes)
 
 
+
 @Composable
 fun HomeScreenConsult(
     navController: NavController,
@@ -62,33 +64,27 @@ fun HomeScreenConsult(
 
     Scaffold(
         bottomBar = {
-            NavigationBar(
-                containerColor = Color.White,
-            ) {
-                // Obtenemos la ruta actual para saber qué ítem seleccionar
+            NavigationBar(containerColor = Color.White) {
                 val currentRoute = navController.currentBackStackEntry?.destination?.route
 
                 bottomNavItems.forEach { item ->
-                    // Comprueba si la ruta actual es la ruta del ítem
                     val isSelected = currentRoute == item.route
-
                     NavigationBarItem(
                         icon = { Icon(item.icon, contentDescription = item.label, modifier = Modifier.size(24.dp)) },
                         label = { Text(item.label, fontSize = 12.sp) },
                         selected = isSelected,
                         onClick = {
                             if (currentRoute != item.route) {
-                                // Navegamos a la ruta deseada
                                 navController.navigate(item.route) {
-                                    // Limpiamos el back stack hasta el inicio del grafo
                                     popUpTo(navController.graph.findStartDestination().id) {
-                                        saveState = true // Guardar el estado de la pantalla anterior (Inicio)
+                                        saveState = true
                                     }
-                                    launchSingleTop = true // Evitar múltiples copias
-                                    restoreState = true // Restaurar si ya estaba en el stack
+                                    launchSingleTop = true
+                                    restoreState = true
                                 }
                             }
-                        })
+                        }
+                    )
                 }
             }
         }
@@ -101,20 +97,28 @@ fun HomeScreenConsult(
                 .padding(horizontal = 16.dp, vertical = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Flecha de retroceso
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = { navController.popBackStack() }) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = "Volver", tint = Color.Black)
+            Box(modifier = Modifier.fillMaxWidth()) {
+                IconButton(
+                    onClick = {
+                        navController.navigate("login") {
+                            popUpTo(0)
+                            launchSingleTop = true
+                        }
+                    },
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(8.dp)
+                ) {
+                    Image(
+                        painter = painterResource(id = com.example.inventariadosapp.R.drawable.ic_close_roja),
+                        contentDescription = stringResource(id = R.string.close_app_description),
+                        modifier = Modifier.size(40.dp)
+                    )
                 }
-                Spacer(Modifier.weight(1f))
             }
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Título y Métricas (Resumen general)
             Text(
                 text = "Resumen general",
                 fontSize = 28.sp,
@@ -124,24 +128,22 @@ fun HomeScreenConsult(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Tarjetas de métricas
             MetricCard(
                 value = metricas.equiposDisponibles.toString(),
                 description = "Equipos Disponibles",
-                cardBackgroundColor = Color(0xFF3F51B5), // Azul fuerte
+                cardBackgroundColor = Color(0xFF3F51B5),
                 icon = Icons.Default.Description
             )
             Spacer(modifier = Modifier.height(16.dp))
             MetricCard(
                 value = metricas.equiposEnUso.toString(),
                 description = "Equipos en Uso",
-                cardBackgroundColor = Color(0xFF9C27B0), // Púrpura
+                cardBackgroundColor = Color(0xFF9C27B0),
                 icon = Icons.Default.List
             )
 
             Spacer(modifier = Modifier.height(40.dp))
 
-            // Acceso Rápido y Botón
             Text(
                 text = "Acceso Rápidos",
                 fontSize = 24.sp,
@@ -151,11 +153,8 @@ fun HomeScreenConsult(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // Botón "Ver Reportes Detallados"
             Button(
-                onClick = {
-                    navController.navigate(ConsultRoutes.ALL_REPORTS)
-                },
+                onClick = { navController.navigate(ConsultRoutes.ALL_REPORTS) },
                 modifier = Modifier
                     .fillMaxWidth(0.9f)
                     .height(60.dp),
@@ -182,10 +181,12 @@ fun HomeScreenConsult(
                     )
                 }
             }
+
             Spacer(Modifier.weight(1f))
         }
     }
 }
+
 
 
 @Composable

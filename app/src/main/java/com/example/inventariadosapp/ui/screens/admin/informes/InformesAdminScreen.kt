@@ -1,104 +1,68 @@
-package com.example.inventariadosapp.screens.admin
+package com.example.inventariadosapp.ui.screens.admin.informes
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.inventariadosapp.R
-import com.example.inventariadosapp.ui.theme.Kavoon
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun InformesAdminScreen(adminNavController: NavController,userCorreo: String) {
-    Scaffold { padding ->
-        Box(
+fun InformesAdminScreen(
+    navController: NavController,
+    userCorreo: String
+) {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        "Panel de Informes",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 20.sp
+                    )
+                }
+            )
+        }
+    ) { padding ->
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(colorResource(id = R.color.fondo_claro))
                 .padding(padding)
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            // 🔙 Flecha hacia atrás que vuelve al inicio
-            IconButton(
-                onClick = { adminNavController.navigate("inicio_admin/$userCorreo") },
-                modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .padding(start = 16.dp, top = 12.dp)
+            Text(
+                text = "Selecciona el tipo de informe a generar",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium
+            )
+
+            Button(
+                onClick = { navController.navigate("informe_equipos/$userCorreo") },
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_arrow_back),
-                    contentDescription = "Volver",
-                    tint = Color.Unspecified,
-                    modifier = Modifier.size(36.dp)
-                )
+                Text("📋 Informe de Equipos", fontSize = 16.sp)
             }
 
-
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 24.dp, vertical = 50.dp),
-                verticalArrangement = Arrangement.spacedBy(30.dp, Alignment.CenterVertically),
-                horizontalAlignment = Alignment.CenterHorizontally
+            Button(
+                onClick = { navController.navigate("informe_obras/$userCorreo") },
+                modifier = Modifier.fillMaxWidth()
             ) {
+                Text("🏗️ Informe de Obras", fontSize = 16.sp)
+            }
 
-                // 🔹 Botón 1: Informe de Equipos
-                BotonInforme(
-                    texto = "Informe de equipos",
-                    colorFondo = Color(0xFF3949AB),
-                    onClick = { adminNavController.navigate("informe_equipos/$userCorreo") }
-                )
-
-                // 🔹 Botón 2: Informe de Obras
-                BotonInforme(
-                    texto = "Informe de obras",
-                    colorFondo = Color(0xFF7B1FA2),
-                    onClick = { adminNavController.navigate("informe_Obras/$userCorreo") }
-                )
-
-                // 🔹 Botón 3: Informe de Usuarios
-                BotonInforme(
-                    texto = "Informe de usuarios",
-                    colorFondo = Color(0xFF6686E8),
-                    onClick = { adminNavController.navigate("informe_Usuarios/$userCorreo") }
-                )
+            Button(
+                onClick = { navController.navigate("informe_usuarios/$userCorreo") },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("👤 Informe de Usuarios", fontSize = 16.sp)
             }
         }
-    }
-}
-@Composable
-fun BotonInforme(
-    texto: String,
-    colorFondo: Color,
-    onClick: () -> Unit
-) {
-    Button(
-        onClick = onClick,
-        colors = ButtonDefaults.buttonColors(colorFondo),
-        modifier = Modifier
-            .width(250.dp)
-            .height(180.dp)
-            .padding(vertical = 20.dp),
-        shape = RoundedCornerShape(12.dp)
-    ) {
-        Text(
-            text = texto,
-            color = Color.White,
-            fontSize = 20.sp,
-            fontStyle = FontStyle.Italic,
-            fontFamily = Kavoon,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center
-        )
     }
 }

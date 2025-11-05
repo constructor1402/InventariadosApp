@@ -1,22 +1,22 @@
 package com.example.inventariadosapp.screens.admin
 
+
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.inventariadosapp.screens.admin.gestion.Obra
+import com.example.inventariadosapp.domain.model.Obra
 import com.example.inventariadosapp.screens.admin.gestion.ObrasAdminScreen
 import com.example.inventariadosapp.ui.screens.admin.InformeCompObraScreen
-import com.example.inventariadosapp.ui.screens.admin.InformeCompScreen
-import com.example.inventariadosapp.ui.screens.admin.InformeCompUsers
+import com.example.inventariadosapp.ui.screens.admin.gestion.equipos.EquiposAdminScreen
+
+import com.example.inventariadosapp.ui.screens.admin.gestion.users.UsuariosAdminScreen
+import com.example.inventariadosapp.ui.screens.admin.informes.InformeEquiposScreen
 import com.example.inventariadosapp.ui.screens.admin.informes.InformeObrasScreen
 import com.example.inventariadosapp.ui.screens.admin.informes.InformeUsuariosScreen
-import com.example.inventariadosapp.ui.screens.admin.informes.InformesEquiposScreen
-
-import com.example.inventariadosapp.ui.screens.admin.gestion.equipos.EquiposAdminScreen
-import com.example.inventariadosapp.ui.screens.admin.gestion.users.UsuariosAdminScreen
+import com.example.inventariadosapp.ui.screens.admin.informes.InformesAdminScreen
 
 
 @Composable
@@ -27,79 +27,56 @@ fun AdminNavigation(mainNavController: NavController, userCorreo: String) {
         navController = adminNavController,
         startDestination = "inicio_admin/$userCorreo"
     ) {
-        // Pantalla principal
+
         composable("inicio_admin/{userCorreo}") { backStackEntry ->
-            val userCorreo = backStackEntry.arguments?.getString("userCorreo") ?: ""
+            val correo = backStackEntry.arguments?.getString("userCorreo") ?: ""
             InicioAdminScreen(
                 adminNavController = adminNavController,
                 mainNavController = mainNavController,
-                userCorreo
+                userCorreo = correo
             )
         }
 
-        // Sección de gestión (grupo interno)
         composable("gestion_admin") { ObrasAdminScreen(adminNavController) }
-
-        // Pantallas internas del grupo de gestión
         composable("obras_admin") { ObrasAdminScreen(adminNavController) }
-        composable(route = "equipos_admin") {
-            EquiposAdminScreen(navController = adminNavController)
-        }
-
+        composable("equipos_admin") { EquiposAdminScreen(adminNavController) }
         composable("usuarios_admin") { UsuariosAdminScreen(adminNavController) }
 
-        // Otros paneles
+// Informes (ajustadas para coincidir con las rutas de los botones)
         composable("informes_admin/{userCorreo}") { backStackEntry ->
             val userCorreo = backStackEntry.arguments?.getString("userCorreo") ?: ""
-            InformesAdminScreen(adminNavController, userCorreo)
+            InformesAdminScreen(navController = adminNavController, userCorreo)
         }
 
         composable("informe_equipos/{userCorreo}") { backStackEntry ->
             val userCorreo = backStackEntry.arguments?.getString("userCorreo") ?: ""
-            InformesEquiposScreen(adminNavController, userCorreo)
+            InformeEquiposScreen(navController = adminNavController, userCorreo)
         }
 
-        composable("resultados_informe/{userCorreo}") { backStackEntry ->
+        composable("informe_obras/{userCorreo}") { backStackEntry ->
             val userCorreo = backStackEntry.arguments?.getString("userCorreo") ?: ""
-            InformeCompScreen(adminNavController, userCorreo)
+            InformeObrasScreen(navController = adminNavController, userCorreo)
         }
 
-        composable("informe_Obras/{userCorreo}") { backStackEntry ->
+        composable("informe_usuarios/{userCorreo}") { backStackEntry ->
             val userCorreo = backStackEntry.arguments?.getString("userCorreo") ?: ""
-            InformeObrasScreen(
-                adminNavController = adminNavController,
-                viewModel = viewModel(),
-                userCorreo,
-                onResultadosObtenidos = { obrasFiltradas ->
-                    // Navegar y pasar las obras filtradas al siguiente screen
-                    adminNavController.currentBackStackEntry?.savedStateHandle?.set("obrasFiltradas", obrasFiltradas)
-                    adminNavController.navigate("informeCompObraScreen/$userCorreo")
-                }
-            )
+            InformeUsuariosScreen(navController = adminNavController, userCorreo)
         }
 
-        composable("informeCompObraScreen/{userCorreo}") {backStackEntry ->
+
+        composable("informeCompObraScreen/{userCorreo}") { backStackEntry ->
             val obrasFiltradas = adminNavController.previousBackStackEntry
                 ?.savedStateHandle
                 ?.get<List<Obra>>("obrasFiltradas")
-                ?: emptyList() // por si no llegan datos
-            val userCorreo = backStackEntry.arguments?.getString("userCorreo") ?: ""
+                ?: emptyList()
+            val correo = backStackEntry.arguments?.getString("userCorreo") ?: ""
 
             InformeCompObraScreen(
                 adminNavController = adminNavController,
                 obrasFiltradas = obrasFiltradas,
                 viewModel = viewModel(),
-                userCorreo
+                userCorreo = correo
             )
         }
-        composable("informe_Usuarios/{userCorreo}") { backStackEntry ->
-            val userCorreo = backStackEntry.arguments?.getString("userCorreo") ?: ""
-            InformeUsuariosScreen(adminNavController,userCorreo)
-        }
-        composable("resultados_users/{userCorreo}") { backStackEntry ->
-            val userCorreo = backStackEntry.arguments?.getString("userCorreo") ?: ""
-            InformeCompUsers(adminNavController, viewModel = viewModel(),userCorreo)}
-
-
     }
 }

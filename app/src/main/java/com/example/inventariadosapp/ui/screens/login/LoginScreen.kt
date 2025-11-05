@@ -199,6 +199,7 @@ fun LoginScreen(navController: NavController) {
                                         val userDoc = documents.first()
                                         val rol = userDoc.getString("rolSeleccionado")
                                         val nombre = userDoc.getString("nombreCompleto")
+                                        val correoUsuario = userDoc.getString("correoElectronico") ?: correo
 
                                         Toast.makeText(
                                             navController.context,
@@ -207,14 +208,12 @@ fun LoginScreen(navController: NavController) {
                                         ).show()
 
                                         when (rol) {
-                                            "Admin" -> navController.navigate("panel_admin")
+                                            "Admin" -> navController.navigate("inicio_admin/${correoUsuario}")
                                             "Topógrafo" -> navController.navigate("panel_topografo")
                                             "Consulta" ->
                                                 navController.navigate(ConsultRoutes.CONSULT_FLOW) {
-                                                    // 🚨 SOLUCIÓN: PopUp para borrar las pantallas de Login/Bienvenida
-                                                    // La ruta "bienvenida" es la que inicia la app.
                                                     popUpTo("bienvenida") {
-                                                        inclusive = true // Borra también la pantalla "bienvenida"
+                                                        inclusive = true
                                                     }
                                                 }
                                             else -> navController.navigate("bienvenida")

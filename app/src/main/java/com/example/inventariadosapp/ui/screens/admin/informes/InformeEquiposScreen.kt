@@ -12,17 +12,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.inventariadosapp.ui.screens.admin.informes.viewmodels.InformeObrasViewModel
+import com.example.inventariadosapp.ui.screens.admin.informes.viewmodels.InformeEquiposViewModel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun InformeObrasScreen(
+fun InformeEquiposScreen(
     navController: NavController,
     userCorreo: String,
-    viewModel: InformeObrasViewModel = viewModel()
+    viewModel: InformeEquiposViewModel = viewModel()
 ) {
-    val obras by viewModel.obras.collectAsState()
+    val equipos by viewModel.equipos.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
 
     Scaffold(
@@ -30,7 +30,7 @@ fun InformeObrasScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Informe de Obras",
+                        text = "Informe de Equipos",
                         fontWeight = FontWeight.Bold,
                         fontSize = 20.sp
                     )
@@ -49,21 +49,21 @@ fun InformeObrasScreen(
             if (isLoading) {
                 CircularProgressIndicator()
             } else {
-                if (obras.isEmpty()) {
+                if (equipos.isEmpty()) {
                     Text(
-                        text = "No hay obras registradas.",
+                        text = "No hay equipos registrados.",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Medium
                     )
                 } else {
                     Text(
-                        text = "Listado de Obras",
+                        text = "Listado de Equipos",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(bottom = 12.dp)
                     )
 
-                    obras.forEach { obra ->
+                    equipos.forEach { equipo ->
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -71,10 +71,12 @@ fun InformeObrasScreen(
                             elevation = CardDefaults.cardElevation(4.dp)
                         ) {
                             Column(modifier = Modifier.padding(12.dp)) {
-                                Text("ID Obra: ${obra.idObra}", fontWeight = FontWeight.Bold)
-                                Text("Nombre: ${obra.nombreObra}")
-                                Text("Ubicación: ${obra.ubicacion}")
-                                Text("Cliente: ${obra.clienteNombre}")
+                                Text("Serial: ${equipo.serial}", fontWeight = FontWeight.Bold)
+                                Text("Referencia: ${equipo.referencia}")
+                                Text("Tipo: ${equipo.tipo}")
+                                Text("Estado: ${equipo.estado}")
+                                Text("Fecha Certificación: ${equipo.fechaCertificacion}")
+                                Text("Descripción: ${equipo.descripcion}")
                             }
                         }
                     }
@@ -86,9 +88,9 @@ fun InformeObrasScreen(
                     Button(
                         onClick = {
                             coroutineScope.launch {
-                                val filePath = viewModel.generarInformePDFobras(obras, userCorreo)
+                                val filePath = viewModel.generarInformePDFequipos(equipos, userCorreo)
                                 if (!filePath.startsWith("Error")) {
-                                    viewModel.guardarInformeEnFirebase(filePath, "obras", userCorreo)
+                                    viewModel.guardarInformeEnFirebase(filePath, "equipos", userCorreo)
                                 }
                             }
                         },
@@ -96,7 +98,6 @@ fun InformeObrasScreen(
                     ) {
                         Text(text = "📄 Generar y subir informe PDF", fontSize = 16.sp)
                     }
-
 
 
                 }

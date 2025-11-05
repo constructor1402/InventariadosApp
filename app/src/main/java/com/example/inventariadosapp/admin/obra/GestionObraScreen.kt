@@ -1,4 +1,4 @@
-package com.example.inventariadosapp.admin.obra
+/*package com.example.inventariadosapp.admin.obra
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -144,4 +144,4 @@ fun GestionObraScreen(
     }
 }
 
-
+*/

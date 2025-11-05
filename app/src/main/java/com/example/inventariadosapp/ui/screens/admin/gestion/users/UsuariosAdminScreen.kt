@@ -46,7 +46,7 @@ fun UsuariosAdminScreen(navController: NavController, viewModel: UserViewModel =
         ) {
             // 🔙 Flecha hacia atrás
             IconButton(
-                onClick = { navController.navigate("inicio_admin") },
+                onClick = { navController.popBackStack() },
                 modifier = Modifier
                     .align(Alignment.TopStart)
                     .padding(start = 12.dp, top = 12.dp)
