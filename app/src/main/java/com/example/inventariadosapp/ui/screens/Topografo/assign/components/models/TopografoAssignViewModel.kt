@@ -126,17 +126,20 @@ class TopografoAssignViewModel : ViewModel() {
     }
 
     // 🔹 Guarda la asignación del equipo y registra el historial
-    fun guardarAsignacion(navController: NavHostController, context: Context) {
-        // ✅ Obtener el contexto y el nombre del usuario activo desde preferencias
-        val nombreActivo = PreferencesHelper.obtenerNombreActivo(context)
+    fun guardarAsignacion(navController: NavHostController) {
+        // 🔹 Obtener usuario que inició sesión desde SesionUsuario
+        val usuario = com.example.inventariadosapp.utils.SesionUsuario.usuarioActual
 
-        if (nombreActivo.isNullOrEmpty()) {
-            viewModelScope.launch { _uiEvent.emit("Error: No se pudo identificar al usuario.") }
+        if (usuario == null) {
+            viewModelScope.launch {
+                _uiEvent.emit("⚠️ No se pudo identificar al usuario. Inicia sesión nuevamente.")
+            }
             return
         }
 
+        // 🔹 Validaciones básicas de los datos
         if (selectedEquipo.serial.isEmpty() || selectedEquipo.obra.isEmpty() || selectedEquipo.obra == "Seleccione La Obra") {
-            viewModelScope.launch { _uiEvent.emit("Error: Faltan datos del equipo u obra.") }
+            viewModelScope.launch { _uiEvent.emit("⚠️ Faltan datos del equipo u obra.") }
             return
         }
 
@@ -146,26 +149,10 @@ class TopografoAssignViewModel : ViewModel() {
         }
 
         isLoading = true
+
         viewModelScope.launch {
             try {
-                // 🔹 Buscar usuario en la colección 'usuarios' por nombre
-                val userQuery = db.collection("usuarios")
-                    .whereEqualTo("nombreCompleto", nombreActivo)
-                    .get()
-                    .await()
-
-                if (userQuery.isEmpty) {
-                    _uiEvent.emit("⚠️ No se encontró el usuario en la base de datos.")
-                    isLoading = false
-                    return@launch
-                }
-
-                val userDoc = userQuery.documents.first()
-                val userName = userDoc.getString("nombreCompleto") ?: nombreActivo
-                val userEmail = userDoc.getString("correoElectronico") ?: "Sin correo"
-                val userUid = userDoc.id  // usamos el ID del documento como identificador único
-
-                // 🔹 Crear registro de historial
+                // 🔹 Crear registro del historial de asignación
                 val log = AsignacionLog(
                     serial = selectedEquipo.serial,
                     tipo = selectedEquipo.tipo,
@@ -173,17 +160,17 @@ class TopografoAssignViewModel : ViewModel() {
                     obraAsignada = selectedEquipo.obra,
                     fechaAsignacion = Timestamp(Date()),
                     estadoPrevio = selectedEquipo.estado,
-                    usuarioUid = userUid,
-                    usuarioEmail = userEmail,
-                    usuarioNombre = userName
+                    usuarioUid = usuario.id,
+                    usuarioEmail = usuario.correoElectronico,
+                    usuarioNombre = usuario.nombreCompleto
                 )
 
-                // 🔹 Guardar historial en la colección 'asignaciones'
+                // 🔹 Guardar en la colección 'asignaciones'
                 db.collection("asignaciones")
                     .add(log)
                     .await()
 
-                // 🔹 Actualizar estado del equipo
+                // 🔹 Actualizar el estado del equipo en la colección 'equipos'
                 db.collection("equipos")
                     .document(selectedEquipo.serial)
                     .update(
@@ -194,16 +181,18 @@ class TopografoAssignViewModel : ViewModel() {
                     )
                     .await()
 
-                _uiEvent.emit("✅ Equipo asignado correctamente")
+                _uiEvent.emit("✅ Equipo '${selectedEquipo.serial}' asignado correctamente a ${selectedEquipo.obra}")
                 clearSelectedEquipo()
                 navController.popBackStack()
 
             } catch (e: Exception) {
-                _uiEvent.emit("Error al guardar la asignación: ${e.message}")
+                _uiEvent.emit("❌ Error al guardar la asignación: ${e.message}")
             } finally {
                 isLoading = false
             }
         }
     }
+
+
 
 }

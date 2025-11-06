@@ -3,13 +3,10 @@ package com.example.inventariadosapp.admin.consulta.ui.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.List
-
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -20,7 +17,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -154,7 +150,7 @@ fun HomeScreenConsult(
             Spacer(modifier = Modifier.height(20.dp))
 
             Button(
-                onClick = { navController.navigate(ConsultRoutes.ALL_REPORTS) },
+                onClick = { navController.navigate("reportsMenu") },
                 modifier = Modifier
                     .fillMaxWidth(0.9f)
                     .height(60.dp),

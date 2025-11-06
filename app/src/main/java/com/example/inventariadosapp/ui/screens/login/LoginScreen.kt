@@ -197,9 +197,20 @@ fun LoginScreen(navController: NavController) {
                                         ).show()
                                     } else {
                                         val userDoc = documents.first()
-                                        val rol = userDoc.getString("rolSeleccionado")
-                                        val nombre = userDoc.getString("nombreCompleto")
+                                        val rol = userDoc.getString("rolSeleccionado") ?: ""
+                                        val nombre = userDoc.getString("nombreCompleto") ?: ""
                                         val correoUsuario = userDoc.getString("correoElectronico") ?: correo
+                                        val userId = userDoc.id
+
+                                        // 🔹 Guardar la sesión global del usuario logueado
+                                        com.example.inventariadosapp.utils.SesionUsuario.usuarioActual =
+                                            com.example.inventariadosapp.utils.UsuarioSesion(
+                                                id = userId,
+                                                nombreCompleto = nombre,
+                                                correoElectronico = correoUsuario,
+                                                rol = rol
+                                            )
+
 
                                         Toast.makeText(
                                             navController.context,

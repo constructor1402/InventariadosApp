@@ -193,7 +193,8 @@ fun AssignManualScreen(navController: NavHostController, viewModel: TopografoAss
                         )
 
                     }
-                    viewModel.guardarAsignacion(navController, context)
+                    viewModel.guardarAsignacion(navController)
+
 
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.verde_admin)),

@@ -1,7 +1,6 @@
 package com.example.inventariadosapp.ui.screens.Topografo
 
 import androidx.compose.runtime.Composable
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -24,6 +23,9 @@ fun TopografoNavigation(parentNavController: NavHostController) {
 
     //INICIALIZA EL VIEWMODEL PARA ASIGNAR
     val assignViewModel: TopografoAssignViewModel = viewModel()
+
+
+
 
     NavHost(
         navController = navController,
@@ -85,10 +87,23 @@ fun TopografoNavigation(parentNavController: NavHostController) {
                 }
             )
         }
-        // 📊 Pantalla de Informes del Topógrafo
+        // 📊 Pantalla de informes del topógrafo
         composable(route = "informes_topografo") {
             InformesTopografoScreen(navController)
         }
+
+        // 🔹 Pantallas compartidas con el rol Consulta
+        composable(
+            route = "storageReports/{folderPath}"
+        ) { backStackEntry ->
+            val folderPath = backStackEntry.arguments?.getString("folderPath") ?: "informes"
+            com.example.inventariadosapp.admin.consulta.ui.StorageReportsScreen(folderPath = folderPath)
+        }
+
+
+
+
+
 
     }
 }

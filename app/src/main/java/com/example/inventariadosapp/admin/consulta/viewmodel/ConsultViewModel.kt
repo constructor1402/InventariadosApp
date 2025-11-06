@@ -31,14 +31,27 @@ class ConsultViewModel : ViewModel() {
     }
 
     private fun loadMetrics() {
-        viewModelScope.launch {
-            // Datos simulados
-            _metricas.value = MetricData(
-                equiposDisponibles = 8,
-                equiposEnUso = 12
-            )
-        }
+        firestore.collection("equipos")
+            .addSnapshotListener { snapshot, e ->
+                if (e != null || snapshot == null) return@addSnapshotListener
+
+                // Contar equipos por estado
+                val disponibles = snapshot.documents.count {
+                    (it.getString("estado") ?: "") == "Disponible"
+                }
+
+                val enUso = snapshot.documents.count {
+                    (it.getString("estado") ?: "") == "Asignado"
+                }
+
+                // Actualizar métricas en tiempo real
+                _metricas.value = MetricData(
+                    equiposDisponibles = disponibles,
+                    equiposEnUso = enUso
+                )
+            }
     }
+
 
 
     private fun loadAllReports() {
